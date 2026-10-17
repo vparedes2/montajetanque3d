@@ -15,6 +15,11 @@
 html,body{height:100%}body{background:var(--bg);color:var(--fg);font-family:var(--f-body);overflow:hidden}
 #app{position:relative;height:100%}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.clk{padding:8px 12px;flex-basis:100%;max-width:min(640px,100%);box-sizing:border-box;display:grid;gap:6px}.clk .r1{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.clk .d{font:700 13px var(--f-display);letter-spacing:.08em;color:#f2b33d}.clk .h{font:600 22px var(--f-mono,monospace);color:#fff}.clk .w{font-size:12.5px;color:#cfd8de;flex:1 1 200px;min-width:0}
+.dbar{position:relative;height:12px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}.dbar i{position:absolute;top:0;bottom:0}.dbar b{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;box-shadow:0 0 4px #fff}
+.clk .cnt{display:flex;gap:14px;font-size:12px;color:#aab8c2;flex-wrap:wrap}.clk .cnt b{color:#fff;font-weight:600}
+#pz{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);padding:12px 18px;font:600 17px var(--f-display);color:#fff;text-align:center;pointer-events:none;z-index:6;max-width:80%}
+#night{position:absolute;inset:0;background:#06101e;pointer-events:none;opacity:0;mix-blend-mode:multiply;z-index:1}
 .glass{background:var(--glass);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px)}
 .top{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;pointer-events:none;z-index:2}
 .top>*{pointer-events:auto}
@@ -63,8 +68,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--water);outline-
   <div class="top">
     <div class="title glass"><h1>Montaje de tanque australiano</h1><p>22 placas de 6 × 3 m · manipulador telescópico con gancho y fajas · carretón · hidrogrúa · Lic. Víctor Javier Paredes</p></div>
     <nav class="chap glass" id="chap" aria-label="Etapas"></nav>
+    <div class="clk glass" aria-live="off"><div class="r1"><span class="d" id="cday">DÍA 1</span><span class="h" id="chr">07:30</span><span class="w" id="cnote"></span></div><div class="dbar" id="dbar"></div><div class="cnt"><span>Placas <b id="cpl">0/22</b></span><span>Bulones <b id="cbo">0/396</b></span><span>Horas-hombre <b id="chh">0</b></span><span id="cagua">Agua en cuello de cisne: <b>disponible</b></span></div></div>
   </div>
-  <div id="stage"><canvas id="gl" aria-label="Animación 3D del montaje de un tanque australiano"></canvas><div id="labels"></div></div>
+  <div id="stage"><canvas id="gl" aria-label="Animación 3D del montaje de un tanque australiano"></canvas><div id="night"></div><div id="labels"></div><div id="pz" class="glass" hidden></div></div>
   <section class="foot glass" aria-live="polite">
     <h3 id="ph">Etapa</h3>
     <ol id="steps"></ol>
@@ -87,6 +93,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--water);outline-
       <div><i style="background:#ff5a5a"></i>Operador interno</div>
       <div><i style="background:#c77dff"></i>Operador externo</div>
       <div><i style="background:#2fd18b"></i>Asistente · cuñas y escalera</div>
+      <div><i style="background:#f2b21c"></i>Chofer del manipulador</div>
+      <div><i style="background:#2d7ff9"></i>Supervisor operativo</div>
+      <div><i style="background:#00b050"></i>Supervisor HSE · chaleco</div>
       <div><i style="background:#ef5350;opacity:.6"></i>Zona de exclusión del izaje</div>
     </div>
     <p style="margin:0;font-size:11.5px;color:var(--muted)">EPP de todo el personal: mameluco azul, casco, gafas, guantes de alto impacto y botines. Color del brazalete = rol.</p>
@@ -106,20 +115,57 @@ const v3=(x,y,z)=>new THREE.Vector3(x,y,z);const polar=(a,r)=>[Math.cos(a)*r,Mat
 
 // ---------- línea de tiempo ----------
 const T={};let t0=0;const add=(k,d)=>{T[k]=[t0,t0+d];t0+=d};
-add('mark',10);add('arrive',10);
-const dD=k=>k<2?3.4:1.25;T.dist=[t0,0];const DS=[];for(let k=0;k<N;k++){DS.push([t0,t0+dD(k)]);t0+=dD(k)}T.dist[1]=t0;
-const asmStart=t0;const dA=k=>k<2?9:3.2;for(let k=0;k<LAST;k++)add('p'+k,dA(k));
-add('sand',9);add('suc',9);add('liner',16);add('close',9);add('bolt',18);add('esc',14);add('fill',10);const TOT=t0;
+const KS=0.5;// segundos de animación (a 1×) por minuto real de obra
+add('mark',45*KS);add('arrive',30*KS);
+const dD=k=>75*KS/N;T.dist=[t0,0];const DS=[];for(let k=0;k<N;k++){DS.push([t0,t0+dD(k)]);t0+=dD(k)}T.dist[1]=t0;
+const asmStart=t0;const dA=k=>k<1?20*KS:10*KS;for(let k=0;k<LAST;k++)add('p'+k,dA(k));
+add('sand',15*KS);add('suc',15*KS);add('liner',195*KS);add('close',30*KS);add('bolt',285*KS);add('esc',8);add('fill',14);const TOT=t0;
+// ---------- cronograma real: dos jornadas ----------
+const SCH=[];let a0=0;
+const W=(ta,tb,c0,c1,day,note)=>{SCH.push({k:'w',a0,a1:a0+(tb-ta),t0:ta,t1:tb,c0,c1,day,note});a0+=tb-ta};
+const P=(ts,c0,c1,day,lab,d)=>{SCH.push({k:'p',a0,a1:a0+d,t0:ts,t1:ts,c0,c1,day,lab});a0+=d};
+{const m=x=>x;let c=450;// 7:30
+ P(0,c,c+45,1,'Charla de seguridad · ATS, permiso de trabajo y chequeo de certificados de fajas, grilletes y manipulador',9);c+=45;
+ W(T.mark[0],T.dist[1],c,c+150,1);c+=150;
+ P(T.dist[1],c,c+20,1,'Pausa de hidratación · mate (20 min)',4);c+=20;
+ W(T.p0[0],T.p9[1],c,c+110,1);c+=110;
+ P(T.p9[1],c,c+60,1,'Almuerzo (1 h)',6);c+=60;
+ W(T.p10[0],T['p'+(LAST-1)][1],c,c+110,1);c+=110;
+ P(T['p'+(LAST-1)][1],c,c+20,1,'Pausa de hidratación · mate (20 min)',4);c+=20;
+ W(T.sand[0],T.suc[1],c,c+15,1,'Distribución de arena con retropala; la succión se hizo en paralelo durante el día');c+=15;
+ const LM=T.liner[0]+(T.liner[1]-T.liner[0])*0.38;
+ W(T.liner[0],LM,c,c+30,1,'Último paso del día: el manipulador ingresa la lona y la deja en el centro');c+=30;
+ P(LM-0.05,c,c+15,1,'Fin de la jornada · orden y limpieza; la cuadrilla se retira en las camionetas',4);c+=15;
+ P(LM-0.05,c,1440+410,1,'Noche · anillo con 3 bulones por unión, lona enrollada en el centro',7);c=1440+410;
+ P(LM-0.05,c,1440+430,2,'La cuadrilla regresa en las camionetas (7:10)',3);c=430;
+ P(LM-0.05,c,c+30,2,'Charla de seguridad · conteo de personal y control de viento',4);c+=30;
+ W(LM,T.liner[1],c,c+165,2,'Solo con agua disponible en el cuello de cisne: sin agua no se desenrolla la lona');c+=165;
+ P(T.liner[1],c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
+ W(T.close[0],T.close[1],c,c+30,2);c+=30;
+ P(T.close[1],c,c+60,2,'Almuerzo (1 h)',6);c+=60;
+ const bm=(T.bolt[0]+T.bolt[1])/2;W(T.bolt[0],bm,c,c+142.5,2,'Abulonado con 2 equipos en paralelo, cada uno con su escalera burrito');c+=142.5;
+ P(bm,c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
+ W(bm,T.bolt[1],c,c+142.5,2,'Abulonado con 2 equipos en paralelo, cada uno con su escalera burrito');c+=142.5;
+ W(T.esc[0],T.esc[1],c,c,2,'En simultáneo con el abulonado: no suma tiempo');
+ P(T.fill[0]+0.01,c,c+15,2,'Fin del montaje (17:20) · orden y limpieza; la cuadrilla se retira en las camionetas',5);c+=15;
+ W(T.fill[0]+0.01,T.fill[1],c,c+240,2,'Llenado: ~4 h a 860 m³/h, controlado por telemetría (fuera del tiempo de montaje)');c+=240;
+ P(T.fill[1],c,c+30,2,'Noche · Locación sin personal, tanque operativo',4)}
+const ATOT=a0;
+const segA=A=>{for(const g of SCH)if(A<g.a1)return g;return SCH[SCH.length-1]};
+const sceneAt=A=>{const g=segA(A);return g.k==='p'?g.t0:lerp(g.t0,g.t1,C(0,1,(A-g.a0)/(g.a1-g.a0||1)))};
+const clockAt=A=>{const g=segA(A);return lerp(g.c0,g.c1,C(0,1,(A-g.a0)/(g.a1-g.a0||1)))};
+const aOfScene=t=>{for(const g of SCH)if(g.k==='w'&&t>=g.t0&&t<=g.t1)return g.a0+(t-g.t0);return 0};
+const effMin=A=>{let m=0;for(const g of SCH){if(g.k!=='w'||g.note&&g.note.startsWith('Llenado'))continue;if(A>=g.a1)m+=g.c1-g.c0;else if(A>g.a0){m+=(g.c1-g.c0)*(A-g.a0)/(g.a1-g.a0||1);break}else break}return m};
 const CH=[
- {k:'mark',t:'Marcado',h:'Preparación del terreno y marcado',s:['Verificar nivelación y compactación; si no es óptima, pedir nivelación y dejarlo en minuta.','Liberar el área de piedras y objetos cortantes.','Clavar la estaca metálica en el centro y marcar la circunferencia con cuerda de 21,01 m tensa (22 placas), dos operadores.','Marcar con el cliente la ubicación de la succión: va en la 5.ª placa, nunca en la última.'],w:'Coordinar con el cliente si hay pozos activos o equipos operando en el sector.'},
+ {k:'mark',t:'Marcado',h:'Charla inicial, chequeo de izaje y marcado',s:['Charla de seguridad y ATS junto a las camionetas; permiso de trabajo firmado.','Chequeo de certificados y estado de fajas, grilletes, gancho y del manipulador (habilitación del operador incluida).','Verificar nivelación y compactación; si no es óptima, pedir nivelación y dejarlo en minuta.','Liberar el área de piedras y objetos cortantes.','Clavar la estaca metálica en el centro y marcar la circunferencia con cuerda de 21,01 m tensa (22 placas), dos operadores.','Marcar con el cliente la ubicación de la succión: va en la 5.ª placa, nunca en la última.'],w:'Coordinar con el cliente si hay pozos activos o equipos operando en el sector.'},
  {k:'arrive',t:'Carretón',h:'Llegada del carretón con las placas',s:['La locación es rectangular, de unos 100 × 100 m, con acceso de ingreso y de egreso (un solo sentido de circulación).','El tractor con el carretón ingresa despacio por el acceso sur, guiado por el señalero, y se estaciona DENTRO de la locación: el camino queda libre.','Se cierra la zona del carretón con conos y cartel: solo ingresa el manipulador y la cuadrilla autorizada.','Cuando se descargó la última placa, se retiran los conos y el carretón sale por el acceso norte, despacio y con señalero, sin pisar nada ni pasar cerca de nadie.'],w:'Velocidad de paso dentro de la locación, sin derrapes ni giros. Señalero siempre a la vista del chofer. Revisar la manga de viento: con viento fuerte no se iza.'},
  {k:'dist',t:'Descarga',h:'Descarga de placas una a una',s:['El manipulador con gancho y fajas toma cada placa del carretón.','La lleva suspendida y la deja junto a su posición sobre la circunferencia, en el sentido de armado.','La misma tarea puede hacerla la hidrogrúa; el procedimiento de izaje es el mismo.'],w:'La cuadrilla espera dentro del anillo marcado, lejos del recorrido de la carga: nadie bajo la placa suspendida ni dentro del radio de giro.'},
  {k:'p0',t:'Anillo',h:'Armado del anillo con manipulador',s:['Primera placa con estabilizadores clavados al piso en ambos extremos.','El manipulador iza la placa con gancho y dos fajas; el soguero, ubicado en el extremo libre de la placa, la lleva con la soga guía hasta la línea marcada sin entrar a la zona de exclusión.','La cuadrilla espera fuera de la zona de exclusión y se acerca recién cuando la placa está a ras del piso, en su posición.','Se arrima la escalera burrito y un operario coloca los 3 bulones de agarre inicial: superior, medio e inferior.'],w:'Nadie bajo la carga suspendida ni dentro del radio de giro. Nadie toca la placa con las manos mientras está colgada. Dotación mínima 5, recomendada 6.'},
- {k:'sand',t:'Arena',h:'Arena y taludes',s:['Viajes de arena distribuidos (4 de 20 m³ en terreno normal, 5 con rocas filosas).','Retropala: colchón de arena que protege la lona.','Talud interno a 45° con arena; talud externo a 45° con material grueso.','Zanjeo en la 5.ª placa, donde va la succión.'],w:'Retirar piedras: cualquier filo bajo la lona termina en pinchazo.'},
+ {k:'sand',t:'Arena',h:'Arena y taludes',s:['Durante el armado del anillo llegan 4 camiones batea de 22 m³: entran por el acceso sur, retroceden con banderillero por el panel abierto (donde va la última placa) y descargan adentro, lejos de la cuadrilla y del manipulador (5 viajes si hay rocas filosas).','Retropala: colchón de arena que protege la lona.','Talud interno a 45° con arena; talud externo a 45° con material grueso.','Zanjeo en la 5.ª placa, donde va la succión.'],w:'Retirar piedras: cualquier filo bajo la lona termina en pinchazo.'},
  {k:'suc',t:'Succión',h:'Succión (pipa) en la 5.ª placa, antes de la lona',s:['El caño se entierra bajo el nivel de platea y pasa por el borde inferior de la placa, trabado con cuña metálica.','Adentro, la boca queda al ras del piso, con malla antivórtice y sombrero bulonado sobre la brida.','Afuera: válvula de corte, derivación con brida ciega de inspección y segunda válvula; tipo lug, colocadas abiertas para centrar.','Nunca en la última placa: ese hueco queda libre para que entre el manipulador con la lona.'],w:'Un pegado apurado no pierde agua: chupa aire. El lastre con bolsas durante el curado es parte del procedimiento.'},
  {k:'liner',t:'Lona',h:'Lona: chorizo, apertura, izaje y atado',s:['Con el tanque vacío de personal, el manipulador entra por el panel abierto con la lona colgada del gancho, la deja en el medio y sale.','El rollo (2 m de ancho, eje perpendicular al diámetro) se desenrolla desde el centro hacia ambos extremos: queda una lonja de 2 m de pared a pared. Después se abren los pliegues de cada mitad hacia los costados.','Con la lona abierta y antes de levantar las paredes, se reparten unas 40 bolsas blancas de rafia con lastre sobre toda la superficie, para que el viento no la levante.','Dos operadores adentro levantan la lona con hisopos (palos de 2 m con punta redondeada, para no romperla).','Afuera, dos operadores en escalera burrito atan las cintas de la lona a la varilla horizontal exterior, a 40 cm del borde.','En el cierre la lona queda media baja: por ahí salen los dos de adentro.'],w:'El tanque queda sin un panel durante esta tarea: paso para el equipo y salida libre, sin espacio confinado. Nadie adentro mientras el manipulador circula.'},
  {k:'close',t:'Cierre',h:'Cierre del anillo y última lona',s:['Antes de izar: conteo de personal, nadie adentro del tanque.','El manipulador coloca la última placa; escalera burrito y 3 bulones de agarre en cada unión. Con el anillo cerrado se retiran los estabilizadores de la primera placa.','Con sogas atadas a 2 m de cada lado del cierre, desde afuera se termina de subir la lona sobre la última placa.'],w:'Nunca cerrar el anillo con una persona adentro: con el tanque cerrado no hay salida, y al llenar hay riesgo de ahogamiento. Señalero, soguero y nadie bajo la carga.'},
- {k:'bolt',t:'Bulonado',h:'Bulonado completo del anillo',s:['Con el anillo cerrado, se colocan todos los bulones de cada unión.','El operario trabaja siempre desde la escalera burrito, unión por unión.','Pistola a batería para el aproche y el torque; control final por “sin luz” en la unión completa.','Cinta multipropósito del lado interno, cuñas y pines según fabricante, cable acerado con tensor.'],w:'Escalera burrito apoyada y estable en cada unión; nunca trepar por la placa ni trabajar desde el talud.'},
+ {k:'bolt',t:'Abulonado',h:'Abulonado completo del anillo (2 equipos)',s:['Con el anillo cerrado, se colocan todos los bulones de cada unión.','El operario trabaja siempre desde la escalera burrito, unión por unión.','Pistola a batería para el aproche y el torque; control final por “sin luz” en la unión completa.','Cinta multipropósito del lado interno, cuñas y pines según fabricante, cable acerado con tensor.'],w:'Escalera burrito apoyada y estable en cada unión; nunca trepar por la placa ni trabajar desde el talud.'},
  {k:'esc',t:'Escalera',h:'Instalación de la escalera de acceso',s:['La escalera de acceso (torre con plataforma, escalera con barandas a ambos lados) se iza con el manipulador, gancho y fajas.','Se apoya contra la cara exterior de una placa, lejos de la succión, del cuello de cisne y del cierre.','El señalero guía la maniobra; la cuadrilla espera fuera de la zona de exclusión y se acerca recién con la escalera apoyada en el piso.','Se nivela, se fija y se verifica la baranda antes de habilitarla.'],w:'Nadie bajo la escalera suspendida ni dentro del radio de giro del manipulador. La escalera es el único acceso habilitado al borde del tanque.'},
  {k:'fill',t:'Llenado',h:'Llenado',s:['Conteo final de personal antes de abrir el ingreso de agua: nadie adentro.','Afuera, en la pipa: manifold 1→2, dos manguerotes Bauer a las bombas A (en marcha) y B (backup), impulsión por derivador 2→1, cisterna de gasoil de 5.000 L en batea y antena de telemetría.','La manguera layflat llega desde el campo y entra por el cuello de cisne sobre el borde, sin rozar la lona.','Volumen útil hasta 2,5 m: 50 cm de resguardo bajo el borde.','Tanque operativo: 3.466 m³ útiles.'],w:'Purga del fondo al final del llenado para eliminar el sedimento del montaje.'}];
 const chapOf=t=>{let c=0;CH.forEach((x,i)=>{if(t>=T[x.k][0])c=i});return c};
@@ -194,7 +240,7 @@ function makePlate(){const g=new THREE.Group();const inner=new THREE.Group();inn
 const plates=[];for(let k=0;k<N;k++){const p=makePlate();p.visible=false;plates.push(p)}
 const RP=R+3.2;
 function setPlateFinal(p,a,lift=0,rad=R,rotZ=0){p.position.set(Math.cos(a)*rad,lift,Math.sin(a)*rad);p.rotation.set(0,-a,0);p.rotateZ(rotZ)}
-function setPlatePile(p,a,h){setPlateFinal(p,a,0.12+h,RP,-Math.PI/2)}
+function setPlatePile(p,a,h){if(Math.abs(a-th(LAST))<1e-9){setPlateFinal(p,th(1),0.12+h,R+7.6,-Math.PI/2);return}setPlateFinal(p,a,0.12+h,RP,-Math.PI/2)}
 
 // ---------- estabilizadores de la primera placa ----------
 const stab=new THREE.Group();scene.add(stab);
@@ -235,11 +281,27 @@ const parkPos=v3(XR,0,-2);
 const ARR=new THREE.CatmullRomCurve3([[RX,-230],[RX,-70],[RX,-50],[RX-5,-41],[LH+2,-40],[XR+4,-38],[XR,-30],[XR,-14],[XR,-2]].map(([x,z])=>v3(x,0,z)),false,'catmullrom',0.4);
 const EXI=new THREE.CatmullRomCurve3([[XR,-2],[XR,14],[XR,30],[XR+4,38],[LH+2,40],[RX-5,41],[RX,50],[RX,70],[RX,230]].map(([x,z])=>v3(x,0,z)),false,'catmullrom',0.4);
 const ARL=ARR.getLength(),EXL=EXI.getLength();
-function rig(cv,L,u){u=C(0,1,u);const p=cv.getPointAt(u),pb=cv.getPointAt(C(0,1,u-7/L)),pf=cv.getPointAt(C(0,1,u+4.7/L)),pff=cv.getPointAt(C(0,1,u+6/L));
-  trailer.position.copy(p);const tb=p.clone().sub(pb);trailer.rotation.set(0,(tb.lengthSq()>1e-6?Math.atan2(tb.x,tb.z):0),0);
-  tractor.position.copy(u>=1?p.clone().add(v3(0,0,4.7).applyEuler(trailer.rotation)):pf);const tf=pff.clone().sub(p);tractor.rotation.set(0,tf.lengthSq()>1e-6&&u<1?Math.atan2(tf.x,tf.z):trailer.rotation.y,0)}
+function rig(cv,L,u){u=C(0,1,u);const p=cv.getPointAt(u),ht=cv.getTangentAt(u),hk=cv.getTangentAt(C(0,1,u+2.35/L)),hc=cv.getTangentAt(C(0,1,u+4.7/L));
+  trailer.position.copy(p);trailer.rotation.set(0,Math.atan2(ht.x,ht.z),0);
+  // el tractor va siempre a 4,7 m fijos por delante del carretón: nunca se encima la carga sobre la cabina al frenar
+  tractor.position.copy(p).addScaledVector(hk.setY(0).normalize(),4.7);tractor.rotation.set(0,Math.atan2(hc.x,hc.z),0)}
 const EXT0=()=>T.dist[1]+1.5,EXT1=()=>T.dist[1]+15;const parkRot=0;const AP=Math.atan2(parkPos.z,parkPos.x),RTR=R+10.5;// carretón sobre el camino, en el sentido de ingreso
 
+// ---------- camionetas de la cuadrilla: estacionadas de culata (en reversa), trompa hacia la salida, en la periferia sudoeste ----------
+function pickup(){const g=new THREE.Group();const wM=M(0xeeeeec,{roughness:.3,metalness:.55}),gl=M(0x1b2530,{roughness:.1,metalness:.7}),bk=M(0x18191b,{roughness:.6}),ch=M(0x9aa0a6,{roughness:.3,metalness:.8});
+  const bx=(w,h,d,m,x,y,z)=>mesh(new THREE.BoxGeometry(w,h,d),m,[x,y,z],g);// adelante = +z local
+  bx(1.86,0.62,5.3,wM,0,0.78,0);bx(1.82,0.3,1.25,wM,0,1.22,2.0);bx(1.74,0.72,2.25,wM,0,1.45,0.25);bx(1.78,0.52,1.95,gl,0,1.47,0.2);
+  const ws=bx(1.62,0.62,0.06,gl,0,1.42,1.4);ws.rotation.x=-0.55;
+  bx(1.86,0.5,0.06,wM,0,1.31,-2.65);[0.9,-0.9].forEach(x=>bx(0.06,0.5,1.95,wM,x,1.31,-1.7));
+  bx(1.6,0.36,0.08,bk,0,0.95,2.64);bx(1.0,0.06,0.09,ch,0,1.0,2.66);[0.62,-0.62].forEach(x=>{bx(0.34,0.14,0.06,M(0xf4f6ff,{emissive:0xeef2ff,emissiveIntensity:.3}),x,1.08,2.64);bx(0.2,0.12,0.12,wM,x*1.62,1.55,1.25)});
+  bx(1.9,0.24,0.2,bk,0,0.55,2.62);bx(1.9,0.24,0.2,bk,0,0.6,-2.68);
+  const pole=mesh(new THREE.CylinderGeometry(0.015,0.015,2.6,5),M(0xff6a13),[0.75,2.3,-2.4],g);// pértiga con banderín (protocolo de yacimiento)
+  mesh(new THREE.BoxGeometry(0.02,0.25,0.4),M(0xff3b1a),[0.75,3.45,-2.2],g);
+  mesh(new THREE.BoxGeometry(0.36,0.09,0.22),M(0xff9a1a,{emissive:0xff7a00,emissiveIntensity:.8}),[0,1.86,0.3],g);
+  [[0.82,1.65],[-0.82,1.65],[0.82,-1.6],[-0.82,-1.6]].forEach(([x,z])=>wheel(g,x,0.42,z,0.42,0.3,0x9aa0a6));
+  scene.add(g);return g}
+const crewTrucks=[[-36,-44.2],[-31.5,-44.2]].map(([x,z])=>{const p=pickup();p.position.set(x,0,z);p.rotation.y=0;// culata contra el terraplén sur, trompa al norte
+  [-1.2,1.2].forEach(dx=>mesh(new THREE.BoxGeometry(0.25,0.18,0.35),M(0xf2b21c),[x+dx*0.55,0.09,z+1.65+0.55],scene));return p});// calzas
 // ---------- conos de cierre de zona del carretón, manga de viento, matafuegos ----------
 const cones=new THREE.Group();scene.add(cones);
 {const cm=M(0xff6a13,{roughness:.6}),wm=M(0xf2f2f2,{emissive:0x666666,emissiveIntensity:.4});const pts=[];
@@ -307,7 +369,7 @@ function person(band,vest=false){const g=new THREE.Group();const cap=(r,l)=>new 
     mesh(cap(0.062,0.2),suit,[0,-0.17,0],a);mesh(cap(0.056,0.2),suit,[0,-0.42,0.02],a);
     mesh(new THREE.CylinderGeometry(0.06,0.06,0.03,10),refl,[0,-0.35,0.02],a,false);
     const h=mesh(new THREE.BoxGeometry(0.09,0.12,0.065),glove,[0,-0.6,0.03],a);return a});
-  mesh(new THREE.BoxGeometry(0.15,0.1,0.17),M(band,{emissive:band,emissiveIntensity:.3}),[0,-0.1,0],arms[0],false);
+  mesh(new THREE.CylinderGeometry(0.068,0.068,0.08,12),M(band,{emissive:band,emissiveIntensity:.3}),[0,-0.13,0],arms[0],false);// brazalete de rol
   // cuello, cabeza, casco con ala, gafas y protección auditiva
   mesh(new THREE.CylinderGeometry(0.055,0.06,0.09,10),skin,[0,1.55,0],g);
   const hd=mesh(new THREE.SphereGeometry(0.105,14,12),skin,[0,1.66,0.005],g);hd.scale.set(0.95,1.12,1);
@@ -319,16 +381,30 @@ function person(band,vest=false){const g=new THREE.Group();const cap=(r,l)=>new 
   [-1,1].forEach(s=>{const e=mesh(new THREE.CylinderGeometry(0.045,0.045,0.04,12),M(0xd1462f),[s*0.112,1.66,0],g,false);e.rotation.z=Math.PI/2});
   mesh(new THREE.TorusGeometry(0.12,0.012,6,16,Math.PI),M(0x333333),[0,1.67,0],g,false).rotation.y=Math.PI/2;
   g.userData.arms=arms;scene.add(g);return g}
-const crew={sen:person(0xc8f03a,true),sog:person(0xffd23a),int:person(0xff5a5a),ext:person(0xc77dff),asi:person(0x2fd18b),m1:person(0xffffff),m2:person(0xffffff)};
+function holdProp(p,mesh_,side){const a=p.userData.arms[side];a.add(mesh_);mesh_.position.set(0,-0.62,0.06);return mesh_}
+const crew={sen:person(0xc8f03a,true),sog:person(0xffd23a),int:person(0xff5a5a),ext:person(0xc77dff),asi:person(0x2fd18b),m1:person(0xff8a1f,true),m2:person(0xffffff),op:person(0xf2b21c),sop:person(0x2d7ff9),hse:person(0x00b050,true)};
+const clip=new THREE.Group();{mesh(new THREE.BoxGeometry(0.24,0.02,0.32),M(0x7a4a22),[0,0,0],clip);mesh(new THREE.BoxGeometry(0.21,0.022,0.26),M(0xf4f4f0),[0,0.002,-0.01],clip,false);mesh(new THREE.BoxGeometry(0.08,0.03,0.03),M(0x999999,{metalness:.7}),[0,0.01,0.15],clip,false)}
+holdProp(crew.hse,clip,0);clip.rotation.x=1.2;
+const phone=mesh(new THREE.BoxGeometry(0.04,0.14,0.075),M(0x111111),null,scene,false);holdProp(crew.sop,phone,1);
+const plano=mesh(new THREE.BoxGeometry(0.5,0.01,0.36),M(0xdfe9f4),null,scene,false);holdProp(crew.sop,plano,0);plano.rotation.x=1.3;
 const sogRope=line(0xeee6b0);
-const ladder=new THREE.Group();scene.add(ladder);{const al=M(0xb8c0c6,{metalness:.7,roughness:.35});const bx=(w,h,d,x,y,z,rx=0)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),al,[x,y,z],ladder);m.rotation.x=rx};
- [-0.35,0.35].forEach(x=>{bx(0.05,1.1,0.05,x,0.55,0);bx(0.05,1.1,0.05,x,0.55,-0.35);bx(0.05,2.3,0.05,x,1.15,0.95,0.62);bx(0.05,2.0,0.05,x,2.0,0.55,0.62);bx(0.05,0.9,0.05,x,1.55,-0.35)});
- bx(0.8,0.05,0.5,0,1.1,-0.15);for(let i=0;i<4;i++)bx(0.75,0.04,0.22,0,0.22+i*0.25,1.55-i*0.36);bx(0.8,0.05,0.05,0,2.0,-0.35);
- [[-0.35,-0.35],[0.35,-0.35],[-0.35,1.95],[0.35,1.95]].forEach(([x,z])=>{const w=mesh(new THREE.CylinderGeometry(0.07,0.07,0.04,10),M(0x333333),[x,0.07,z],ladder);w.rotation.z=Math.PI/2})}
-const ladder2=new THREE.Group();scene.add(ladder2);{const al=M(0xb8c0c6,{metalness:.7,roughness:.35});const bx=(w,h,d,x,y,z,rx=0)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),al,[x,y,z],ladder2);m.rotation.x=rx};
- [-0.35,0.35].forEach(x=>{bx(0.05,1.1,0.05,x,0.55,0);bx(0.05,1.1,0.05,x,0.55,-0.35);bx(0.05,2.3,0.05,x,1.15,0.95,0.62);bx(0.05,2.0,0.05,x,2.0,0.55,0.62);bx(0.05,0.9,0.05,x,1.55,-0.35)});
- bx(0.8,0.05,0.5,0,1.1,-0.15);for(let i=0;i<4;i++)bx(0.75,0.04,0.22,0,0.22+i*0.25,1.55-i*0.36);bx(0.8,0.05,0.05,0,2.0,-0.35);
- [[-0.35,-0.35],[0.35,-0.35],[-0.35,1.95],[0.35,1.95]].forEach(([x,z])=>{const w=mesh(new THREE.CylinderGeometry(0.07,0.07,0.04,10),M(0x333333),[x,0.07,z],ladder2);w.rotation.z=Math.PI/2})}
+// escalera burrito (plataforma con escalones y barandas, sobre ruedas): adelante = -z local (hacia la placa)
+function burrito(){const g=new THREE.Group();scene.add(g);const al=M(0xb8c0c6,{metalness:.7,roughness:.35});
+  const bx=(w,h,d,x,y,z,rx=0)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),al,[x,y,z],g);m.rotation.x=rx;return m};
+  const HP=1.1,Z0=0.1,Z1=1.5,ang=Math.atan2(HP,Z1-Z0),L=Math.hypot(HP,Z1-Z0),yAt=z=>HP-(z-Z0)*HP/(Z1-Z0);
+  bx(0.8,0.05,0.55,0,HP,-0.17);                                                    // plataforma
+  [[-0.37,-0.42],[0.37,-0.42],[-0.37,0.08],[0.37,0.08]].forEach(([x,z])=>bx(0.05,HP,0.05,x,HP/2,z));// patas
+  [-0.37,0.37].forEach(x=>{bx(0.04,0.04,0.5,x,0.35,-0.17);bx(0.04,0.04,0.5,x,0.75,-0.17)});         // travesaños laterales
+  bx(0.74,0.04,0.04,0,0.35,-0.42);
+  [-0.37,0.37].forEach(x=>{bx(0.05,0.12,L,x,HP/2,(Z0+Z1)/2,ang);                      // largueros
+    bx(0.04,0.04,L,x,HP/2+0.9,(Z0+Z1)/2,ang);                                        // pasamanos paralelo
+    [Z0+0.05,Z1-0.12].forEach(z=>bx(0.04,0.9,0.04,x,yAt(z)+0.45,z));                 // parantes del pasamanos
+    bx(0.04,1.0,0.04,x,HP+0.5,-0.42);bx(0.04,0.04,0.55,x,HP+1.0,-0.17)});            // baranda de la plataforma
+  bx(0.78,0.04,0.04,0,HP+1.0,-0.42);bx(0.78,0.04,0.04,0,HP+0.55,-0.42);
+  for(let i=1;i<=3;i++){const z=Z0+i*(Z1-Z0)/4;bx(0.7,0.04,0.2,0,yAt(z),z)}           // escalones
+  [[-0.37,-0.42],[0.37,-0.42],[-0.37,Z1-0.05],[0.37,Z1-0.05]].forEach(([x,z])=>{const w=mesh(new THREE.CylinderGeometry(0.07,0.07,0.04,10),M(0x333333),[x,0.07,z],g);w.rotation.z=Math.PI/2});
+  return g}
+const ladder=burrito(),ladder2=burrito();
 const excl=new THREE.Mesh(new THREE.RingGeometry(7.6,7.9,64),new THREE.MeshBasicMaterial({color:0xef5350,transparent:true,opacity:.55,side:THREE.DoubleSide}));excl.rotation.x=-Math.PI/2;excl.position.y=0.05;scene.add(excl);
 function put(o,x,z,face){o.position.set(x,0,z);o.rotation.y=face}
 const faceTo=(x,z,tx,tz)=>Math.atan2(tx-x,tz-z);
@@ -338,6 +414,7 @@ const boltMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:.7,emissi
 const bolts=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const g=new THREE.Group();[0.35,1.5,2.65].forEach(y=>mesh(new THREE.SphereGeometry(0.07,6,5),boltMat.clone(),[Math.cos(a)*(R+0.12),y,Math.sin(a)*(R+0.12)],g,false));g.visible=false;scene.add(g);bolts.push(g)}
 const wedges=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const w=mesh(new THREE.ConeGeometry(0.12,0.35,4),M(0xb8902a,{metalness:.5}),[Math.cos(a)*(R+0.25),2.4,Math.sin(a)*(R+0.25)],scene,false);w.visible=false;wedges.push(w)}
 const boltsFull=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const g=new THREE.Group();for(let i=0;i<8;i++)for(const s of[-1,1]){const b=mesh(new THREE.SphereGeometry(0.055,6,5),boltMat.clone(),[0,0.2+i*0.37,0],g,false);const aa=a+s*0.004;b.position.x=Math.cos(aa)*(R+0.12);b.position.z=Math.sin(aa)*(R+0.12)}g.visible=false;scene.add(g);boltsFull.push(g)}
+const gun2=mesh(new THREE.BoxGeometry(0.12,0.22,0.3),M(0xd83b2a),null,scene,false);gun2.visible=false;
 const gun=mesh(new THREE.BoxGeometry(0.12,0.22,0.3),M(0xd83b2a),null,scene,false);
 const cable=mesh(new THREE.TorusGeometry(R+0.2,0.035,6,200),M(0x555555,{metalness:.8}),[0,1.5,0],scene,false);cable.rotation.x=Math.PI/2;cable.visible=false;
 
@@ -345,7 +422,48 @@ const cable=mesh(new THREE.TorusGeometry(R+0.2,0.035,6,200),M(0x555555,{metalnes
 const lathe=(pts,mat,seg=120)=>{const m=new THREE.Mesh(new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),seg),mat);m.receiveShadow=true;scene.add(m);return m};
 const sand=lathe([[0,0.32],[R-1.45,0.32],[R-0.15,1.55],[R-0.1,0]],M(0xd9c08e,{roughness:1}));
 const grav=lathe([[R+0.15,1.25],[R+1.45,0.02],[R+1.5,0]],M(0x7d7468,{roughness:1}));
-const sandPiles=[0,1,2,3].map(i=>{const a=i*1.57+0.6;return mesh(new THREE.ConeGeometry(2.6,1.8,20),M(0xd9c08e,{roughness:1}),[Math.cos(a)*9,0.9,Math.sin(a)*9])});
+// ---------- camiones batea de arena (22 m³): entran por el acceso sur, retroceden por el panel abierto (última placa) y descargan adentro ----------
+const AO=th(LAST);const OPN=polar(AO,R+1.2),STG=[36,13];
+const DUMP=[[AO,13.5],[AO+0.42,10.5],[AO-0.42,10.5],[AO,7.0]].map(([a,r])=>polar(a,r));
+const curve=pts=>new THREE.CatmullRomCurve3(pts.map(([x,z])=>v3(x,0,z)),false,'catmullrom',0.35);
+const TK_IN=curve([[RX,-150],[RX,-62],[RX-4,-44],[LH-2,-39],[44,-31],[41,-14],[33,-4],[29.5,4],[31,9.5],STG]);// llega de frente y gira: queda con la trompa hacia afuera, listo para retroceder sin girar en el lugar
+const TK_OUT=curve([STG,[39,20],[44,31],[LH+1,39],[RX-4,43],[RX,62],[RX,160]]);
+const TK_REV=DUMP.map(d=>curve([STG,[(STG[0]+OPN[0])/2+1,(STG[1]+OPN[1])/2+1],OPN,d]));
+const TKS=[2,6,10,14].map(k=>T['p'+k][0]);// de a un camión por vez; ninguno queda maniobrando durante una pausa
+const TKD=Math.min(22,T.p6[0]-T.p2[0]-0.5);// duración de cada maniobra (s de animación)
+const sandMat=M(0xa8875a,{roughness:1});// arena traída: más oscura que la platea
+function dumpTruck(){const g=new THREE.Group();scene.add(g);// origen = extremo trasero; adelante = +z
+  const red=M(0xc23a22,{metalness:.35,roughness:.45}),dk=M(0x2a2a2a),gl=M(0x1d2a33,{metalness:.3,roughness:.15}),ch=M(0xcfd4d8,{metalness:.9,roughness:.25}),bx=M(0x8d8f92,{metalness:.55,roughness:.5});
+  mesh(new THREE.BoxGeometry(1.1,0.35,11.2),dk,[0,0.95,5.8],g);
+  mesh(new THREE.BoxGeometry(2.45,2.2,1.9),red,[0,2.25,10.4],g);mesh(new THREE.BoxGeometry(2.4,1.2,1.1),red,[0,1.6,11.7],g);mesh(new THREE.BoxGeometry(2.2,0.9,0.05),gl,[0,2.85,11.36],g,false);
+  [-1.23,1.23].forEach(x=>mesh(new THREE.BoxGeometry(0.05,0.75,1.1),gl,[x,2.85,10.5],g,false));mesh(new THREE.BoxGeometry(2.45,0.3,0.25),ch,[0,0.85,12.3],g);
+  [-0.8,0.8].forEach(x=>mesh(new THREE.BoxGeometry(0.35,0.2,0.08),M(0xfff6c8,{emissive:0xfff0b0,emissiveIntensity:.4}),[x,1.15,12.3],g,false));
+  mesh(new THREE.BoxGeometry(0.3,0.12,0.2),M(0xff9a1a,{emissive:0xff7a00,emissiveIntensity:.8}),[0,3.4,10.4],g);
+  [[-1.05,11.2],[1.05,11.2]].forEach(([x,z])=>wheel(g,x,0.55,z,0.55,0.35));[1.2,2.5,8.8].forEach(z=>[-1.15,-0.75,0.75,1.15].forEach(x=>wheel(g,x,0.55,z,0.55,0.3)));
+  const piv=new THREE.Group();piv.position.set(0,1.3,0.25);g.add(piv);
+  mesh(new THREE.BoxGeometry(2.5,0.12,8.2),bx,[0,0,4.1],piv);[-1.22,1.22].forEach(x=>mesh(new THREE.BoxGeometry(0.06,1.5,8.2),bx,[x,0.75,4.1],piv));mesh(new THREE.BoxGeometry(2.5,1.5,0.06),bx,[0,0.75,8.2],piv);
+  const gate=mesh(new THREE.BoxGeometry(2.5,1.5,0.06),bx,[0,0.75,0],piv);
+  const load=mesh(new THREE.BoxGeometry(2.36,0.25,8.0),sandMat,[0,1.25,4.1],piv);
+  const flow=mesh(new THREE.BoxGeometry(2.0,1.3,0.9),sandMat,[0,0.65,-0.5],g);flow.visible=false;
+  const ram=mesh(new THREE.CylinderGeometry(0.11,0.11,1,10),ch,null,g);
+  g.userData={piv,load,gate,ram,flow};g.visible=false;return g}
+const trucks=TKS.map(()=>dumpTruck());
+function onCurve(o,cv,u,rev){u=C(0,1,u);const p=cv.getPointAt(u),d=cv.getTangentAt(u);o.position.copy(p);o.rotation.y=Math.atan2(d.x,d.z)+(rev?Math.PI:0)}
+function setRam(g){const P=g.userData.piv;P.updateMatrix();const top=v3(0,0,7.6).applyMatrix4(P.matrix),bot=v3(0,1.15,7.8);const r=g.userData.ram;r.position.copy(top).add(bot).multiplyScalar(0.5);const d=top.clone().sub(bot);r.scale.set(1,Math.max(0.05,d.length()),1);r.quaternion.setFromUnitVectors(v3(0,1,0),d.normalize());r.visible=P.rotation.x<-0.02}
+function updTrucks(t){let any=null;
+  trucks.forEach((g,i)=>{const s0=TKS[i],u=(t-s0)/TKD;g.visible=u>0&&u<1;const P=g.userData.piv;P.rotation.x=0;g.userData.gate.rotation.x=0;g.userData.flow.visible=false;
+    const pile=sandPiles[i];
+    if(g.visible){any=g;
+      if(u<0.32)onCurve(g,TK_IN,ss(u/0.32),false);// ingreso despacio, guiado
+      else if(u<0.47){const r=ss(seg(u,0.32,0.47));onCurve(g,TK_REV[i],r,false);g.rotation.y+=Math.PI}// retroceso con banderillero
+      else if(u<0.66){onCurve(g,TK_REV[i],1,false);g.rotation.y+=Math.PI;const tip=ss(seg(u,0.48,0.55))*(1-ss(seg(u,0.6,0.66)));P.rotation.x=-0.38*tip;g.userData.gate.rotation.x=0.9*tip;g.userData.flow.visible=tip>0.6&&u<0.6;g.userData.load.visible=u<0.58}
+      else{const r=ss(seg(u,0.66,1));if(r<0.35)onCurve(g,TK_REV[i],1-r/0.35,true);else onCurve(g,TK_OUT,(r-0.35)/0.65,false)}
+      if(u<0.47)g.userData.load.visible=true;setRam(g)}
+    // pila de arena detrás del camión
+    const dumped=seg(t,s0+TKD*0.52,s0+TKD*0.6);if(t>s0+TKD*0.5&&!pile.userData.set){const d=DUMP[i],o=polar(Math.atan2(d[1]-OPN[1],d[0]-OPN[0]),1);pile.position.set(d[0]+o[0]*2.2,0.9,d[1]+o[1]*2.2);pile.userData.set=true}
+    pile.userData.grow=dumped});
+  return any}
+const sandPiles=[0,1,2,3].map(i=>{const m=mesh(new THREE.ConeGeometry(2.6,1.8,20),sandMat,[0,0.9,0]);m.visible=false;return m});
 const loader=new THREE.Group();scene.add(loader);mesh(new THREE.BoxGeometry(1.8,1.2,3.2),yel,[0,1.1,0],loader);mesh(new THREE.BoxGeometry(1.1,1.2,1.2),glass,[0,2.2,0.3],loader);mesh(new THREE.BoxGeometry(2.3,0.6,0.6),M(0x555555),[0,0.6,2.0],loader);[[-0.9,1],[0.9,1],[-0.9,-1],[0.9,-1]].forEach(([x,z])=>wheel(loader,x,0.5,z,0.5,0.35,0xf2b21c));
 const sucGroup=new THREE.Group();scene.add(sucGroup);const trench=new THREE.Group();scene.add(trench);
 {const a=TS;const [x,z]=polar(a,R);sucGroup.position.set(x,0,z);sucGroup.rotation.y=-a;trench.position.set(x,0,z);trench.rotation.y=-a;
@@ -421,8 +539,9 @@ const ballast=new THREE.Group();scene.add(ballast);
 {const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#ecebe4';x.fillRect(0,0,64,64);x.strokeStyle='rgba(150,150,140,.35)';for(let i=0;i<64;i+=3){x.beginPath();x.moveTo(i,0);x.lineTo(i,64);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(64,i);x.stroke()}
  const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;const bm=M(0xffffff,{map:tx,roughness:.9});const bg=new THREE.BoxGeometry(0.6,0.2,0.4);
  [[4.5,6],[9.5,10],[14.5,12],[18.3,12]].forEach(([r,n],ri)=>{for(let i=0;i<n;i++){const a=i/n*Math.PI*2+ri*0.37;const b=new THREE.Mesh(bg,bm);b.position.set(Math.cos(a)*r,0.47,Math.sin(a)*r);b.rotation.y=-a+((i*7)%5-2)*0.3;b.castShadow=true;b.visible=false;ballast.add(b)}})}
+const BAGW=[];const carried=[0,1,2,3].map(()=>{const m=mesh(new THREE.BoxGeometry(0.55,0.2,0.38),M(0xecebe4,{roughness:.9}),null,scene);m.visible=false;return m});
 const ties=new THREE.Group();scene.add(ties);
-{const rod=new THREE.Mesh(new THREE.TorusGeometry(R+0.2,0.025,6,240),M(0x777777,{metalness:.8}));rod.rotation.x=Math.PI/2;rod.position.y=PH-0.4;scene.add(rod);rod.castShadow=true;// varilla horizontal exterior a 40 cm del borde
+{const rod=new THREE.Mesh(new THREE.TorusGeometry(R+0.2,0.025,6,240),M(0x777777,{metalness:.8}));rod.rotation.x=Math.PI/2;rod.position.y=PH-0.4;scene.add(rod);rod.castShadow=false;window.__rod=rod;// varilla horizontal exterior a 40 cm del borde
  const tm=new THREE.MeshStandardMaterial({color:0xe8e0c0,roughness:.9});const nT=Math.round(2*Math.PI*R);// una cinta cada ~1 m
  for(let i=0;i<nT;i++){const a=i/nT*Math.PI*2;const c=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.42,0.06),tm);c.position.set(Math.cos(a)*(R+0.17),PH-0.2,Math.sin(a)*(R+0.17));c.rotation.y=-a;ties.add(c)}}
 const water=new THREE.Mesh(new THREE.CircleGeometry(R-0.3,96),new THREE.MeshStandardMaterial({color:0x2c6f8f,roughness:.08,metalness:.2,transparent:true,opacity:.92}));water.rotation.x=-Math.PI/2;scene.add(water);
@@ -435,7 +554,7 @@ const stair=new THREE.Group();scene.add(stair);
  [[-0.55,-0.6],[0.55,-0.6],[-0.55,0.6],[0.55,0.6]].forEach(([x,z])=>b(0.08,3.0,0.08,x,1.5,z));
  b(1.25,0.07,1.35,0,3.0,0);[0.9,1.9].forEach(y=>{b(1.1,0.05,0.05,0,y,-0.6);b(1.1,0.05,0.05,0,y,0.6);b(0.05,0.05,1.2,-0.55,y,0);b(0.05,0.05,1.2,0.55,y,0)});
  [-0.62,0.62].forEach(x=>{b(0.05,1.0,0.05,x,3.5,-0.62);b(0.05,1.0,0.05,x,3.5,0.62)});b(0.05,0.05,1.3,0.62,4.0,0);b(1.25,0.05,0.05,0,4.0,-0.62);
- const L=Math.hypot(3.0,3.6),ang=Math.atan2(3.0,3.6);[-0.45,0.45].forEach(x=>{b(0.07,0.18,L,x,1.5,2.4,ang);b(0.05,0.05,L,x,2.45,2.4,ang);[0.4,1.4,2.4,3.4].forEach(zz=>b(0.05,0.95,0.05,x,0.55+zz*3.0/3.6,0.6+zz))});
+ const L=Math.hypot(3.0,3.6),ang=Math.atan2(3.0,3.6);[-0.45,0.45].forEach(x=>{b(0.07,0.18,L,x,1.5,2.4,ang);b(0.05,0.05,L,x,2.45,2.4,ang);[0.5,1.5,2.5,3.4].forEach(zz=>{const z=0.6+zz,ys=3.0-(z-0.6)*3.0/3.6;b(0.05,0.95,0.05,x,ys+0.5,z)})});
  for(let i=0;i<10;i++){const zz=0.75+i*0.34;b(0.86,0.04,0.24,0,3.0-(zz-0.6)*3.0/3.6,zz)}}
 stair.visible=false;
 const goose=new THREE.Group();scene.add(goose);goose.rotation.y=-GA;
@@ -449,7 +568,7 @@ const stream=mesh(new THREE.CylinderGeometry(0.16,0.28,2.8,12,1,true),new THREE.
 
 // ---------- etiquetas ----------
 const labels=$('labels');const L={};const lab=(k,t)=>{const e=document.createElement('div');e.className='lbl';e.textContent=t;labels.appendChild(e);L[k]={e,p:new THREE.Vector3()}};
-lab('th','Manipulador telescópico');lab('tr','Carretón');lab('hc','Hidrogrúa');lab('suc','Marca de succión');lab('lay','Layflat desde el campo');
+lab('th','Manipulador telescópico');lab('tr','Carretón');lab('hc','Hidrogrúa');lab('suc','Marca de succión');lab('lay','Layflat desde el campo');lab('bd','Banderillero de camiones');lab('pk','Camionetas de la cuadrilla · estacionadas de culata');L.pk.p.set(-33.75,3.2,-44.2);
 
 // ---------- utilidades de pose ----------
 function stairPose(eu){if(eu<0.24)return{a:LPA,r:LRP,y:0};if(eu<0.8){const f=ss(seg(eu,0.24,0.8));return{a:lerp(LPA,LADA,f),r:lerp(LRP,LRF,f),y:1.2*Math.sin(Math.PI*f)+0.3}}if(eu<0.86)return{a:LADA,r:LRF,y:0.3*(1-ss(seg(eu,0.8,0.86)))};return{a:LADA,r:LRF,y:0}}
@@ -461,7 +580,7 @@ function applyPose(o,A,B,f,arc=0){o.position.lerpVectors(A.p,B.p,f);o.position.y
 // ---------- estado en función del tiempo ----------
 const camGoal={t:v3(0,1,0),e:v3(-38,34,48)};
 function update(t){
-  const ch=chapOf(t);placeStair(t);
+  const ch=chapOf(t);placeStair(t);if(window.__rod)window.__rod.visible=t>=T.liner[0];gun2.visible=false;ladder2.visible=false;stake.visible=t<T.arrive[0];
   // marcado
   const um=seg(t,...T.mark);paintArc(ss(seg(um,0.2,0.85)));
   const ra=TS+Math.PI*2*ss(seg(um,0.2,0.85));rope.visible=um>0.15&&um<0.9;rope.geometry.setFromPoints([v3(0,0.3,0),v3(Math.cos(ra)*R,0.3,Math.sin(ra)*R)]);
@@ -483,7 +602,14 @@ function update(t){
     if(t<DS[k][1]){distK=k;du=seg(t,...DS[k]);
       const A=poseOf(d=>{d.position.copy(trailer.localToWorld(slot.clone().add(v3(0,0.06,0))));d.quaternion.copy(trailer.quaternion);d.rotateY(Math.PI/2);d.rotateZ(-Math.PI/2);d.translateX(-0.0)});
       const B=poseOf(d=>setPlatePile(d,a,0));
-      const f=du<0.25?0:du>0.8?1:ss((du-0.25)/0.55);applyPose(p,A,B,f,4.5);if(du>0.2&&du<0.85)p.position.y+=1.2*ss(seg(du,0.2,0.3))*(1-ss(seg(du,0.75,0.85)));continue}
+      // traslado con pluma corta, por fuera de la circunferencia (radio ~R+7), siguiendo el giro del manipulador por el camino más corto
+      const tA=Math.atan2(trailer.position.z,trailer.position.x),wr=(x,r)=>r+Math.atan2(Math.sin(x-r),Math.cos(x-r)),aB=wr(a,tA);
+      const ac=lerp(tA,aB,ss(seg(du,0.25,0.8)));const [cx,cz]=polar(ac,R+7.2);
+      const Cq=poseOf(d=>setPlatePile(d,ac,0)).q;const Cp=v3(cx,2.6,cz);
+      if(du<0.32){const g=ss(seg(du,0.2,0.32));p.position.lerpVectors(A.p,Cp,g);p.position.y=lerp(A.p.y,2.6,ss(seg(du,0.18,0.26)));p.quaternion.slerpQuaternions(A.q,Cq,g)}
+      else if(du<0.78){p.position.copy(Cp);p.quaternion.copy(Cq)}
+      else{const g=ss(seg(du,0.78,0.88));p.position.lerpVectors(Cp,B.p,g);p.position.y=lerp(2.6,B.p.y,ss(seg(du,0.8,0.9)));p.quaternion.slerpQuaternions(Cq,B.q,g)}
+      continue}
     if(t<ak[0]){setPlatePile(p,a,0);continue}
     if(t>=ak[1]){setPlateFinal(p,a);placed++;continue}
     active=k;au=seg(t,...ak);
@@ -499,19 +625,19 @@ function update(t){
   stab.visible=t>T.p0[0]+(T.p0[1]-T.p0[0])*0.74&&t<T.close[1]-0.3;
   // bulones: 3 de agarre al colocar cada placa; bulonado completo con el anillo cerrado
   const setAt=k=>{const ak=k<LAST?T['p'+k]:T.close;return ak[0]+(ak[1]-ak[0])*0.8};
-  const bj=Math.floor(bu*N*1.0);
+  const H2=Math.ceil(N/2),bj=Math.floor(bu*H2),bj2=H2+bj;
   bolts.forEach((g,k)=>{const k2=(k+1)%N;const tj=Math.max(setAt(k),setAt(k2));g.visible=t>tj;
     const glow=(t>tj&&t<tj+1.2)?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.6)});
-  boltsFull.forEach((g,k)=>{g.visible=t>T.bolt[0]&&(bu>=1||k<bj||(k===bj&&bu*N-bj>0.5));const glow=k===bj&&bu<1?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.2)});
-  wedges.forEach((w,k)=>w.visible=t>T.bolt[0]&&(bu>=1||k<bj));cable.visible=t>T.bolt[0]&&bu>0.95||t>=T.bolt[1];
+  boltsFull.forEach((g,k)=>{const kk=k<H2?k:k-H2;g.visible=t>T.bolt[0]&&(bu>=1||kk<bj||(kk===bj&&bu*H2-bj>0.5));const glow=kk===bj&&bu<1?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.2)});
+  wedges.forEach((w,k)=>w.visible=t>T.bolt[0]&&(bu>=1||(k<H2?k:k-H2)<bj));cable.visible=t>T.bolt[0]&&bu>0.95||t>=T.bolt[1];
   // manipulador
   const lu=seg(t,...T.liner);
   const teleVis=t>=T.arrive[0]+(T.arrive[1]-T.arrive[0])*0.8;[tele,boomA,boomB,liftCyl,hookPlate,hookBlock,hook,hookCable].forEach(o=>o.visible=teleVis);
   let ka=active>=0?active:(t<asmStart?0:(t<T.close[0]?LAST-1:LAST));
   {let ang,loaded=false,load3=null,lift=0;
    const trailerAng=Math.atan2(trailer.position.z,trailer.position.x);
-   if(distK>=0){const a=th(distK);const goA=trailerAng,goB=a;
-     ang=du<0.25?lerp(distK?th(distK-1):goA,goA,ss(du/0.25)):du<0.8?lerp(goA,goB,ss((du-0.25)/0.55)):goB;
+   if(distK>=0){const wrap=(x,ref)=>ref+Math.atan2(Math.sin(x-ref),Math.cos(x-ref));const goA=trailerAng,goB=wrap(th(distK),goA);
+     ang=du<0.25?lerp(distK?wrap(th(distK-1),goA):goA,goA,ss(du/0.25)):du<0.8?lerp(goA,goB,ss((du-0.25)/0.55)):goB;
      loaded=du>0.12&&du<0.92;load3=plates[distK]}
    else if(t<asmStart){ang=trailerAng-0.45}
    else{ang=th(ka);if(active>=0&&au<0.15){const prev=ka===LAST?th(LAST-1):th(Math.max(0,ka-1));ang=lerp(prev,th(ka),ss(au/0.15))}
@@ -522,14 +648,14 @@ function update(t){
    const inLiner=t>=T.liner[0]&&lu<0.5;
    const eu=seg(t,...T.esc),inEsc=t>=T.esc[0]&&t<T.esc[1];
    if(inEsc){const L0=stairPose(eu);ang=eu<0.15?lerp(th(LAST)+0.35,LPA,ss(eu/0.15)):L0.a;RR=eu<0.12?RTH:eu<0.86?lerp(RTH,L0.r+5.2,ss(seg(eu,0.12,0.2))):lerp(L0.r+5.2,RTH,ss(seg(eu,0.88,1)));loaded=false;load3=null}
-   if(inLiner){ang=th(LAST);RR=lu<0.1?RTH:lu<0.3?lerp(RTH,5,ss(seg(lu,0.1,0.3))):lu<0.36?5:lerp(5,RTH,ss(seg(lu,0.36,0.5)));loaded=false;load3=null}const [x,z]=polar(ang,RR);tele.position.set(x,0,z);tele.rotation.y=-ang+Math.PI/2;tele.updateMatrixWorld();
+   if(inLiner){ang=th(LAST);RR=lu<0.1?RTH:lu<0.3?lerp(RTH,5,ss(seg(lu,0.1,0.3))):lu<0.355?5:lerp(5,RTH,ss(seg(lu,0.355,0.378)));loaded=false;load3=null}const [x,z]=polar(ang,RR);tele.position.set(x,0,z);tele.rotation.y=-ang+Math.PI/2;tele.updateMatrixWorld();
    // resguardo físico: el manipulador nunca invade el carretón ni la zona de conos (separación mínima 6 m)
    if(trailer.visible){const lp=trailer.worldToLocal(tele.position.clone());const dx=Math.max(0,Math.abs(lp.x)-1.3-1.6),dz=Math.max(0,lp.z>3?lp.z-3-3:(lp.z<-12?-12-lp.z-3:0));
      if(dx<6&&dz<6){const push=6-dx;const dir=new THREE.Vector3(Math.sign(lp.x)||-1,0,0).applyQuaternion(trailer.quaternion);tele.position.addScaledVector(dir,push);tele.updateMatrixWorld()}}
    {const ax=LX;roll.rotation.set(0,-ax+Math.PI/2,Math.PI/2);roll2.rotation.copy(roll.rotation);
     if(t<T.liner[0]){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75,rz);roll.visible=t>T.suc[0];roll.scale.set(1,1,1)}
-    else if(lu<0.08){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75+ss(seg(lu,0.05,0.08))*0.9,rz);roll.visible=true}
-    else if(lu<0.36){const c=tele.localToWorld(v3(0,0,-5.0));const down=ss(seg(lu,0.3,0.36));roll.position.set(c.x,1.65-down*0.9,c.z);roll.visible=true}
+    else if(lu<0.1){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75+ss(seg(lu,0.05,0.1))*0.9,rz);roll.visible=true}
+    else if(lu<0.36){const c=tele.localToWorld(v3(0,0,-5.0));if(lu<0.12){const [rx,rz]=polar(LX,R+7.6);c.x=lerp(rx,c.x,ss(seg(lu,0.1,0.12)));c.z=lerp(rz,c.z,ss(seg(lu,0.1,0.12)))}const down=ss(seg(lu,0.3,0.34));if(lu>0.34){roll.userData.rest=roll.userData.rest||c.clone();}else roll.userData.rest=null;if(roll.userData.rest){roll.position.set(roll.userData.rest.x,0.75,roll.userData.rest.z)}else roll.position.set(c.x,1.65-down*0.9,c.z);roll.visible=true}
     else{// se desenrolla desde el centro hacia ambos extremos: dos medios rollos que se alejan y se achican
       const cu=ss(seg(lu,0.38,0.55)),d=cu*(R-1.6),sc=Math.max(0.25,0.72*(1-cu)+0.25);const dir=v3(Math.cos(LX),0,Math.sin(LX));
       roll.visible=roll2.visible=lu<0.56;roll.scale.set(sc,1,sc);roll2.scale.set(sc,1,sc);
@@ -541,7 +667,8 @@ function update(t){
      const uu=distK>=0?du:au;const up=distK>=0?(uu<0.2?ss(seg(uu,0.12,0.2)):uu>0.85?1-ss(seg(uu,0.85,0.92)):1):(uu<0.25?ss(seg(uu,0.18,0.25)):uu>0.8?1-ss(seg(uu,0.8,0.86)):1);
      const mid=lugs[0].clone().lerp(lugs[1],0.5);hookP=mid.clone().add(v3(0,2.3*up+0.4,0));slings.forEach((s,i)=>{s.visible=up>0.5;aimY(s,hookP,lugs[i])})}
    else if(inEsc&&eu>0.18&&eu<0.86){const top=stair.localToWorld(v3(0,4.05,0));const up=ss(seg(eu,0.18,0.24))*(1-ss(seg(eu,0.8,0.86)));hookP=top.clone().add(v3(0,0.4+1.6*up,0));[stair.localToWorld(v3(0.6,4.0,-0.6)),stair.localToWorld(v3(-0.6,4.0,0.6))].forEach((e,i)=>{slings[i].visible=true;aimY(slings[i],hookP,e)})}
-   else if(inLiner&&lu>0.06&&lu<0.37){const rp=roll.position;const ax=v3(Math.cos(LX),0,Math.sin(LX));hookP=rp.clone().add(v3(0,1.6,0));[rp.clone().addScaledVector(ax,2.4),rp.clone().addScaledVector(ax,-2.4)].forEach((e,i)=>{slings[i].visible=true;aimY(slings[i],hookP,e.add(v3(0,0.7,0)))})}
+   else if(inLiner&&lu>0.06&&lu<0.355){const rp=roll.position;const ax=v3(Math.cos(LX),0,Math.sin(LX));const rest=tele.localToWorld(v3(0,4.2,-3.6));const k=ss(seg(lu,0.342,0.355));hookP=rp.clone().add(v3(0,1.6,0)).lerp(rest,k);// desengancha y recoge el gancho antes de retirarse
+     [rp.clone().addScaledVector(ax,2.4),rp.clone().addScaledVector(ax,-2.4)].forEach((e,i)=>{slings[i].visible=k<0.05;aimY(slings[i],hookP,e.add(v3(0,0.7,0)))})}
    else{slings.forEach(s=>s.visible=false);hookP=tele.localToWorld(v3(0,4.2,-3.6))}
    const tip=hookP.clone().add(v3(0,1.7,0));const dl=tip.distanceTo(piv);const mid=piv.clone().lerp(tip,Math.min(0.58,5.2/dl));
    aim(boomA,piv,mid);aim(boomB,mid,tip);aim(liftCyl,tele.localToWorld(v3(0.55,1.4,-0.6)),piv.clone().lerp(tip,Math.min(0.3,2.6/dl)));
@@ -552,13 +679,17 @@ function update(t){
   hcrane.visible=crA.visible=crB.visible=crCyl.visible=crCable.visible=false;L.hc.e.hidden=true;
   // chorizo y apertura de la lona
   {const cu=ss(seg(lu,0.38,0.55));chorizo.visible=lu>0.38&&lu<0.6;chorizo.rotation.set(0,-LX,0);chorizo.scale.set(Math.max(0.01,cu*2*(R-1.6)),1,1);chorizo.position.set(0,0.46,0);
-   const op=ss(seg(lu,0.55,0.70));linerFloor.visible=lu>0.55;{const sy=0.25+0.75*op;linerFloor.scale.set(1,sy,Math.max(2/(2*R),op));linerFloor.position.y=0.36*(1-sy)+0.01}
-   linerWall.visible=lu>0.80;const wu=ss(seg(lu,0.80,0.93));linerWall.scale.y=Math.max(0.001,wu);linerWall.position.y=1.6+wu*(PH-1.6)/2;linerLip.visible=lu>0.92;ties.visible=lu>0.92;
-   ballast.children.forEach((b,i)=>b.visible=t>T.liner[0]&&lu>0.70+0.095*i/ballast.children.length);
+   const op=ss(seg(lu,0.5,0.6));linerFloor.visible=lu>0.5;{const sy=0.25+0.75*op;linerFloor.scale.set(1,sy,Math.max(2/(2*R),op));linerFloor.position.y=0.36*(1-sy)+0.01}
+   linerWall.visible=lu>0.84;const wu=ss(seg(lu,0.84,0.95));linerWall.scale.y=Math.max(0.001,wu);linerWall.position.y=1.6+wu*(PH-1.6)/2;linerLip.visible=lu>0.94;ties.visible=lu>0.94;
+   {const BW=['sen','sog','asi','m1'],NB=ballast.children.length,bf=seg(lu,0.60,0.83)*NB/BW.length;
+    ballast.children.forEach((b,i)=>{const w=i%BW.length,j=Math.floor(i/BW.length);b.visible=t>T.liner[0]&&(lu>0.83||j<Math.floor(bf)||(j===Math.floor(bf)&&bf-j>=0.5))});
+    BAGW.length=0;if(t>T.liner[0]&&lu>0.60&&lu<0.83){const FP=polar(th(LAST),R+5);BW.forEach((k,w)=>{const j=Math.floor(bf),f=bf-j,bi=Math.min(NB-1,j*BW.length+w),b=ballast.children[bi].position;
+      const go=f<0.5,u=go?ss(f/0.5):ss((f-0.5)/0.5);const A=go?FP:[b.x,b.z],Bp=go?[b.x,b.z]:FP;const off=(w-1.5)*0.9;const x=lerp(A[0],Bp[0],u)+off*Math.sin(th(LAST)),z=lerp(A[1],Bp[1],u)-off*Math.cos(th(LAST));
+      BAGW.push({k,x,z,face:faceTo(x,z,Bp[0],Bp[1]),carry:go})})}}
    // sector del cierre: lona media baja hasta colocar la última placa; después se sube con sogas desde afuera
    const cl=seg(t,...T.close);const fu2=t<T.close[0]?0:ss(seg(cl,0.84,1));const fh=lerp(0.35,PH-1.5,fu2);
    const done=t>=T.close[0]&&fu2>=0.999;const wh=(PH-1.5)*linerWall.scale.y;
-   flap.visible=lu>0.80&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
+   flap.visible=lu>0.84&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
    linerWall.geometry=done?wallFull:wallPart;linerLip.geometry=done?lipFull:lipPart;
    const ropeOn=t>=T.close[0]&&cl>0.8&&cl<1;flapRopes.forEach((r,i)=>{r.visible=ropeOn;if(ropeOn){const a=th(LAST)+(i?1:-1)*(DT/2+2/R)*0.9;const [x1,z1]=polar(a,R-0.3);const [x2,z2]=polar(a,R+5);r.geometry.setFromPoints([v3(x1,1.55+fh,z1),v3(x2,1.2,z2)])}})}
   // personas dentro del tanque (control de seguridad)
@@ -566,7 +697,7 @@ function update(t){
    const el=$('inside');el.textContent=n;el.style.color=n>0?(t>=T.close[0]?'#ef5350':'#f2b33d'):'#4fd18b'}
   // cuadrilla
   {const a=th(ka);const P=(da,r)=>polar(a+da/R,r);let q;const working=t>=T.arrive[1];
-   ['m1','m2'].forEach(k=>crew[k].visible=t<T.arrive[0]+2);
+   ['m1','m2'].forEach(k=>crew[k].visible=t<T.arrive[0]+2);crew.m1.userData.arms[1].rotation.z=0;
    if(t<T.mark[1]){const [x,z]=polar(ra,R+0.4);put(crew.m1,x,z,faceTo(x,z,0,0)+Math.PI);put(crew.m2,0.6,0.4,faceTo(0.6,0.4,x,z));['sen','sog','int','ext','asi'].forEach((k,i)=>put(crew[k],-6+i*1.4,-R-8,0))}
    else if(!working){['sen','sog','int','ext','asi'].forEach((k,i)=>put(crew[k],-6+i*1.4,-R-8,0));const [x,z]=polar(AP+0.12,R+4);put(crew.sen,x,z,faceTo(x,z,trailer.position.x,trailer.position.z))}
    else{const tgt=distK>=0?plates[distK].position:(active>=0?plates[active].position:tele.position);
@@ -606,16 +737,31 @@ function update(t){
    if(t>=T.esc[0]&&t<T.esc[1]){const eu=seg(t,...T.esc);gun.visible=false;crew.asi.position.y=0;
      let q=polar(LADA+0.75,R+15);put(crew.sen,q[0],q[1],faceTo(q[0],q[1],tele.position.x,tele.position.z));
      const near=eu>0.87;[['ext',-0.5],['asi',-0.62],['int',-0.74],['sog',0.95]].forEach(([k,o],i)=>{const qq=near&&k!=='sog'?polar(LADA+0.14+i*0.11,R+3.4):polar(LADA+o,R+12);put(crew[k],qq[0],qq[1],faceTo(qq[0],qq[1],stair.position.x,stair.position.z))})}
-   crew.sen.userData.arms[1].rotation.z=(working||t>T.mark[1])?2.4+Math.sin(t*4)*0.5:0;crew.sen.userData.arms[0].rotation.z=(working||t>T.mark[1])?-0.4:0;
+   {// chofer en la cabina del manipulador
+    crew.op.visible=tele.visible;if(tele.visible){const p=tele.localToWorld(v3(-0.72,0.55,0.25));crew.op.position.copy(p);crew.op.rotation.y=tele.rotation.y+Math.PI}
+    // supervisores: recorren la periferia observando la tarea, fuera de las zonas de riesgo
+    {// HSE con tablilla: la mira y anota; supervisor: llama, mira el plano o indica señalando
+     const ah=crew.hse.userData.arms;ah[0].rotation.set(-1.0,0,0);ah[1].rotation.set(-0.8+0.15*Math.sin(t*5),0,0.25);
+     const m=Math.floor(t/12)%3,as=crew.sop.userData.arms;phone.visible=m===0;plano.visible=m===1;
+     if(m===0){as[1].rotation.set(0,0,-2.6);as[0].rotation.set(0,0,0)}else if(m===1){as[0].rotation.set(-1.1,0,0);as[1].rotation.set(-1.1,0,0)}else{as[1].rotation.set(-1.5,0,0);as[0].rotation.set(0,0,0.15*Math.sin(t*3))}}
+    const fa=Math.atan2(tele.position.z,tele.position.x);[['sop',0.75,R+15],['hse',-0.85,R+14]].forEach(([k,o,r],i)=>{const a=fa+o+0.12*Math.sin(t*0.15+i*2);const [x,z]=polar(a,r);crew[k].visible=t>=T.arrive[0];put(crew[k],x,z,faceTo(x,z,tele.position.x,tele.position.z))});
+    // el señalero, sin maniobras de izaje, se suma al abulonado y al orden de la locación
+    if(t>=T.bolt[0]&&t<T.fill[0]&&!(t>=T.esc[0]&&t<T.esc[1])){const ja=th(Math.min(N-1,bj2))+DT/2;const [x,z]=polar(ja,R+1.15);put(crew.sen,x,z,faceTo(x,z,0,0));crew.sen.position.y=1.12;{const [lx,lz]=polar(ja,R+0.75);ladder2.position.set(lx,0,lz);ladder2.rotation.set(0,-ja+Math.PI/2,0);ladder2.visible=true}{const [sx,sz]=polar(ja+0.05,R+2.2);put(crew.sog,sx,sz,faceTo(sx,sz,x,z))}gun2.visible=bu<1;gun2.position.copy(crew.sen.position).add(v3(0,1.25+Math.sin(t*9+1)*0.25,0)).add(v3(-Math.cos(ja)*0.35,0,-Math.sin(ja)*0.35));crew.sen.userData.arms[1].rotation.z=0.9+Math.sin(t*6)*0.2;crew.sen.userData.arms[0].rotation.z=0}
+    else if(t>=T.fill[0]){const [x,z]=polar(TS+0.35,R+9);put(crew.sen,x,z,faceTo(x,z,0,0))}}
+   if(!(t>=T.bolt[0]&&t<T.esc[0]))crew.sen.userData.arms[1].rotation.z=(working||t>T.mark[1])?2.4+Math.sin(t*4)*0.5:0;crew.sen.userData.arms[0].rotation.z=(working||t>T.mark[1])?-0.4:0;
    {let ja=null;if(active>0)ja=th(active)-DT/2;else if(t>=T.bolt[0]&&t<T.esc[0])ja=th(Math.min(N-1,bj))+DT/2;
     if(ja!==null){const near=active>0?ss(seg(au,0.62,0.7)):1;const [lx,lz]=polar(ja-(1-near)*0.4,R+0.75);ladder.position.set(lx,0,lz);ladder.rotation.set(0,-ja+Math.PI/2,0);ladder.visible=true}
     else ladder.visible=false}
    let corner=null;if(distK>=0&&du>0.2&&du<0.85)corner=plates[distK].localToWorld(v3(0.05,0.3,2.8));else if(active>=0&&au>0.2&&au<0.8)corner=plates[active].localToWorld(v3(0.05,0.3,2.8));
    sogRope.visible=!!corner;if(corner){sogRope.geometry.setFromPoints([crew.sog.position.clone().add(v3(0,1.2,0)),corner]);crew.sog.userData.arms[1].rotation.x=-1.0}else crew.sog.userData.arms[1].rotation.x=0}
+  carried.forEach(c=>c.visible=false);BAGW.forEach((q,i)=>{const p=crew[q.k];p.visible=true;put(p,q.x,q.z,q.face);p.position.y=0.36;const sw=Math.sin(t*9+i);p.userData.arms.forEach((a,s)=>a.rotation.set(q.carry?-1.1:sw*0.5*(s?1:-1),0,0));if(q.carry){carried[i].visible=true;carried[i].position.copy(p.position).add(v3(Math.sin(q.face)*0.35,1.05,Math.cos(q.face)*0.35));carried[i].rotation.y=q.face}});
   // arena y taludes
   const su=seg(t,...T.sand);sand.visible=su>0.15;sand.scale.y=Math.max(0.001,ss(seg(su,0.15,0.9)));grav.visible=su>0.5;grav.scale.y=Math.max(0.001,ss(seg(su,0.5,1)));
-  sandPiles.forEach((m,i)=>{m.visible=t>T.sand[0]&&su<0.6;m.scale.setScalar(Math.max(0.001,1-ss(seg(su,0.1+i*0.08,0.55))))});
-  loader.visible=su>0.05&&su<0.95;{const a=su*7;loader.position.set(Math.cos(a)*10,0,Math.sin(a)*10);loader.rotation.y=-a}
+  {const tk=updTrucks(t);sandPiles.forEach((m,i)=>{const g=m.userData.grow||0;m.visible=m.userData.set&&t>TKS[i]+TKD*0.52&&(t<T.sand[0]||su<0.6);m.scale.setScalar(Math.max(0.001,Math.min(ss(g),1-ss(seg(su,0.1+i*0.08,0.55)))))});
+   L.bd.e.hidden=!tk;if(tk){L.bd.p.copy(crew.m1.position).add(v3(0,2.3,0))}
+   if(tk){crew.m1.visible=true;const [bx,bz]=[44,1];put(crew.m1,bx,bz,faceTo(bx,bz,tk.position.x,tk.position.z));crew.m1.userData.arms[1].rotation.z=2.2+Math.sin(t*5)*0.4}}
+  loader.visible=su>0.02&&su<0.98;{const AO2=th(LAST);if(su<0.12||su>0.88){const f=su<0.12?ss(seg(su,0.02,0.12)):1-ss(seg(su,0.88,0.98));const r=lerp(R+9,10,f);loader.position.set(Math.cos(AO2)*r,0,Math.sin(AO2)*r);loader.rotation.y=-AO2+(su<0.12?-Math.PI/2:Math.PI/2)}
+   else{const a=AO2+(su-0.12)/0.76*Math.PI*2;loader.position.set(Math.cos(a)*10,0,Math.sin(a)*10);loader.rotation.y=-a}}
   // succión
   const cu=seg(t,...T.suc);trench.visible=t>T.sand[0]+(T.sand[1]-T.sand[0])*0.8&&cu<0.85;sucGroup.visible=cu>0.1;sucGroup.position.y=1.2*(1-ss(seg(cu,0.1,0.55)));bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=pst.visible&&Math.floor(t*2+i)%2===0);
   // llenado
@@ -629,34 +775,88 @@ function update(t){
   else if(cn==='arrive'){camGoal.t.copy(trailer.position).add(v3(0,1,0));camGoal.e.copy(trailer.position).add(v3(-22,14,-18))}
   else if(cn==='dist'){const p=distK>=0?plates[distK].position:trailer.position;camGoal.t.set(p.x*0.6+tele.position.x*0.4,2,p.z*0.6+tele.position.z*0.4);const aa=Math.atan2(p.z,p.x);const [ex,ez]=polar(aa-0.35,R+44);camGoal.e.set(ex,26,ez)}
   else if(cn==='bolt'){const ja=th(Math.min(N-1,bj))+DT/2;const [x,z]=polar(ja,R+1);camGoal.t.set(x,1.5,z);const [ex,ez]=polar(ja-0.25,R+13);camGoal.e.set(ex,6.5,ez)}
-  else if(cn==='esc'){const eu=seg(time,...T.esc);const P=stairPose(eu);const [x,z]=polar(P.a,P.r);camGoal.t.set(x,2,z);const [ex,ez]=polar(P.a-0.45,R+24);camGoal.e.set(ex,13,ez)}
+  else if(cn==='esc'){const eu=seg(t,...T.esc);const P=stairPose(eu);const [x,z]=polar(P.a,P.r);camGoal.t.set(x,2,z);const [ex,ez]=polar(P.a-0.45,R+24);camGoal.e.set(ex,13,ez)}
   else if(cn==='suc'){const [x,z]=polar(TS,R+1);camGoal.t.set(x,0.3,z);const [ex,ez]=polar(TS-0.3,R+10);camGoal.e.set(ex,7,ez)}
   else if(cn==='p0'||cn==='close'){const [x,z]=polar(a0,R+4);camGoal.t.set(x,2,z);const [ex,ez]=polar(a0-0.55,R+30);camGoal.e.set(ex,17,ez)}
   else if(cn==='liner'){const ga=th(LAST);const [ex,ez]=polar(ga+0.5,R+26);camGoal.t.set(0,0.5,0);camGoal.e.set(ex,24,ez)}
-  else if(cn==='fill'){const fu=seg(time,...T.fill);if(fu<0.55){const [x,z]=polar(TS,R+14);camGoal.t.set(x,1,z);const [ex,ez]=polar(TS-0.55,R+30);camGoal.e.set(ex,16,ez)}else{const [ex,ez]=polar(GA+0.9,R+34);camGoal.t.set(0,1,0);camGoal.e.set(ex,24,ez)}}
+  else if(cn==='fill'){const fu=seg(t,...T.fill);if(fu<0.55){const [x,z]=polar(TS,R+14);camGoal.t.set(x,1,z);const [ex,ez]=polar(TS-0.55,R+30);camGoal.e.set(ex,16,ez)}else{const [ex,ez]=polar(GA+0.9,R+34);camGoal.t.set(0,1,0);camGoal.e.set(ex,24,ez)}}
   else {camGoal.t.set(0,1,0);camGoal.e.set(-36,30,44)}
   return ch}
 
 // ---------- interfaz ----------
-const chapNav=$('chap');CH.forEach((c,i)=>{const b=document.createElement('button');b.textContent=c.t;b.onclick=()=>{time=T[c.k][0]+0.01;auto=true;$('cam').classList.add('on')};chapNav.appendChild(b)});
+const chapNav=$('chap');CH.forEach((c,i)=>{const b=document.createElement('button');b.textContent=c.t;b.onclick=()=>{time=i===0?0:aOfScene(T[c.k][0]+0.01);auto=true;$('cam').classList.add('on')};chapNav.appendChild(b)});
 let curCh=-1;function showCh(i){if(i===curCh)return;curCh=i;const c=CH[i];$('ph').innerHTML=c.h+`<small>${i+1} / ${CH.length}</small>`;$('steps').innerHTML=c.s.map(s=>`<li>${s}</li>`).join('');$('safe').textContent='⚠ '+c.w;[...chapNav.children].forEach((b,j)=>b.setAttribute('aria-current',String(j===i)))}
 let time=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,speed=2;
-const setPlayLbl=()=>$('play').textContent=playing?'❚❚ Pausa':(time>=TOT?'▶ Repetir':'▶ Reproducir');
-$('play').onclick=()=>{if(!playing&&time>=TOT)time=0;playing=!playing;setPlayLbl()};setPlayLbl();
+const setPlayLbl=()=>$('play').textContent=playing?'❚❚ Pausa':(time>=ATOT?'▶ Repetir':'▶ Reproducir');
+$('play').onclick=()=>{if(!playing&&time>=ATOT)time=0;playing=!playing;setPlayLbl()};setPlayLbl();
 document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{speed=+b.dataset.sp;document.querySelectorAll('[data-sp]').forEach(x=>x.classList.toggle('on',x===b))});
-$('tl').oninput=e=>{time=e.target.value/1000*TOT};
+$('tl').oninput=e=>{time=e.target.value/1000*ATOT};
 $('cam').onclick=()=>{auto=!auto;$('cam').classList.toggle('on',auto)};
 const fmtT=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;if(!w)return;if(canvas.width!==Math.round(w*renderer.getPixelRatio())||canvas.height!==Math.round(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}}
 const vv=new THREE.Vector3();
-function render(dt=0){const ch=update(time);showCh(ch);
+const hhmm=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(Math.floor(m%60)).padStart(2,'0')};
+let barDay=0;function drawBar(day){barDay=day;const B=$('dbar');B.innerHTML='';const X=c=>(c-450)/(1350-450)*100;
+  SCH.filter(g=>g.day===day&&g.k!=='p'||g.day===day&&g.k==='p'&&g.c1-g.c0<200).forEach(g=>{const c0=Math.max(450,g.c0),c1=Math.min(1350,g.c1);if(c1<=c0)return;const i=document.createElement('i');i.style.left=X(c0)+'%';i.style.width=(X(c1)-X(c0))+'%';i.style.background=g.k==='p'?'#f2b33d':(g.note&&g.note.startsWith('Llenado')?'#3fa7d6':'#4f86c6');i.title=g.lab||g.note||'';B.appendChild(i)});
+  const mk=document.createElement('b');mk.id='dmk';B.appendChild(mk)}
+function daylight(A){const g=segA(A);const cm=clockAt(A)%1440;const el=Math.sin(Math.PI*(cm-405)/810);const az=(-90+180*(cm-405)/810)*Math.PI/180;const e=Math.max(-0.2,el);
+  const ce=Math.cos(Math.asin(C(-1,1,e)));sun.position.set(ce*Math.sin(az)*90,Math.max(4,e*90),-ce*Math.cos(az)*90);
+  const d=C(0,1,(el+0.05)/0.35);sun.intensity=1.6*d;sun.color.setRGB(1,0.78+0.16*d,0.6+0.25*d);renderer.toneMappingExposure=0.62*(0.45+0.55*d);$('night').style.opacity=(0.62*(1-d)).toFixed(3)}
+const kit=new THREE.Group();scene.add(kit);// fajas y grilletes extendidos para el chequeo
+{for(let i=0;i<4;i++){const f=mesh(new THREE.BoxGeometry(0.12,0.02,2.2),M(0xff8a1f),[-30+i*0.45,0.02,-37.5],kit,false);}
+ for(let i=0;i<4;i++){const gk=mesh(new THREE.TorusGeometry(0.11,0.03,6,12,Math.PI*1.4),M(0x9aa0a6,{metalness:.8}),[-28+i*0.35,0.05,-36.3],kit,false);gk.rotation.x=-Math.PI/2}}
+function crewPause(g){const lab=g.lab||'';const night=/Noche|retira/.test(lab)&&!/regresa/.test(lab);
+  crewTrucks.forEach(p=>p.visible=!/Noche/.test(lab));kit.visible=/certificados/.test(lab);
+  const ks=['sen','sog','int','ext','asi','m1','op','sop','hse'];
+  if(/Noche|sin personal/.test(lab)){ks.concat(['m2']).forEach(k=>crew[k].visible=false);return}
+  ks.forEach((k,i)=>{const a=-0.2+i*0.34,x=-33.7+Math.cos(a+Math.PI/2)*3.4,z=-38.2+Math.sin(a+Math.PI/2)*2.2;crew[k].visible=true;crew[k].position.set(x,0,z);crew[k].rotation.y=faceTo(x,z,-31.6,-38.0);crew[k].userData.arms.forEach(a=>{a.rotation.set(0,0,0)})});
+  crew.m2.visible=false;gun.visible=false;ladder.visible=false;ladder2.visible=false;sogRope.visible=false}
+function render(dt=0){const ch=update(sceneAt(time));showCh(ch);daylight(time);
+  {const g0=segA(time);if(g0.k==='p')crewPause(g0);else{const fillOn=g0.note&&g0.note.startsWith('Llenado');crewTrucks.forEach(p=>p.visible=!fillOn);kit.visible=false;if(fillOn)Object.values(crew).forEach(p=>p.visible=false)}}
+  {const g=segA(time),cm=clockAt(time);const day=cm>=1440?2:g.day;$('cday').textContent='DÍA '+day;$('chr').textContent=hhmm(cm);
+   $('cnote').textContent=g.k==='p'?g.lab:(g.note||CH[ch].h);if(barDay!==day)drawBar(day);const mk=$('dmk');if(mk)mk.style.left=C(0,100,(((cm>=1440?cm-1440:cm))-450)/900*100)+'%';
+   $('pz').hidden=g.k!=='p';if(g.k==='p')$('pz').textContent=g.lab;
+   const st=sceneAt(time);const bu=seg(st,...T.bolt);$('cpl').textContent=$('pc').textContent;
+   {const pl=parseInt($('pc').textContent)||0;const un=st>=T.close[1]?N:Math.max(0,pl-1);$('cbo').textContent=Math.round(un*3+bu*15*N)+'/396'}
+   $('chh').textContent=Math.round(effMin(time)/60*6)}
   if(auto){const k=Math.min(1,dt*1.6||1);controls.target.lerp(camGoal.t,k);camera.position.lerp(camGoal.e,k*0.8)}
   controls.update();resize();renderer.render(scene,camera);
   const W=canvas.clientWidth,H=canvas.clientHeight;for(const k in L){const l=L[k];if(l.e.hidden)continue;vv.copy(l.p).project(camera);if(vv.z>1||Math.abs(vv.x)>1.1||Math.abs(vv.y)>1.1){l.e.style.display='none';continue}l.e.style.display='';l.e.style.left=((vv.x+1)/2*W)+'px';l.e.style.top=((1-vv.y)/2*H)+'px'}
-  $('tl').value=Math.round(time/TOT*1000);$('tm').textContent=fmtT(time)+' / '+fmtT(TOT)}
+  $('tl').value=Math.round(time/ATOT*1000);$('tm').textContent=fmtT(time)+' / '+fmtT(ATOT)}
+// ---------- leyendas al pasar el mouse ----------
+const TIP=[];const tip=(o,t,d)=>{if(o){o.userData.tipT=t;o.userData.tipD=d;TIP.push(o)}};
+tip(crew.sen,'Señalero','Chaleco reflectivo verde. Guía al manipulador; sin izaje, colabora con bolsas y abulonado.');
+tip(crew.sog,'Soguero','Lleva la placa con la soga guía desde el extremo libre, fuera de la zona de exclusión.');
+tip(crew.int,'Operador interno','Trabaja del lado interior del anillo; nunca adentro al cerrar ni durante el llenado.');
+tip(crew.ext,'Operador externo','Trabaja del lado exterior: bulones y atado de la lona a la varilla.');
+tip(crew.asi,'Asistente','Cuñas, escalera burrito y bulones de agarre.');
+tip(crew.m1,'Banderillero / operario','Chaleco naranja. Guía a los camiones de arena; ayuda con las bolsas de lastre.');
+tip(crew.m2,'Operario de marcado','Sostiene la cuerda desde la estaca central.');
+tip(crew.op,'Chofer del manipulador','Operador habilitado del manipulador telescópico.');
+tip(crew.sop,'Supervisor operativo','Coordina por teléfono, revisa el plano de instalación e indica tareas a la cuadrilla.');
+tip(crew.hse,'Supervisor HSE','Chaleco. Con tablilla y formularios: ATS, permisos, checklist de izaje y observaciones.');
+tip(tele,'Manipulador telescópico','Gancho y dos fajas certificadas. Zona de exclusión durante cada izaje.');
+tip(trailer,'Carretón con placas','22 placas de 6 × 3 m. Estacionado dentro de la locación, con conos.');tip(tractor,'Tractor del carretón','Ingresa y egresa en un solo sentido.');
+trucks.forEach(g=>tip(g,'Camión batea de arena','22 m³. Retrocede con banderillero por el panel abierto y descarga adentro.'));
+crewTrucks.forEach(g=>tip(g,'Camioneta de la cuadrilla','Estacionada de culata, con calzas, pértiga y baliza.'));
+tip(stair,'Escalera de acceso','Único acceso habilitado al borde del tanque. Se instala con el manipulador.');
+tip(ladder,'Escalera burrito','Plataforma con baranda y ruedas: para bulones y atado de la lona.');tip(ladder2,'Escalera burrito (2.º equipo)','Segundo frente de abulonado.');
+tip(ballast,'Bolsas de lastre','Bolsas blancas de rafia llenadas con arena de la zona: evitan que el viento levante la lona.');
+sandPiles.forEach(p=>tip(p,'Pila de arena','Descargada por camión batea; la retropala la distribuye como colchón bajo la lona.'));
+tip(loader,'Retropala','Distribuye la arena y arma los taludes a 45°.');tip(sucGroup,'Succión (pipa)','En la 5.ª placa: caño enterrado, malla antivórtice, sombrero y dos válvulas.');
+tip(pst,'Estación de bombeo','Manifold, manguerotes Bauer, bombas A y B, cisterna de gasoil y telemetría.');tip(goose,'Cuello de cisne','La layflat entra por arriba del borde, sin rozar la lona.');
+tip(cones,'Conos y cartel','Delimitan la zona de izaje y del carretón.');tip(kit,'Fajas y grilletes','Chequeo de certificados y estado antes de izar.');
+tip(sock,'Manga de viento','Con viento fuerte no se iza.');tip(stab,'Estabilizadores','Sostienen la primera placa hasta cerrar el anillo.');
+plates.forEach((p,i)=>tip(p,'Placa '+(i+1),'Chapa de 6 × 3 m. '+(i===SUCK?'Lleva la succión.':i===LAST?'Última placa: se coloca en el cierre.':'')));
+const tipEl=document.createElement('div');tipEl.className='lbl';tipEl.style.cssText+='white-space:normal;max-width:260px;padding:6px 8px;font-weight:400;z-index:9;transform:translate(12px,12px)';tipEl.hidden=true;$('labels').appendChild(tipEl);
+const rc=new THREE.Raycaster(),mv=new THREE.Vector2();
+canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||e.buttons){tipEl.hidden=true;return}const r=canvas.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);rc.setFromCamera(mv,camera);
+  const hits=rc.intersectObjects(TIP.filter(o=>o.visible),true);let o=null;for(const h of hits){let q=h.object;let vis=true;while(q&&!q.userData.tipT){if(!q.visible)vis=false;q=q.parent}if(q&&vis&&q.visible){o=q;break}}
+  if(!o){tipEl.hidden=true;return}tipEl.innerHTML='<b>'+o.userData.tipT+'</b><br>'+o.userData.tipD;tipEl.hidden=false;tipEl.style.left=(e.clientX-r.left)+'px';tipEl.style.top=(e.clientY-r.top)+'px'});
+canvas.addEventListener('pointerleave',()=>tipEl.hidden=true);
 const clock=new THREE.Clock();
-function loop(){const dt=Math.min(0.05,clock.getDelta());if(playing){time+=dt*speed;if(time>=TOT){time=TOT;playing=false;setPlayLbl()}}render(dt);requestAnimationFrame(loop)}
-window.__cam=(t,e)=>{auto=false;controls.target.set(...t);camera.position.set(...e);render(0)};window.__mt=s=>{time=s;auto=true;playing=false;setPlayLbl();render(1)};
+function loop(){const dt=Math.min(0.05,clock.getDelta());if(playing){time+=dt*speed;if(time>=ATOT){time=ATOT;playing=false;setPlayLbl()}}render(dt);requestAnimationFrame(loop)}
+window.__cam=(t,e)=>{auto=false;controls.target.set(...t);camera.position.set(...e);render(0)};window.__dbg=()=>({bw:BAGW.map(q=>[q.k,q.x.toFixed(1),q.z.toFixed(1)]),time,st:sceneAt(time),TKS,TKD,tr:trucks.map(g=>g.visible?[+g.position.x.toFixed(1),+g.position.z.toFixed(1),+g.rotation.y.toFixed(2)]:null)});window.__crewPos=k=>crew[k].position.toArray();window.__mtA=s=>{time=parseFloat(s);auto=true;playing=false;setPlayLbl();render(1)};window.__mt=s=>{time=aOfScene(s);auto=true;playing=false;setPlayLbl();render(1)};
 loop();
 })();
 </script>
