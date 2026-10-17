@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Montaje de Tanque Australiano</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: escena 3D a pantalla completa; arriba título y etapas, abajo panel de la etapa con texto del manual y línea de tiempo; derecha datos y cuadrilla. Oscuro, como los simuladores. */
+:root{--bg:#0a1016;--glass:rgba(11,18,25,.86);--line:#22323f;--fg:#e6edf2;--muted:#8fa2b1;--water:#41b8ea;--warn:#f2b33d;--crit:#ef5350;--ok:#4fd18b;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:dark}
+[hidden]{display:none!important}
+html,body{height:100%}body{background:var(--bg);color:var(--fg);font-family:var(--f-body);overflow:hidden}
+#app{position:relative;height:100%}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px)}
+.top{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;pointer-events:none;z-index:2}
+.top>*{pointer-events:auto}
+.title{padding:9px 14px}
+.title h1{margin:0;font:700 23px/1.05 var(--f-display);letter-spacing:.03em;text-transform:uppercase}
+.title p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.chap{display:flex;flex-wrap:wrap;gap:2px;padding:4px}
+.chap button,.btn{font:500 12.5px var(--f-body);color:var(--fg);background:transparent;border:1px solid transparent;border-radius:6px;padding:6px 9px;cursor:pointer}
+.chap button[aria-current="true"]{background:#163142;border-color:#2c5873}
+.chap button:hover,.btn:hover{border-color:var(--water)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--water);outline-offset:2px}
+.side{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:120px;width:250px;padding:12px;display:grid;gap:10px;font-size:12.5px;z-index:2}
+.side h2{margin:0;font:600 14px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+.kv span{color:var(--muted)}
+.crew{display:grid;gap:4px}
+.crew div{display:flex;gap:8px;align-items:center}
+.crew i{width:12px;height:12px;border-radius:3px;flex:none}
+.foot{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:calc(max(16px,env(safe-area-inset-right,0px)) + 266px);bottom:calc(12px + env(safe-area-inset-bottom,0px));padding:12px 14px;display:grid;gap:8px;z-index:2}
+.foot h3{margin:0;font:700 21px var(--f-display);letter-spacing:.03em}
+.foot h3 small{font:500 12px var(--f-mono);color:var(--water);margin-left:8px;letter-spacing:.05em}
+#steps{margin:0;padding-left:20px;font-size:13.5px;color:#c9d6df;display:grid;gap:2px;max-width:84ch}
+.safety{font-size:12.5px;border-left:3px solid var(--warn);padding:4px 9px;background:rgba(242,179,61,.08);border-radius:4px;color:#f3dfb4}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--water)}
+.time{font:500 12px var(--f-mono);color:var(--muted);min-width:96px;text-align:right;font-variant-numeric:tabular-nums}
+.btn.on{border-color:var(--water);background:#163142}
+.lbl{position:absolute;transform:translate(-50%,-100%);font:600 12px var(--f-display);letter-spacing:.05em;color:#fff;background:rgba(10,16,22,.8);border:1px solid #2c3d4a;border-radius:4px;padding:0 6px;pointer-events:none;white-space:nowrap}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+@media (max-width:860px){
+  body{overflow:auto}#app{height:auto;display:flex;flex-direction:column}
+  #stage{position:relative;height:62svh;min-height:330px}
+  .top{position:static;margin:10px 16px 0}
+  .title h1{font-size:18px}.title p{display:none}
+  .chap button{font-size:11.5px;padding:5px 7px}
+  .foot,.side{position:static;width:auto;margin:10px 16px 0}
+  .side{margin-bottom:16px}
+}
+@media (min-width:861px){#stage{position:absolute;inset:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body style="margin:0">
+
+<div id="app">
+  <div class="top">
+    <div class="title glass"><h1>Montaje de tanque australiano</h1><p>22 placas de 6 × 3 m · manipulador telescópico con gancho y fajas · carretón · hidrogrúa · Lic. Víctor Javier Paredes</p></div>
+    <nav class="chap glass" id="chap" aria-label="Etapas"></nav>
+  </div>
+  <div id="stage"><canvas id="gl" aria-label="Animación 3D del montaje de un tanque australiano"></canvas><div id="labels"></div></div>
+  <section class="foot glass" aria-live="polite">
+    <h3 id="ph">Etapa</h3>
+    <ol id="steps"></ol>
+    <div class="safety" id="safe"></div>
+    <div class="ctl">
+      <button class="btn" id="play" aria-label="Reproducir o pausar">❚❚ Pausa</button>
+      <input type="range" id="tl" min="0" max="1000" value="0" aria-label="Línea de tiempo">
+      <span class="time" id="tm">0:00</span>
+      <button class="btn" data-sp="1">1×</button><button class="btn on" data-sp="2">2×</button><button class="btn" data-sp="4">4×</button>
+      <button class="btn on" id="cam">Cámara automática</button>
+    </div>
+  </section>
+  <aside class="side glass" aria-label="Datos del tanque">
+    <h2>Tanque</h2>
+    <div class="kv"><span>Placas</span><b>22 × (6 × 3 m)</b><span>Radio de marcado</span><b>21,01 m</b><span>Diámetro</span><b>42,0 m</b><span>Capacidad nominal</span><b>4.160 m³</b><span>Volumen útil</span><b>3.466 m³</b><span>Placas en el anillo</span><b id="pc">0 / 22</b><span>Personas dentro</span><b id="inside">0</b></div>
+    <h2>Cuadrilla</h2>
+    <div class="crew">
+      <div><i style="background:#c8f03a"></i>Señalero · chaleco reflectivo</div>
+      <div><i style="background:#ffd23a"></i>Soguero · soga guía</div>
+      <div><i style="background:#ff5a5a"></i>Operador interno</div>
+      <div><i style="background:#c77dff"></i>Operador externo</div>
+      <div><i style="background:#2fd18b"></i>Asistente · cuñas y escalera</div>
+      <div><i style="background:#ef5350;opacity:.6"></i>Zona de exclusión del izaje</div>
+    </div>
+    <p style="margin:0;font-size:11.5px;color:var(--muted)">EPP de todo el personal: mameluco azul, casco, gafas, guantes de alto impacto y botines. Color del brazalete = rol.</p>
+    <p style="margin:0;font-size:11.5px;color:var(--muted)">Secuencia según <i>Water Transfer en Vaca Muerta</i>, cap. 7. Animación ilustrativa, sin escala de tiempos real.</p>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const N=22,R=21.01,PH=3,DT=2*Math.PI/N,A0=0.35;
+const C=(a,b,t)=>Math.max(a,Math.min(b,t)),lerp=(a,b,t)=>a+(b-a)*t,ss=t=>{t=C(0,1,t);return t*t*(3-2*t)},seg=(t,a,b)=>C(0,1,(t-a)/(b-a));
+const th=k=>A0+DT/2+k*DT;const LAST=N-1;const SUCK=4;const TS=th(SUCK)+0.22*DT;// succión en la 5.ª placa, nunca en la última
+const v3=(x,y,z)=>new THREE.Vector3(x,y,z);const polar=(a,r)=>[Math.cos(a)*r,Math.sin(a)*r];
+
+// ---------- línea de tiempo ----------
+const T={};let t0=0;const add=(k,d)=>{T[k]=[t0,t0+d];t0+=d};
+add('mark',10);add('arrive',10);
+const dD=k=>k<2?3.4:1.25;T.dist=[t0,0];const DS=[];for(let k=0;k<N;k++){DS.push([t0,t0+dD(k)]);t0+=dD(k)}T.dist[1]=t0;
+const asmStart=t0;const dA=k=>k<2?9:3.2;for(let k=0;k<LAST;k++)add('p'+k,dA(k));
+add('sand',9);add('suc',9);add('liner',16);add('close',9);add('bolt',18);add('esc',14);add('fill',10);const TOT=t0;
+const CH=[
+ {k:'mark',t:'Marcado',h:'Preparación del terreno y marcado',s:['Verificar nivelación y compactación; si no es óptima, pedir nivelación y dejarlo en minuta.','Liberar el área de piedras y objetos cortantes.','Clavar la estaca metálica en el centro y marcar la circunferencia con cuerda de 21,01 m tensa (22 placas), dos operadores.','Marcar con el cliente la ubicación de la succión: va en la 5.ª placa, nunca en la última.'],w:'Coordinar con el cliente si hay pozos activos o equipos operando en el sector.'},
+ {k:'arrive',t:'Carretón',h:'Llegada del carretón con las placas',s:['La locación es rectangular, de unos 100 × 100 m, con acceso de ingreso y de egreso (un solo sentido de circulación).','El tractor con el carretón ingresa despacio por el acceso sur, guiado por el señalero, y se estaciona DENTRO de la locación: el camino queda libre.','Se cierra la zona del carretón con conos y cartel: solo ingresa el manipulador y la cuadrilla autorizada.','Cuando se descargó la última placa, se retiran los conos y el carretón sale por el acceso norte, despacio y con señalero, sin pisar nada ni pasar cerca de nadie.'],w:'Velocidad de paso dentro de la locación, sin derrapes ni giros. Señalero siempre a la vista del chofer. Revisar la manga de viento: con viento fuerte no se iza.'},
+ {k:'dist',t:'Descarga',h:'Descarga de placas una a una',s:['El manipulador con gancho y fajas toma cada placa del carretón.','La lleva suspendida y la deja junto a su posición sobre la circunferencia, en el sentido de armado.','La misma tarea puede hacerla la hidrogrúa; el procedimiento de izaje es el mismo.'],w:'La cuadrilla espera dentro del anillo marcado, lejos del recorrido de la carga: nadie bajo la placa suspendida ni dentro del radio de giro.'},
+ {k:'p0',t:'Anillo',h:'Armado del anillo con manipulador',s:['Primera placa con estabilizadores clavados al piso en ambos extremos.','El manipulador iza la placa con gancho y dos fajas; el soguero, ubicado en el extremo libre de la placa, la lleva con la soga guía hasta la línea marcada sin entrar a la zona de exclusión.','La cuadrilla espera fuera de la zona de exclusión y se acerca recién cuando la placa está a ras del piso, en su posición.','Se arrima la escalera burrito y un operario coloca los 3 bulones de agarre inicial: superior, medio e inferior.'],w:'Nadie bajo la carga suspendida ni dentro del radio de giro. Nadie toca la placa con las manos mientras está colgada. Dotación mínima 5, recomendada 6.'},
+ {k:'sand',t:'Arena',h:'Arena y taludes',s:['Viajes de arena distribuidos (4 de 20 m³ en terreno normal, 5 con rocas filosas).','Retropala: colchón de arena que protege la lona.','Talud interno a 45° con arena; talud externo a 45° con material grueso.','Zanjeo en la 5.ª placa, donde va la succión.'],w:'Retirar piedras: cualquier filo bajo la lona termina en pinchazo.'},
+ {k:'suc',t:'Succión',h:'Succión (pipa) en la 5.ª placa, antes de la lona',s:['El caño se entierra bajo el nivel de platea y pasa por el borde inferior de la placa, trabado con cuña metálica.','Adentro, la boca queda al ras del piso, con malla antivórtice y sombrero bulonado sobre la brida.','Afuera: válvula de corte, derivación con brida ciega de inspección y segunda válvula; tipo lug, colocadas abiertas para centrar.','Nunca en la última placa: ese hueco queda libre para que entre el manipulador con la lona.'],w:'Un pegado apurado no pierde agua: chupa aire. El lastre con bolsas durante el curado es parte del procedimiento.'},
+ {k:'liner',t:'Lona',h:'Lona: chorizo, apertura, izaje y atado',s:['Con el tanque vacío de personal, el manipulador entra por el panel abierto con la lona colgada del gancho, la deja en el medio y sale.','El rollo (2 m de ancho, eje perpendicular al diámetro) se desenrolla desde el centro hacia ambos extremos: queda una lonja de 2 m de pared a pared. Después se abren los pliegues de cada mitad hacia los costados.','Con la lona abierta y antes de levantar las paredes, se reparten unas 40 bolsas blancas de rafia con lastre sobre toda la superficie, para que el viento no la levante.','Dos operadores adentro levantan la lona con hisopos (palos de 2 m con punta redondeada, para no romperla).','Afuera, dos operadores en escalera burrito atan las cintas de la lona a la varilla horizontal exterior, a 40 cm del borde.','En el cierre la lona queda media baja: por ahí salen los dos de adentro.'],w:'El tanque queda sin un panel durante esta tarea: paso para el equipo y salida libre, sin espacio confinado. Nadie adentro mientras el manipulador circula.'},
+ {k:'close',t:'Cierre',h:'Cierre del anillo y última lona',s:['Antes de izar: conteo de personal, nadie adentro del tanque.','El manipulador coloca la última placa; escalera burrito y 3 bulones de agarre en cada unión. Con el anillo cerrado se retiran los estabilizadores de la primera placa.','Con sogas atadas a 2 m de cada lado del cierre, desde afuera se termina de subir la lona sobre la última placa.'],w:'Nunca cerrar el anillo con una persona adentro: con el tanque cerrado no hay salida, y al llenar hay riesgo de ahogamiento. Señalero, soguero y nadie bajo la carga.'},
+ {k:'bolt',t:'Bulonado',h:'Bulonado completo del anillo',s:['Con el anillo cerrado, se colocan todos los bulones de cada unión.','El operario trabaja siempre desde la escalera burrito, unión por unión.','Pistola a batería para el aproche y el torque; control final por “sin luz” en la unión completa.','Cinta multipropósito del lado interno, cuñas y pines según fabricante, cable acerado con tensor.'],w:'Escalera burrito apoyada y estable en cada unión; nunca trepar por la placa ni trabajar desde el talud.'},
+ {k:'esc',t:'Escalera',h:'Instalación de la escalera de acceso',s:['La escalera de acceso (torre con plataforma, escalera con barandas a ambos lados) se iza con el manipulador, gancho y fajas.','Se apoya contra la cara exterior de una placa, lejos de la succión, del cuello de cisne y del cierre.','El señalero guía la maniobra; la cuadrilla espera fuera de la zona de exclusión y se acerca recién con la escalera apoyada en el piso.','Se nivela, se fija y se verifica la baranda antes de habilitarla.'],w:'Nadie bajo la escalera suspendida ni dentro del radio de giro del manipulador. La escalera es el único acceso habilitado al borde del tanque.'},
+ {k:'fill',t:'Llenado',h:'Llenado',s:['Conteo final de personal antes de abrir el ingreso de agua: nadie adentro.','Afuera, en la pipa: manifold 1→2, dos manguerotes Bauer a las bombas A (en marcha) y B (backup), impulsión por derivador 2→1, cisterna de gasoil de 5.000 L en batea y antena de telemetría.','La manguera layflat llega desde el campo y entra por el cuello de cisne sobre el borde, sin rozar la lona.','Volumen útil hasta 2,5 m: 50 cm de resguardo bajo el borde.','Tanque operativo: 3.466 m³ útiles.'],w:'Purga del fondo al final del llenado para eliminar el sedimento del montaje.'}];
+const chapOf=t=>{let c=0;CH.forEach((x,i)=>{if(t>=T[x.k][0])c=i});return c};
+
+// ---------- escena ----------
+const canvas=$('gl');const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(innerWidth<861?1.5:2,devicePixelRatio||1));
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.62;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+{const c=document.createElement('canvas');c.width=4;c.height=256;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#5d8fc4');g.addColorStop(0.55,'#a9c4dc');g.addColorStop(1,'#d9d2c4');x.fillStyle=g;x.fillRect(0,0,4,256);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;scene.background=t}
+scene.fog=new THREE.Fog(0xcfcfc6,120,420);
+const camera=new THREE.PerspectiveCamera(42,1,0.3,900);camera.position.set(-38,34,48);
+const controls=new THREE.OrbitControls(camera,canvas);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*0.49;controls.target.set(0,1,0);
+let auto=true;controls.addEventListener('start',()=>{auto=false;$('cam').classList.remove('on')});
+scene.add(new THREE.HemisphereLight(0xdfe9f2,0x7a6650,0.75));
+const sun=new THREE.DirectionalLight(0xfff0d8,1.6);sun.position.set(-40,60,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-50,right:50,top:50,bottom:-50,near:10,far:170});sun.shadow.bias=-0.0005;scene.add(sun);
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.75,metalness:.05},o));
+function mesh(g,m,p,parent=scene,sh=true){const o=new THREE.Mesh(g,m);if(p)o.position.set(...p);o.castShadow=sh;o.receiveShadow=true;parent.add(o);return o}
+function aim(o,a,b){const d=new THREE.Vector3().subVectors(b,a);o.position.copy(a).addScaledVector(d,0.5);o.scale.set(1,1,Math.max(0.001,d.length()));o.lookAt(b)}
+function aimY(o,a,b){const d=new THREE.Vector3().subVectors(b,a);o.position.copy(a).addScaledVector(d,0.5);o.scale.set(1,Math.max(0.001,d.length()),1);o.quaternion.setFromUnitVectors(v3(0,1,0),d.normalize())}
+const line=(col)=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([v3(0,0,0),v3(0,1,0)]),new THREE.LineBasicMaterial({color:col}));scene.add(l);return l};
+
+// ---------- estepa ----------
+const XR=R+21,RX=62,LH=50;// XR: estacionamiento del carretón DENTRO de la locación; RX: camino de acceso, afuera
+function hgt(x,z){const ds=Math.max(Math.abs(x),Math.abs(z))-LH-6;if(ds<0)return 0;const f=Math.min(1,ds/30)*Math.min(1,Math.max(0,(Math.abs(x-RX)-4)/10))*(Math.abs(z+40)<6||Math.abs(z-40)<6?Math.min(1,Math.max(0,(x-RX)/10)):1);return f*(1.6*Math.sin(x*0.045)*Math.cos(z*0.038)+0.9*Math.sin(x*0.11+z*0.07)+Math.max(0,(Math.hypot(x,z)-150)*0.12))}
+{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.fillStyle='#9c8664';x.fillRect(0,0,512,512);for(let i=0;i<12000;i++){const v=120+Math.random()*90;x.fillStyle=`rgba(${v},${v-20},${v-45},${Math.random()*.55})`;x.fillRect(Math.random()*512,Math.random()*512,1+Math.random()*2.5,1+Math.random()*2.5)}
+ const tx=new THREE.CanvasTexture(c);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(60,60);tx.encoding=THREE.sRGBEncoding;
+ const g=new THREE.PlaneGeometry(800,800,160,160);g.rotateX(-Math.PI/2);const p=g.attributes.position;const col=[];
+ for(let i=0;i<p.count;i++){const X=p.getX(i),Z=p.getZ(i);p.setY(i,hgt(X,Z));const k=Math.abs(X)<LH&&Math.abs(Z)<LH?0.82:0.95+0.08*Math.sin(X*0.03+Z*0.05);col.push(k,k*0.98,k*0.94)}
+ g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();
+ const gr=new THREE.Mesh(g,new THREE.MeshStandardMaterial({map:tx,vertexColors:true,roughness:1}));gr.receiveShadow=true;scene.add(gr);
+ // camino de acceso
+ const road=new THREE.Mesh(new THREE.PlaneGeometry(8,520),new THREE.MeshStandardMaterial({color:0xb5a07e,roughness:1}));road.rotation.x=-Math.PI/2;road.position.set(RX,0.025,0);road.receiveShadow=true;scene.add(road);
+ [-40,40].forEach(z=>{const a=new THREE.Mesh(new THREE.PlaneGeometry(14,8),road.material);a.rotation.x=-Math.PI/2;a.position.set(LH+6,0.027,z);a.receiveShadow=true;scene.add(a)})}// accesos: ingreso por el sur, egreso por el norte (un solo sentido)// bardas lejanas: mesetas de cima plana con estratos
+{const strata=[0xa0866a,0xb79b78,0x8e7559,0xc2a985];for(let i=0;i<14;i++){const a=i/14*Math.PI*2+0.2,r=300+Math.random()*80;const w=40+Math.random()*60,h=18+Math.random()*22;
+  const g=new THREE.Group();g.position.set(Math.cos(a)*r,0,Math.sin(a)*r);g.rotation.y=Math.random()*6;scene.add(g);
+  for(let s=0;s<4;s++){const m=new THREE.Mesh(new THREE.CylinderGeometry(w*(1-0.08*(s+1))*0.6,w*(1-0.08*s)*0.6,h/4,9),new THREE.MeshLambertMaterial({color:strata[s]}));m.position.y=h/8+s*h/4;m.scale.z=0.55;g.add(m)}}}
+// vegetación: coirón, jarilla, neneo, piedras
+function scatter(geo,mat,n,minR,maxR,sMin,sMax,yOff=0){const im=new THREE.InstancedMesh(geo,mat,n);const d=new THREE.Object3D();const c=new THREE.Color();
+  for(let k=0;k<n;k++){let x,z;do{const a=Math.random()*6.283,r=minR+Math.sqrt(Math.random())*(maxR-minR);x=Math.cos(a)*r;z=Math.sin(a)*r}while(Math.abs(x-RX)<6||(Math.abs(x)<LH+5&&Math.abs(z)<LH+5));
+    const s=sMin+Math.random()*(sMax-sMin);d.position.set(x,hgt(x,z)+yOff*s,z);d.rotation.set(0,Math.random()*6.3,0);d.scale.set(s,s*(0.7+Math.random()*0.6),s);d.updateMatrix();im.setMatrixAt(k,d.matrix);
+    c.copy(mat.color).offsetHSL((Math.random()-.5)*0.04,(Math.random()-.5)*0.15,(Math.random()-.5)*0.12);im.setColorAt(k,c)}im.castShadow=true;im.receiveShadow=true;scene.add(im);return im}
+{const coiron=new THREE.ConeGeometry(0.32,0.75,6,1,true);coiron.translate(0,0.37,0);
+ scatter(coiron,new THREE.MeshLambertMaterial({color:0xc9b26a,side:THREE.DoubleSide}),2600,R+20,260,0.7,1.6);
+ scatter(new THREE.IcosahedronGeometry(0.6,0),new THREE.MeshLambertMaterial({color:0x5c6b33,flatShading:true}),700,R+22,260,0.7,1.8,0.45);
+ scatter(new THREE.IcosahedronGeometry(0.45,0),new THREE.MeshLambertMaterial({color:0x7d8a48,flatShading:true}),500,R+22,260,0.6,1.3,0.35);
+ scatter(new THREE.DodecahedronGeometry(0.4,0),new THREE.MeshStandardMaterial({color:0x8a8178,roughness:1,flatShading:true}),380,R+19,260,0.4,1.6,0.15)}
+// platea nivelada
+{const pl=new THREE.Mesh(new THREE.PlaneGeometry(2*LH,2*LH),new THREE.MeshStandardMaterial({color:0xa38c6a,roughness:1}));pl.rotation.x=-Math.PI/2;pl.position.y=0.01;pl.receiveShadow=true;scene.add(pl);
+ // terraplén perimetral bajo de la locación (100 × 100 m), abierto en los dos accesos
+ const bm=new THREE.MeshStandardMaterial({color:0x8f7a5c,roughness:1});const berm=(x,z,w,d)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,0.45,d),bm);b.position.set(x,0.2,z);b.receiveShadow=true;b.castShadow=true;scene.add(b)};
+ berm(0,-LH-0.6,2*LH+2.4,1.2);berm(0,LH+0.6,2*LH+2.4,1.2);berm(-LH-0.6,0,1.2,2*LH);berm(LH+0.6,-45.5,1.2,9);berm(LH+0.6,0,1.2,72);berm(LH+0.6,45.5,1.2,9)}
+
+// ---------- marcado ----------
+const stake=mesh(new THREE.CylinderGeometry(0.06,0.06,0.9,8),M(0x777777,{metalness:.6}),[0,0.45,0]);
+const paintMat=new THREE.MeshBasicMaterial({color:0xf04a7a,side:THREE.DoubleSide});
+let paint=null,paintF=-1;function paintArc(f){if(Math.abs(f-paintF)<0.002)return;paintF=f;if(paint){scene.remove(paint);paint.geometry.dispose();paint=null}if(f<=0)return;paint=new THREE.Mesh(new THREE.RingGeometry(R-0.08,R+0.08,160,1,0,Math.PI*2*f),paintMat);paint.rotation.x=-Math.PI/2;paint.position.y=0.03;scene.add(paint)}
+const rope=line(0xffffff);
+const sucMark=mesh(new THREE.CircleGeometry(0.7,24),new THREE.MeshBasicMaterial({color:0xff2d2d}),null,scene,false);sucMark.rotation.x=-Math.PI/2;sucMark.position.set(Math.cos(TS)*R,0.04,Math.sin(TS)*R);
+
+// ---------- placa ----------
+const plateTex=(()=>{const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');x.fillStyle='#4a5866';x.fillRect(0,0,512,256);
+  x.fillStyle='#c8361f';x.fillRect(0,140,512,62);for(let i=0;i<2600;i++){x.fillStyle=`rgba(${120+Math.random()*60},${70+Math.random()*30},40,${Math.random()*.18})`;x.fillRect(Math.random()*512,Math.random()*256,2+Math.random()*6,1+Math.random()*4)}
+  for(let i=0;i<512;i+=64){x.fillStyle='rgba(20,26,32,.55)';x.fillRect(i,0,7,256);x.fillStyle='rgba(255,255,255,.08)';x.fillRect(i+7,0,3,256)}
+  [40,92,140,202].forEach(y=>{x.fillStyle='rgba(20,26,32,.6)';x.fillRect(0,y,512,6)});const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return t})();
+const pMat=M(0xffffff,{map:plateTex,metalness:.45,roughness:.6,side:THREE.DoubleSide});const frameMat=M(0x2f3a44,{metalness:.55,roughness:.5});
+function makePlate(){const g=new THREE.Group();const inner=new THREE.Group();inner.position.x=-R;g.add(inner);
+  const sh=new THREE.Mesh(new THREE.CylinderGeometry(R,R,PH,18,1,true,Math.PI/2-DT/2,DT),pMat);sh.position.y=PH/2;sh.castShadow=sh.receiveShadow=true;inner.add(sh);
+  [0.06,PH-0.06].forEach(y=>{const r=new THREE.Mesh(new THREE.TorusGeometry(R+0.05,0.05,6,24,DT),frameMat);r.rotation.x=Math.PI/2;r.rotation.z=-DT/2;r.position.y=y;inner.add(r)});
+  for(let i=0;i<=4;i++){const a=-DT/2+DT*i/4;const b=new THREE.Mesh(new THREE.BoxGeometry(0.12,PH,0.08),frameMat);b.position.set(Math.cos(a)*(R+0.08),PH/2,Math.sin(a)*(R+0.08));b.rotation.y=-a;b.castShadow=true;inner.add(b)}
+  [-1.8,1.8].forEach(z=>{const e=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.03,6,10),frameMat);e.position.set(0.05,PH+0.08,z);g.add(e)});
+  scene.add(g);return g}
+const plates=[];for(let k=0;k<N;k++){const p=makePlate();p.visible=false;plates.push(p)}
+const RP=R+3.2;
+function setPlateFinal(p,a,lift=0,rad=R,rotZ=0){p.position.set(Math.cos(a)*rad,lift,Math.sin(a)*rad);p.rotation.set(0,-a,0);p.rotateZ(rotZ)}
+function setPlatePile(p,a,h){setPlateFinal(p,a,0.12+h,RP,-Math.PI/2)}
+
+// ---------- estabilizadores de la primera placa ----------
+const stab=new THREE.Group();scene.add(stab);
+{const a=th(0);[-2.7,2.7].forEach(dz=>{const g=new THREE.Group();stab.add(g);
+  const top=v3(-0.1,2.3,dz),bot=v3(-2.7,0.05,dz);// lado interno
+  const prop=mesh(new THREE.BoxGeometry(0.1,0.1,1),M(0xe8501a,{metalness:.35}),null,g);aim(prop,top,bot);
+  const plate=mesh(new THREE.BoxGeometry(0.4,0.05,0.4),M(0x555555,{metalness:.6}),[bot.x,0.03,bot.z],g);
+  const spike=mesh(new THREE.CylinderGeometry(0.04,0.02,0.7,6),M(0x777777,{metalness:.7}),[bot.x-0.1,0.2,bot.z],g);
+  const clamp=mesh(new THREE.BoxGeometry(0.2,0.25,0.2),M(0x444444,{metalness:.6}),[top.x,top.y,top.z],g)});
+ stab.position.set(Math.cos(a)*R,0,Math.sin(a)*R);stab.rotation.y=-a}
+
+// ---------- tractor y carretón ----------
+const yel=M(0xf2b21c,{metalness:.25,roughness:.5}),blk=M(0x181818,{roughness:.8}),chrome=M(0xcfd4d8,{metalness:.9,roughness:.25}),glass=M(0x1d2a33,{metalness:.3,roughness:.15});
+function wheel(parent,x,y,z,r=0.55,w=0.38,rim=0xb8bec2){const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);const t=mesh(new THREE.CylinderGeometry(r,r,w,20),blk,null,g);t.rotation.z=Math.PI/2;const h=mesh(new THREE.CylinderGeometry(r*0.55,r*0.55,w+0.02,14),M(rim,{metalness:.7,roughness:.35}),null,g);h.rotation.z=Math.PI/2;return g}
+const tractor=new THREE.Group();scene.add(tractor);// adelante = +z local
+{const red=M(0xb5291f,{metalness:.35,roughness:.4});
+ mesh(new THREE.BoxGeometry(1.2,0.35,6.6),M(0x2a2a2a),[0,0.95,0.2],tractor);
+ mesh(new THREE.BoxGeometry(2.45,2.3,2.0),red,[0,2.35,2.6],tractor);mesh(new THREE.BoxGeometry(2.4,1.3,1.2),red,[0,1.65,3.9],tractor);
+ mesh(new THREE.BoxGeometry(2.2,0.95,0.05),glass,[0,2.95,3.61],tractor,false);[-1.24,1.24].forEach(x=>mesh(new THREE.BoxGeometry(0.05,0.8,1.2),glass,[x,2.95,2.7],tractor,false));
+ mesh(new THREE.BoxGeometry(1.5,0.9,0.06),chrome,[0,1.6,4.52],tractor);mesh(new THREE.BoxGeometry(2.5,0.3,0.25),chrome,[0,0.85,4.55],tractor);
+ [-0.8,0.8].forEach(x=>mesh(new THREE.BoxGeometry(0.35,0.2,0.08),M(0xfff6c8,{emissive:0xfff0b0,emissiveIntensity:.4}),[x,1.15,4.6],tractor,false));
+ [-1.25,1.25].forEach(x=>{const ft=mesh(new THREE.CylinderGeometry(0.32,0.32,1.1,14),chrome,[x,1.0,1.1],tractor);ft.rotation.x=Math.PI/2});
+ [-0.95,0.95].forEach(x=>mesh(new THREE.CylinderGeometry(0.08,0.08,1.6,8),chrome,[x,3.5,1.55],tractor));
+ mesh(new THREE.CylinderGeometry(0.75,0.75,0.12,20),M(0x333333,{metalness:.6}),[0,1.25,-1.4],tractor);
+ [[-1.05,3.6],[1.05,3.6]].forEach(([x,z])=>wheel(tractor,x,0.55,z,0.55,0.35,0xcfd4d8));
+ [-1.4,-2.6].forEach(z=>[-1.15,-0.75,0.75,1.15].forEach(x=>wheel(tractor,x,0.55,z,0.55,0.3,0xcfd4d8)))}
+const trailer=new THREE.Group();scene.add(trailer);
+{const gray=M(0x3b4045,{metalness:.5,roughness:.5});
+ mesh(new THREE.BoxGeometry(2.6,0.28,12.5),gray,[0,1.35,-5.5],trailer);mesh(new THREE.BoxGeometry(2.6,0.06,12.4),M(0x7a5a33,{roughness:.9}),[0,1.52,-5.5],trailer);
+ mesh(new THREE.BoxGeometry(2.6,0.5,2.6),gray,[0,1.85,1.7],trailer);mesh(new THREE.BoxGeometry(2.6,0.9,0.3),gray,[0,1.5,0.35],trailer);
+ [-1.0,1.0].forEach(x=>mesh(new THREE.BoxGeometry(0.14,1.1,0.14),gray,[x,0.6,-0.6],trailer));[-1.0,1.0].forEach(x=>mesh(new THREE.BoxGeometry(0.35,0.06,0.35),gray,[x,0.04,-0.6],trailer));
+ [-8.6,-9.8,-11].forEach(z=>[-1.1,-0.7,0.7,1.1].forEach(x=>wheel(trailer,x,0.5,z,0.5,0.28)));
+ [-1.32,1.32].forEach(x=>{for(let i=0;i<7;i++)mesh(new THREE.BoxGeometry(0.03,0.12,0.6),M(i%2?0xffffff:0xd02020,{emissive:i%2?0x333333:0x330000}),[x,1.35,-11+i*0.9],trailer,false)})}
+// placas cargadas en el carretón (dos pilas)
+const load=[];for(let i=0;i<N;i++){const st=i%2,h=Math.floor(i/2);const b=mesh(new THREE.BoxGeometry(2.95,0.11,5.9),M(0x4a5866,{metalness:.5,roughness:.55}),[0,1.62+h*0.13,st?-9.0:-2.6],trailer);load.push(b)}
+const loadSlot=i=>{const st=i%2,h=Math.floor(i/2);return v3(0,1.62+h*0.13,st?-9.0:-2.6)};
+const parkPos=v3(XR,0,-2);
+const ARR=new THREE.CatmullRomCurve3([[RX,-230],[RX,-70],[RX,-50],[RX-5,-41],[LH+2,-40],[XR+4,-38],[XR,-30],[XR,-14],[XR,-2]].map(([x,z])=>v3(x,0,z)),false,'catmullrom',0.4);
+const EXI=new THREE.CatmullRomCurve3([[XR,-2],[XR,14],[XR,30],[XR+4,38],[LH+2,40],[RX-5,41],[RX,50],[RX,70],[RX,230]].map(([x,z])=>v3(x,0,z)),false,'catmullrom',0.4);
+const ARL=ARR.getLength(),EXL=EXI.getLength();
+function rig(cv,L,u){u=C(0,1,u);const p=cv.getPointAt(u),pb=cv.getPointAt(C(0,1,u-7/L)),pf=cv.getPointAt(C(0,1,u+4.7/L)),pff=cv.getPointAt(C(0,1,u+6/L));
+  trailer.position.copy(p);const tb=p.clone().sub(pb);trailer.rotation.set(0,(tb.lengthSq()>1e-6?Math.atan2(tb.x,tb.z):0),0);
+  tractor.position.copy(u>=1?p.clone().add(v3(0,0,4.7).applyEuler(trailer.rotation)):pf);const tf=pff.clone().sub(p);tractor.rotation.set(0,tf.lengthSq()>1e-6&&u<1?Math.atan2(tf.x,tf.z):trailer.rotation.y,0)}
+const EXT0=()=>T.dist[1]+1.5,EXT1=()=>T.dist[1]+15;const parkRot=0;const AP=Math.atan2(parkPos.z,parkPos.x),RTR=R+10.5;// carretón sobre el camino, en el sentido de ingreso
+
+// ---------- conos de cierre de zona del carretón, manga de viento, matafuegos ----------
+const cones=new THREE.Group();scene.add(cones);
+{const cm=M(0xff6a13,{roughness:.6}),wm=M(0xf2f2f2,{emissive:0x666666,emissiveIntensity:.4});const pts=[];
+ const rect=[[XR-3.6,-15],[XR+3.6,-15],[XR+3.6,5],[XR-3.6,5]];
+ for(let e=0;e<4;e++){const A=rect[e],B=rect[(e+1)%4];const n=Math.round(Math.hypot(B[0]-A[0],B[1]-A[1])/2.5);for(let i=0;i<n;i++){const x=lerp(A[0],B[0],i/n),z=lerp(A[1],B[1],i/n);
+   if(e===3&&z>-9&&z<-1)continue;// acceso del manipulador
+   const g=new THREE.Group();g.position.set(x,0,z);cones.add(g);mesh(new THREE.BoxGeometry(0.45,0.04,0.45),M(0x222222),[0,0.02,0],g);mesh(new THREE.ConeGeometry(0.17,0.7,12),cm,[0,0.39,0],g);mesh(new THREE.CylinderGeometry(0.11,0.13,0.1,12),wm,[0,0.45,0],g);pts.push(v3(x,0.6,z))}}
+ const sign=new THREE.Group();sign.position.set(XR-4.4,0,-11);cones.add(sign);mesh(new THREE.CylinderGeometry(0.04,0.04,1.6,6),M(0x888888),[0,0.8,0],sign);
+ const c=document.createElement('canvas');c.width=256;c.height=160;const x=c.getContext('2d');x.fillStyle='#ffd400';x.fillRect(0,0,256,160);x.strokeStyle='#111';x.lineWidth=10;x.strokeRect(5,5,246,150);x.fillStyle='#111';x.font='bold 30px Arial';x.textAlign='center';x.fillText('ZONA DE IZAJE',128,62);x.font='bold 24px Arial';x.fillText('PROHIBIDO',128,100);x.fillText('EL PASO',128,132);
+ const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;const bd=new THREE.Mesh(new THREE.PlaneGeometry(1.1,0.7),new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide}));bd.position.set(0,1.5,0);bd.rotation.y=-Math.PI/2;sign.add(bd)}
+const sock=new THREE.Group();{const [x,z]=polar(-2.2,R+14);sock.position.set(x,0,z);scene.add(sock);mesh(new THREE.CylinderGeometry(0.05,0.06,5,8),M(0xdddddd,{metalness:.6}),[0,2.5,0],sock);
+ const fab=mesh(new THREE.CylinderGeometry(0.28,0.12,1.6,12,1,true),M(0xff5a1a,{side:THREE.DoubleSide}),[0.85,4.85,0],sock);fab.rotation.z=Math.PI/2+0.25;sock.userData.fab=fab}
+{const [x,z]=polar(AP-0.25,R+9);const e=new THREE.Group();e.position.set(x,0,z);scene.add(e);mesh(new THREE.CylinderGeometry(0.12,0.12,0.6,12),M(0xc81e1e,{roughness:.4}),[0,0.3,0],e);mesh(new THREE.BoxGeometry(0.5,0.05,0.5),M(0x333333),[0,0.02,0],e)}
+
+// ---------- hidrogrúa (camión grúa) ----------
+const hcrane=new THREE.Group();scene.add(hcrane);
+{const wht=M(0xe8e8e4,{metalness:.25,roughness:.45}),cy=M(0xe2b21e,{metalness:.35,roughness:.4});
+ mesh(new THREE.BoxGeometry(1.1,0.35,8.2),M(0x2a2a2a),[0,0.95,-0.6],hcrane);mesh(new THREE.BoxGeometry(2.4,2.1,2.2),wht,[0,2.0,2.5],hcrane);
+ mesh(new THREE.BoxGeometry(2.2,0.9,0.05),glass,[0,2.5,3.61],hcrane,false);mesh(new THREE.BoxGeometry(2.4,0.3,0.25),chrome,[0,0.85,3.7],hcrane);
+ mesh(new THREE.BoxGeometry(2.4,0.12,5.2),M(0x6b4f2c),[0,1.3,-2.6],hcrane);mesh(new THREE.BoxGeometry(2.6,0.6,0.9),cy,[0,1.45,0.9],hcrane);
+ [-1.7,1.7].forEach(x=>{mesh(new THREE.BoxGeometry(1.2,0.2,0.3),cy,[x*0.8,1.2,0.9],hcrane);mesh(new THREE.BoxGeometry(0.15,1.1,0.15),cy,[x,0.6,0.9],hcrane);mesh(new THREE.BoxGeometry(0.5,0.08,0.5),M(0x333333),[x,0.04,0.9],hcrane)});
+ [[-1.05,2.9],[1.05,2.9]].forEach(([x,z])=>wheel(hcrane,x,0.55,z));[-2.6,-3.8].forEach(z=>[-1.1,-0.75,0.75,1.1].forEach(x=>wheel(hcrane,x,0.55,z,0.55,0.3)))}
+const hcBase=mesh(new THREE.CylinderGeometry(0.45,0.55,0.9,14),M(0xe2b21e,{metalness:.35}),[0,2.1,0.9],hcrane);
+const crA=mesh(new THREE.BoxGeometry(0.42,0.42,1),M(0xe2b21e,{metalness:.35}),null),crB=mesh(new THREE.BoxGeometry(0.32,0.32,1),M(0xe2b21e,{metalness:.35}),null),crCyl=mesh(new THREE.CylinderGeometry(0.08,0.08,1,8),chrome,null);
+const crCable=line(0x222222);
+
+// ---------- manipulador telescópico ----------
+const tele=new THREE.Group();scene.add(tele);// adelante = -z local
+{mesh(new THREE.BoxGeometry(2.3,0.85,5.2),blk,[0,1.15,0],tele);mesh(new THREE.BoxGeometry(2.35,1.1,1.1),yel,[0,1.45,2.55],tele);mesh(new THREE.BoxGeometry(2.0,0.5,0.4),blk,[0,1.0,3.1],tele);
+ const cab=new THREE.Group();cab.position.set(-0.72,1.55,0.2);tele.add(cab);mesh(new THREE.BoxGeometry(0.95,1.75,1.9),glass,[0,0.9,0],cab);
+ [[-0.48,-0.95],[0.48,-0.95],[-0.48,0.95],[0.48,0.95]].forEach(([x,z])=>mesh(new THREE.BoxGeometry(0.08,1.8,0.08),yel,[x,0.9,z],cab));mesh(new THREE.BoxGeometry(1.05,0.1,2.0),yel,[0,1.82,0],cab);
+ mesh(new THREE.BoxGeometry(0.15,0.15,0.15),M(0xff8a1f,{emissive:0xff6a00,emissiveIntensity:.6}),[0,1.95,0.5],cab);
+ [[-1.1,1.85],[1.1,1.85],[-1.1,-1.85],[1.1,-1.85]].forEach(([x,z])=>wheel(tele,x,0.72,z,0.72,0.55,0xf2b21c));
+ [-1.25,1.25].forEach(x=>mesh(new THREE.BoxGeometry(0.12,0.12,0.9),yel,[x,0.95,-2.7],tele))}
+{const fend=M(0x1f1f1f,{roughness:.6});[[-1.1,1.85],[1.1,1.85],[-1.1,-1.85],[1.1,-1.85]].forEach(([x,z])=>{const f=mesh(new THREE.CylinderGeometry(0.86,0.86,0.6,16,1,true,Math.PI*0.05,Math.PI*0.9),fend,[x,0.72,z],tele);f.rotation.z=Math.PI/2;f.rotation.y=0;f.material.side=THREE.DoubleSide});
+ const cw=mesh(new THREE.CylinderGeometry(0.6,0.6,2.3,16,1,false,0,Math.PI),yel,[0,1.3,2.65],tele);cw.rotation.z=Math.PI/2;cw.rotation.x=-Math.PI/2;
+ [-0.85,0.85].forEach(x=>{mesh(new THREE.BoxGeometry(0.22,0.14,0.06),M(0xfff6d8,{emissive:0xfff0b0,emissiveIntensity:.5}),[x,1.35,-2.62],tele,false);mesh(new THREE.BoxGeometry(0.2,0.12,0.06),M(0xd22b2b,{emissive:0x600000}),[x,1.55,3.12],tele,false)});
+ mesh(new THREE.BoxGeometry(0.05,0.28,0.2),blk,[-1.25,2.9,-0.7],tele);mesh(new THREE.CylinderGeometry(0.015,0.015,0.5,6),blk,[-1.2,2.75,-0.5],tele).rotation.z=0.6;
+ mesh(new THREE.BoxGeometry(0.9,0.06,0.5),M(0x2a2a2a),[-0.72,0.75,0.2],tele);// estribo de cabina
+ [-0.18,0.18].forEach(x=>mesh(new THREE.CylinderGeometry(0.03,0.03,4.4,6),M(0x111111),[x+0.55,1.75,0.2],tele).rotation.x=Math.PI/2)}
+const outr=[-1,1].map(s=>{const g=new THREE.Group();tele.add(g);g.position.set(s*1.25,0.95,-2.85);mesh(new THREE.BoxGeometry(0.16,1.0,0.16),yel,[0,-0.45,0],g);mesh(new THREE.BoxGeometry(0.5,0.08,0.5),blk,[0,-0.92,0],g);return g});
+const boomA=mesh(new THREE.BoxGeometry(0.62,0.62,1),yel,null),boomB=mesh(new THREE.BoxGeometry(0.46,0.46,1),M(0x1d1d1d,{metalness:.4}),null),liftCyl=mesh(new THREE.CylinderGeometry(0.11,0.11,1,10),chrome,null);
+const hookPlate=mesh(new THREE.BoxGeometry(0.7,0.55,0.25),M(0x2b2b2b,{metalness:.5}),null);
+const hookBlock=mesh(new THREE.BoxGeometry(0.32,0.45,0.32),M(0xd23a2a),null);const hook=mesh(new THREE.TorusGeometry(0.16,0.05,6,12,Math.PI*1.5),M(0x333333,{metalness:.7}),null);
+const hookCable=line(0x222222);
+const slingMat=new THREE.MeshStandardMaterial({color:0xff8a1f,roughness:.8});const slings=[0,1].map(()=>mesh(new THREE.CylinderGeometry(0.05,0.05,1,6),slingMat,null));
+const RTH=R+12.5;
+
+// ---------- personas con EPP ----------
+const suit=M(0x1f4fa8,{roughness:.85}),skin=M(0xd9a98a),boot=M(0x1a1410),glove=M(0xff7a1a),helm=M(0xf4f4f0,{roughness:.4}),goggle=M(0x101418,{metalness:.5,roughness:.15});
+function person(band,vest=false){const g=new THREE.Group();const cap=(r,l)=>new THREE.CapsuleGeometry(r,l,4,10);
+  const refl=M(0xdfe3e6,{emissive:0x8a8a8a,emissiveIntensity:.6,metalness:.3});
+  // piernas con rodilla, botines de seguridad
+  [-0.105,0.105].forEach(x=>{mesh(cap(0.085,0.36),suit,[x,0.66,0],g);mesh(cap(0.075,0.34),suit,[x,0.3,0.01],g);
+    mesh(new THREE.CylinderGeometry(0.083,0.083,0.05,12),refl,[x,0.36,0.01],g,false);
+    const bt=mesh(new THREE.BoxGeometry(0.15,0.12,0.28),boot,[x,0.06,0.05],g);mesh(new THREE.CylinderGeometry(0.075,0.075,0.15,10),boot,[x,0.06,0.17],g).rotation.z=Math.PI/2});
+  mesh(new THREE.BoxGeometry(0.36,0.2,0.22),suit,[0,0.92,0],g);
+  // torso (mameluco) con cintas reflectivas y cierre
+  const tor=mesh(cap(0.2,0.3),suit,[0,1.2,0],g);tor.scale.set(1.05,1,0.66);
+  [1.1,1.28].forEach(y=>{const b=mesh(new THREE.CylinderGeometry(0.212,0.212,0.045,18),refl,[0,y,0],g,false);b.scale.set(1.05,1,0.67)});
+  mesh(new THREE.BoxGeometry(0.02,0.42,0.01),M(0x222222),[0,1.18,0.135],g,false);
+  if(vest){const v=mesh(cap(0.215,0.26),M(0xc8f03a,{emissive:0x405010,emissiveIntensity:.5}),[0,1.22,0],g);v.scale.set(1.06,1,0.7);[1.14,1.32].forEach(y=>{const b=mesh(new THREE.CylinderGeometry(0.226,0.226,0.045,18),refl,[0,y,0],g,false);b.scale.set(1.06,1,0.71)})}
+  // brazos articulados: hombro, brazo, antebrazo y guante
+  const arms=[-1,1].map(s=>{const a=new THREE.Group();a.position.set(s*0.26,1.43,0);g.add(a);mesh(new THREE.SphereGeometry(0.075,10,8),suit,[0,0,0],a);
+    mesh(cap(0.062,0.2),suit,[0,-0.17,0],a);mesh(cap(0.056,0.2),suit,[0,-0.42,0.02],a);
+    mesh(new THREE.CylinderGeometry(0.06,0.06,0.03,10),refl,[0,-0.35,0.02],a,false);
+    const h=mesh(new THREE.BoxGeometry(0.09,0.12,0.065),glove,[0,-0.6,0.03],a);return a});
+  mesh(new THREE.BoxGeometry(0.15,0.1,0.17),M(band,{emissive:band,emissiveIntensity:.3}),[0,-0.1,0],arms[0],false);
+  // cuello, cabeza, casco con ala, gafas y protección auditiva
+  mesh(new THREE.CylinderGeometry(0.055,0.06,0.09,10),skin,[0,1.55,0],g);
+  const hd=mesh(new THREE.SphereGeometry(0.105,14,12),skin,[0,1.66,0.005],g);hd.scale.set(0.95,1.12,1);
+  mesh(new THREE.SphereGeometry(0.03,8,6),skin,[0,1.64,0.105],g,false);
+  mesh(new THREE.BoxGeometry(0.19,0.045,0.03),goggle,[0,1.69,0.098],g,false);
+  mesh(new THREE.SphereGeometry(0.128,16,10,0,Math.PI*2,0,Math.PI/2),helm,[0,1.72,0],g);
+  const brim=mesh(new THREE.CylinderGeometry(0.15,0.15,0.016,18),helm,[0,1.725,0.02],g);brim.scale.set(1,1,1.12);
+  mesh(new THREE.BoxGeometry(0.02,0.04,0.2),helm,[0,1.86,0],g,false);
+  [-1,1].forEach(s=>{const e=mesh(new THREE.CylinderGeometry(0.045,0.045,0.04,12),M(0xd1462f),[s*0.112,1.66,0],g,false);e.rotation.z=Math.PI/2});
+  mesh(new THREE.TorusGeometry(0.12,0.012,6,16,Math.PI),M(0x333333),[0,1.67,0],g,false).rotation.y=Math.PI/2;
+  g.userData.arms=arms;scene.add(g);return g}
+const crew={sen:person(0xc8f03a,true),sog:person(0xffd23a),int:person(0xff5a5a),ext:person(0xc77dff),asi:person(0x2fd18b),m1:person(0xffffff),m2:person(0xffffff)};
+const sogRope=line(0xeee6b0);
+const ladder=new THREE.Group();scene.add(ladder);{const al=M(0xb8c0c6,{metalness:.7,roughness:.35});const bx=(w,h,d,x,y,z,rx=0)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),al,[x,y,z],ladder);m.rotation.x=rx};
+ [-0.35,0.35].forEach(x=>{bx(0.05,1.1,0.05,x,0.55,0);bx(0.05,1.1,0.05,x,0.55,-0.35);bx(0.05,2.3,0.05,x,1.15,0.95,0.62);bx(0.05,2.0,0.05,x,2.0,0.55,0.62);bx(0.05,0.9,0.05,x,1.55,-0.35)});
+ bx(0.8,0.05,0.5,0,1.1,-0.15);for(let i=0;i<4;i++)bx(0.75,0.04,0.22,0,0.22+i*0.25,1.55-i*0.36);bx(0.8,0.05,0.05,0,2.0,-0.35);
+ [[-0.35,-0.35],[0.35,-0.35],[-0.35,1.95],[0.35,1.95]].forEach(([x,z])=>{const w=mesh(new THREE.CylinderGeometry(0.07,0.07,0.04,10),M(0x333333),[x,0.07,z],ladder);w.rotation.z=Math.PI/2})}
+const ladder2=new THREE.Group();scene.add(ladder2);{const al=M(0xb8c0c6,{metalness:.7,roughness:.35});const bx=(w,h,d,x,y,z,rx=0)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),al,[x,y,z],ladder2);m.rotation.x=rx};
+ [-0.35,0.35].forEach(x=>{bx(0.05,1.1,0.05,x,0.55,0);bx(0.05,1.1,0.05,x,0.55,-0.35);bx(0.05,2.3,0.05,x,1.15,0.95,0.62);bx(0.05,2.0,0.05,x,2.0,0.55,0.62);bx(0.05,0.9,0.05,x,1.55,-0.35)});
+ bx(0.8,0.05,0.5,0,1.1,-0.15);for(let i=0;i<4;i++)bx(0.75,0.04,0.22,0,0.22+i*0.25,1.55-i*0.36);bx(0.8,0.05,0.05,0,2.0,-0.35);
+ [[-0.35,-0.35],[0.35,-0.35],[-0.35,1.95],[0.35,1.95]].forEach(([x,z])=>{const w=mesh(new THREE.CylinderGeometry(0.07,0.07,0.04,10),M(0x333333),[x,0.07,z],ladder2);w.rotation.z=Math.PI/2})}
+const excl=new THREE.Mesh(new THREE.RingGeometry(7.6,7.9,64),new THREE.MeshBasicMaterial({color:0xef5350,transparent:true,opacity:.55,side:THREE.DoubleSide}));excl.rotation.x=-Math.PI/2;excl.position.y=0.05;scene.add(excl);
+function put(o,x,z,face){o.position.set(x,0,z);o.rotation.y=face}
+const faceTo=(x,z,tx,tz)=>Math.atan2(tx-x,tz-z);
+
+// ---------- bulones, cuñas, cable ----------
+const boltMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:.7,emissive:0xffc040,emissiveIntensity:0});
+const bolts=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const g=new THREE.Group();[0.35,1.5,2.65].forEach(y=>mesh(new THREE.SphereGeometry(0.07,6,5),boltMat.clone(),[Math.cos(a)*(R+0.12),y,Math.sin(a)*(R+0.12)],g,false));g.visible=false;scene.add(g);bolts.push(g)}
+const wedges=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const w=mesh(new THREE.ConeGeometry(0.12,0.35,4),M(0xb8902a,{metalness:.5}),[Math.cos(a)*(R+0.25),2.4,Math.sin(a)*(R+0.25)],scene,false);w.visible=false;wedges.push(w)}
+const boltsFull=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const g=new THREE.Group();for(let i=0;i<8;i++)for(const s of[-1,1]){const b=mesh(new THREE.SphereGeometry(0.055,6,5),boltMat.clone(),[0,0.2+i*0.37,0],g,false);const aa=a+s*0.004;b.position.x=Math.cos(aa)*(R+0.12);b.position.z=Math.sin(aa)*(R+0.12)}g.visible=false;scene.add(g);boltsFull.push(g)}
+const gun=mesh(new THREE.BoxGeometry(0.12,0.22,0.3),M(0xd83b2a),null,scene,false);
+const cable=mesh(new THREE.TorusGeometry(R+0.2,0.035,6,200),M(0x555555,{metalness:.8}),[0,1.5,0],scene,false);cable.rotation.x=Math.PI/2;cable.visible=false;
+
+// ---------- arena, taludes, succión, lona, agua ----------
+const lathe=(pts,mat,seg=120)=>{const m=new THREE.Mesh(new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),seg),mat);m.receiveShadow=true;scene.add(m);return m};
+const sand=lathe([[0,0.32],[R-1.45,0.32],[R-0.15,1.55],[R-0.1,0]],M(0xd9c08e,{roughness:1}));
+const grav=lathe([[R+0.15,1.25],[R+1.45,0.02],[R+1.5,0]],M(0x7d7468,{roughness:1}));
+const sandPiles=[0,1,2,3].map(i=>{const a=i*1.57+0.6;return mesh(new THREE.ConeGeometry(2.6,1.8,20),M(0xd9c08e,{roughness:1}),[Math.cos(a)*9,0.9,Math.sin(a)*9])});
+const loader=new THREE.Group();scene.add(loader);mesh(new THREE.BoxGeometry(1.8,1.2,3.2),yel,[0,1.1,0],loader);mesh(new THREE.BoxGeometry(1.1,1.2,1.2),glass,[0,2.2,0.3],loader);mesh(new THREE.BoxGeometry(2.3,0.6,0.6),M(0x555555),[0,0.6,2.0],loader);[[-0.9,1],[0.9,1],[-0.9,-1],[0.9,-1]].forEach(([x,z])=>wheel(loader,x,0.5,z,0.5,0.35,0xf2b21c));
+const sucGroup=new THREE.Group();scene.add(sucGroup);const trench=new THREE.Group();scene.add(trench);
+{const a=TS;const [x,z]=polar(a,R);sucGroup.position.set(x,0,z);sucGroup.rotation.y=-a;trench.position.set(x,0,z);trench.rotation.y=-a;
+ const pm=M(0x5e666b,{metalness:.6,roughness:.4}),fm=M(0x444b50,{metalness:.6});
+ const pipeX=(x0,x1,y)=>{const p=mesh(new THREE.CylinderGeometry(0.17,0.17,Math.abs(x1-x0),16),pm,[(x0+x1)/2,y,0],sucGroup);p.rotation.z=Math.PI/2};
+ const pipeY=(x0,y0,y1)=>mesh(new THREE.CylinderGeometry(0.17,0.17,Math.abs(y1-y0),16),pm,[x0,(y0+y1)/2,0],sucGroup);
+ const elbow=(x0,y0)=>mesh(new THREE.SphereGeometry(0.2,12,10),pm,[x0,y0,0],sucGroup);
+ pipeX(-2.4,2.2,-0.45);elbow(-2.4,-0.45);elbow(2.2,-0.45);
+ pipeY(-2.4,-0.45,0.3);// boca interior al ras
+ mesh(new THREE.CylinderGeometry(0.42,0.42,0.06,24),fm,[-2.4,0.33,0],sucGroup);// brida
+ const mesh_=mesh(new THREE.CylinderGeometry(0.3,0.3,0.02,24),new THREE.MeshStandardMaterial({color:0x9aa3a8,metalness:.6,wireframe:true}),[-2.4,0.37,0],sucGroup,false);
+ const hat=mesh(new THREE.TorusGeometry(0.4,0.06,6,20),M(0x2b3035,{metalness:.6}),[-2.4,0.38,0],sucGroup);hat.rotation.x=Math.PI/2;// sombrero bulonado
+ mesh(new THREE.BoxGeometry(0.35,0.18,0.5),M(0x9a7d3a,{metalness:.5}),[0,0.09,0],sucGroup);// cuña metálica en el borde inferior de la placa
+ pipeY(2.2,-0.45,0.4);elbow(2.2,0.4);pipeX(2.2,5.2,0.4);
+ const valve=(xv)=>{const v=mesh(new THREE.CylinderGeometry(0.32,0.32,0.22,16),M(0x2a4fa8),[xv,0.4,0],sucGroup);v.rotation.z=Math.PI/2;mesh(new THREE.CylinderGeometry(0.03,0.03,0.45,6),M(0x777777),[xv,0.8,0],sucGroup);const hw=mesh(new THREE.TorusGeometry(0.17,0.03,6,16),M(0x1f9a4a),[xv,1.03,0],sucGroup);hw.rotation.x=Math.PI/2};
+ valve(2.9);valve(4.4);
+ mesh(new THREE.CylinderGeometry(0.15,0.15,0.55,12),pm,[3.65,0.68,0],sucGroup);mesh(new THREE.CylinderGeometry(0.3,0.3,0.06,16),fm,[3.65,0.97,0],sucGroup);// derivación con brida ciega
+ const cp=mesh(new THREE.TorusGeometry(0.22,0.06,8,16),M(0xc94a22),[5.2,0.4,0],sucGroup);cp.rotation.y=Math.PI/2;
+ // zanja
+ const tr=mesh(new THREE.BoxGeometry(8.2,0.02,0.9),M(0x5a4a38,{roughness:1}),[1.4,0.035,0],trench,false)}
+// ---------- bombeo exterior en la pipa: manifold, 2 manguerotes Bauer, 2 bombas, cisterna, telemetría ----------
+const beacons2=[];const pst=new THREE.Group();scene.add(pst);
+{const [x,z]=polar(TS,R);pst.position.set(x,0,z);pst.rotation.y=-TS;
+ const G=M(0x6b7378,{metalness:.55,roughness:.4}),HB=M(0x1a1c1e,{roughness:.6}),GR=M(0x2f7d3e,{metalness:.3,roughness:.5}),BK=M(0x1e1e1e),VB=M(0x2a4fa8);
+ const tube=(pts,r,mat)=>{const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p=>v3(...p))),40,r,12),mat);m.castShadow=true;pst.add(m);return m};
+ const cyl=(r,h,mat,p,rz=0,rx=0)=>{const m=mesh(new THREE.CylinderGeometry(r,r,h,16),mat,p,pst);m.rotation.z=rz;m.rotation.x=rx;return m};
+ // manifold 1→2 al final de la pipa
+ cyl(0.2,0.5,G,[5.6,0.4,0],Math.PI/2);cyl(0.2,2.6,G,[5.95,0.4,0],0,Math.PI/2);
+ const valve=(xx,zz,open)=>{cyl(0.24,0.2,VB,[xx,0.4,zz],Math.PI/2);cyl(0.025,0.4,M(0x777777),[xx,0.75,zz]);const hw=mesh(new THREE.TorusGeometry(0.15,0.03,6,16),M(open?0x1f9a4a:0xb3261e),[xx,0.95,zz],pst);hw.rotation.x=Math.PI/2};
+ [1.2,-1.2].forEach((zz,i)=>{cyl(0.2,0.6,G,[6.3,0.4,zz],Math.PI/2);valve(6.4,zz,i===0);const c=mesh(new THREE.TorusGeometry(0.22,0.06,8,16),M(0xc94a22),[6.7,0.4,zz],pst);c.rotation.y=Math.PI/2});
+ // manguerotes Bauer (succión) hacia cada bomba
+ tube([[6.7,0.4,1.2],[8.5,0.3,1.9],[10.5,0.45,2.6],[11.4,0.7,2.6]],0.17,HB);
+ tube([[6.7,0.4,-1.2],[8.5,0.3,-1.9],[10.5,0.45,-2.6],[11.4,0.7,-2.6]],0.17,HB);
+ // lona de contención
+ const ln=mesh(new THREE.BoxGeometry(9,0.04,9.5),M(0x2c2f33,{roughness:.9}),[15,0.02,0],pst,false);ln.receiveShadow=true;
+ [[15,4.75,9,0.1],[15,-4.75,9,0.1]].forEach(([xx,zz,w,d])=>mesh(new THREE.BoxGeometry(w,0.25,d),M(0x2c2f33),[xx,0.12,zz],pst));[[10.5],[19.5]].forEach(([xx])=>mesh(new THREE.BoxGeometry(0.1,0.25,9.5),M(0x2c2f33),[xx,0.12,0],pst));
+ // bombas (bastidor verde, motor, voluta)
+ const pump=(zz,run)=>{const g=new THREE.Group();g.position.set(14.2,0,zz);pst.add(g);
+   const fr=M(0x2f7d3e,{metalness:.3});[[-1.9,0],[1.9,0]].forEach(([xx])=>mesh(new THREE.BoxGeometry(0.12,0.12,1.4),fr,[xx,0.25,0],g));[-0.65,0.65].forEach(z2=>mesh(new THREE.BoxGeometry(3.9,0.12,0.12),fr,[0,0.25,z2],g));
+   [-1.9,1.9].forEach(xx=>[-0.65,0.65].forEach(z2=>mesh(new THREE.BoxGeometry(0.1,1.8,0.1),fr,[xx,1.1,z2],g)));mesh(new THREE.BoxGeometry(3.9,0.1,1.4),fr,[0,2.0,0],g);
+   mesh(new THREE.BoxGeometry(2.2,1.1,1.0),M(0xc9a227,{metalness:.3}),[0.4,0.95,0],g);mesh(new THREE.BoxGeometry(0.4,0.9,1.0),BK,[1.7,0.95,0],g);
+   const vo=mesh(new THREE.CylinderGeometry(0.42,0.42,0.35,20),M(0x2b4a35,{metalness:.3}),[-1.2,0.75,0],g);vo.rotation.z=Math.PI/2;
+   const ex=mesh(new THREE.CylinderGeometry(0.08,0.08,0.7,8),M(0x888888,{metalness:.7}),[1.2,2.3,0.3],g);
+   const b=mesh(new THREE.SphereGeometry(0.08,8,6),new THREE.MeshBasicMaterial({color:run?0x3dff6a:0xffb020}),[1.5,2.15,0],g,false);beacons2.push(b);return g};
+ pump(2.6,true);pump(-2.6,false);
+ // impulsiones con válvulas → derivador 2→1 → layflat
+ [2.6,-2.6].forEach((zz,i)=>{tube([[16.0,0.75,zz],[17.2,0.6,zz],[18.2,0.5,zz*0.4],[18.8,0.5,0]],0.15,G);valve(17.0,zz,i===0)});
+ cyl(0.26,0.7,G,[19.0,0.5,0],Math.PI/2);
+ const out=[];for(let i=0;i<=30;i++){const u=i/30;out.push([19.4+u*60,0.2,Math.sin(u*4)*5*u])}const lay=tube(out,0.32,HB);lay.scale.y=1;
+ // cisterna GO 5.000 L en batea, antena, matafuegos
+ const bt=new THREE.Group();bt.position.set(15,0,-7.5);pst.add(bt);mesh(new THREE.BoxGeometry(3.2,0.45,2.2),M(0xf0f0ee),[0,0.22,0],bt);
+ const ft=mesh(new THREE.CylinderGeometry(0.62,0.62,2.4,24),M(0xf2f2f0,{roughness:.4}),[0,1.0,0],bt);ft.rotation.z=Math.PI/2;
+ const an=new THREE.Group();an.position.set(12,0,6);pst.add(an);mesh(new THREE.CylinderGeometry(0.04,0.04,3.2,8),M(0xc9ced1,{metalness:.5}),[0,1.6,0],an);
+ const dish=mesh(new THREE.SphereGeometry(0.32,20,10,0,Math.PI*2,0,Math.PI*0.35),M(0xf4f5f5,{side:THREE.DoubleSide}),[0,3.3,0],an);dish.rotation.x=Math.PI*0.62;
+ [[11,-4.2],[18.5,4.2]].forEach(([xx,zz])=>mesh(new THREE.CylinderGeometry(0.12,0.12,0.6,12),M(0xc81e1e),[xx,0.3,zz],pst));
+ pst.traverse(o=>{if(o.isMesh)o.castShadow=true})}
+const bags=new THREE.Group();scene.add(bags);{const [x,z]=polar(TS,R-2.4);bags.position.set(x,0.38,z);bags.rotation.y=-TS;for(let i=0;i<4;i++)mesh(new THREE.BoxGeometry(0.5,0.25,0.35),M(0xe9e4d6),[(i%2)*0.5-0.25,0.12+Math.floor(i/2)*0.25,(i<2?-0.3:0.3)],bags)}
+const linerMat=M(0x1d4fa8,{roughness:.35,metalness:.1,side:THREE.DoubleSide});
+const LX=th(LAST);// eje del chorizo: desde el panel abierto hacia el lado opuesto
+const _lf=0;const linerFloor=lathe([[0,0.36],[R-1.45,0.36],[R-0.2,1.6]],linerMat);linerFloor.rotation.y=-LX;
+const GHW=DT/2+2/R,GTH=Math.PI/2-th(LAST);// sector del cierre: panel abierto ± 2 m
+const linerWall=new THREE.Mesh(new THREE.CylinderGeometry(R-0.06,R-0.06,PH-1.5,140,1,true,GTH+GHW,2*Math.PI-2*GHW),linerMat);linerWall.position.y=1.6+(PH-1.6)/2;scene.add(linerWall);
+const linerLip=new THREE.Mesh(new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,140,1,true,GTH+GHW,2*Math.PI-2*GHW),linerMat);linerLip.position.y=PH-0.2;scene.add(linerLip);
+const flap=new THREE.Mesh(new THREE.CylinderGeometry(R-0.06,R-0.06,1,24,1,true,GTH-GHW,2*GHW),linerMat);scene.add(flap);
+const flapLip=new THREE.Mesh(new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,24,1,true,GTH-GHW,2*GHW),linerMat);flapLip.position.y=PH-0.2;scene.add(flapLip);
+const wallPart=linerWall.geometry,lipPart=linerLip.geometry,wallFull=new THREE.CylinderGeometry(R-0.06,R-0.06,PH-1.5,160,1,true),lipFull=new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,160,1,true);
+const flapRopes=[-1,1].map(()=>line(0xeee6b0));
+const poles=[0,1].map(()=>{const p=mesh(new THREE.CylinderGeometry(0.03,0.03,2,6),M(0xc8a46a),null,scene,false);mesh(new THREE.SphereGeometry(0.08,8,6),M(0xf0e6d0),[0,1,0],p,false);return p});
+const roll=mesh(new THREE.CylinderGeometry(0.75,0.75,2,20),linerMat,null);const roll2=mesh(new THREE.CylinderGeometry(0.75,0.75,2,20),linerMat,null);roll2.visible=false;
+const chorizo=mesh(new THREE.BoxGeometry(1,0.18,2),linerMat,null);// lonja de 2 m de ancho, plegada en acordeón
+// bolsas blancas de rafia con lastre (~40) sobre toda la lona, antes de levantar las paredes
+const ballast=new THREE.Group();scene.add(ballast);
+{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#ecebe4';x.fillRect(0,0,64,64);x.strokeStyle='rgba(150,150,140,.35)';for(let i=0;i<64;i+=3){x.beginPath();x.moveTo(i,0);x.lineTo(i,64);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(64,i);x.stroke()}
+ const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;const bm=M(0xffffff,{map:tx,roughness:.9});const bg=new THREE.BoxGeometry(0.6,0.2,0.4);
+ [[4.5,6],[9.5,10],[14.5,12],[18.3,12]].forEach(([r,n],ri)=>{for(let i=0;i<n;i++){const a=i/n*Math.PI*2+ri*0.37;const b=new THREE.Mesh(bg,bm);b.position.set(Math.cos(a)*r,0.47,Math.sin(a)*r);b.rotation.y=-a+((i*7)%5-2)*0.3;b.castShadow=true;b.visible=false;ballast.add(b)}})}
+const ties=new THREE.Group();scene.add(ties);
+{const rod=new THREE.Mesh(new THREE.TorusGeometry(R+0.2,0.025,6,240),M(0x777777,{metalness:.8}));rod.rotation.x=Math.PI/2;rod.position.y=PH-0.4;scene.add(rod);rod.castShadow=true;// varilla horizontal exterior a 40 cm del borde
+ const tm=new THREE.MeshStandardMaterial({color:0xe8e0c0,roughness:.9});const nT=Math.round(2*Math.PI*R);// una cinta cada ~1 m
+ for(let i=0;i<nT;i++){const a=i/nT*Math.PI*2;const c=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.42,0.06),tm);c.position.set(Math.cos(a)*(R+0.17),PH-0.2,Math.sin(a)*(R+0.17));c.rotation.y=-a;ties.add(c)}}
+const water=new THREE.Mesh(new THREE.CircleGeometry(R-0.3,96),new THREE.MeshStandardMaterial({color:0x2c6f8f,roughness:.08,metalness:.2,transparent:true,opacity:.92}));water.rotation.x=-Math.PI/2;scene.add(water);
+// cuello de cisne conectado a la layflat que viene del campo
+const GA=th(10);
+// escalera de acceso al tanque (torre naranja con plataforma y escalera con barandas)
+const LADA=th(16),LPA=th(16)+0.42,LRF=R+1.25,LRP=R+10;
+const stair=new THREE.Group();scene.add(stair);
+{const om=M(0xf08a1c,{metalness:.35,roughness:.45});const b=(w,h,d,x,y,z,rx=0)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),om,[x,y,z],stair);m.rotation.x=rx;return m};
+ [[-0.55,-0.6],[0.55,-0.6],[-0.55,0.6],[0.55,0.6]].forEach(([x,z])=>b(0.08,3.0,0.08,x,1.5,z));
+ b(1.25,0.07,1.35,0,3.0,0);[0.9,1.9].forEach(y=>{b(1.1,0.05,0.05,0,y,-0.6);b(1.1,0.05,0.05,0,y,0.6);b(0.05,0.05,1.2,-0.55,y,0);b(0.05,0.05,1.2,0.55,y,0)});
+ [-0.62,0.62].forEach(x=>{b(0.05,1.0,0.05,x,3.5,-0.62);b(0.05,1.0,0.05,x,3.5,0.62)});b(0.05,0.05,1.3,0.62,4.0,0);b(1.25,0.05,0.05,0,4.0,-0.62);
+ const L=Math.hypot(3.0,3.6),ang=Math.atan2(3.0,3.6);[-0.45,0.45].forEach(x=>{b(0.07,0.18,L,x,1.5,2.4,ang);b(0.05,0.05,L,x,2.45,2.4,ang);[0.4,1.4,2.4,3.4].forEach(zz=>b(0.05,0.95,0.05,x,0.55+zz*3.0/3.6,0.6+zz))});
+ for(let i=0;i<10;i++){const zz=0.75+i*0.34;b(0.86,0.04,0.24,0,3.0-(zz-0.6)*3.0/3.6,zz)}}
+stair.visible=false;
+const goose=new THREE.Group();scene.add(goose);goose.rotation.y=-GA;
+{const gm=M(0x585e63,{metalness:.5});
+ const tube=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[R+3,0.4,0],[R+1.6,0.45,0],[R+0.9,1.5,0],[R+0.6,3.4,0],[R-0.2,3.7,0],[R-0.9,3.1,0]].map(a=>v3(...a))),40,0.2,10),gm);tube.castShadow=true;goose.add(tube);
+ const cp=mesh(new THREE.TorusGeometry(0.28,0.07,8,20),M(0xc94a22),[R+3,0.4,0],goose);cp.rotation.y=Math.PI/2;
+ const pts=[];for(let i=0;i<=40;i++){const s=i/40;pts.push(v3(R+3+s*120,0.22,Math.sin(s*7)*4*s))}
+ const lay=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),160,0.32,10),M(0x17191b,{roughness:.5}));lay.scale.y=1;lay.castShadow=true;goose.add(lay);
+ lay.geometry.scale(1,0.55,1)}
+const stream=mesh(new THREE.CylinderGeometry(0.16,0.28,2.8,12,1,true),new THREE.MeshStandardMaterial({color:0xcfe8f5,transparent:true,opacity:.75,emissive:0x8ab8d0,emissiveIntensity:.3}),null,scene,false);
+
+// ---------- etiquetas ----------
+const labels=$('labels');const L={};const lab=(k,t)=>{const e=document.createElement('div');e.className='lbl';e.textContent=t;labels.appendChild(e);L[k]={e,p:new THREE.Vector3()}};
+lab('th','Manipulador telescópico');lab('tr','Carretón');lab('hc','Hidrogrúa');lab('suc','Marca de succión');lab('lay','Layflat desde el campo');
+
+// ---------- utilidades de pose ----------
+function stairPose(eu){if(eu<0.24)return{a:LPA,r:LRP,y:0};if(eu<0.8){const f=ss(seg(eu,0.24,0.8));return{a:lerp(LPA,LADA,f),r:lerp(LRP,LRF,f),y:1.2*Math.sin(Math.PI*f)+0.3}}if(eu<0.86)return{a:LADA,r:LRF,y:0.3*(1-ss(seg(eu,0.8,0.86)))};return{a:LADA,r:LRF,y:0}}
+function placeStair(t){stair.visible=t>=T.bolt[0];if(!stair.visible)return;const P=t<T.esc[0]?stairPose(0):stairPose(seg(t,...T.esc));const [x,z]=polar(P.a,P.r);stair.position.set(x,P.y,z);stair.rotation.set(0,-P.a,0);stair.updateMatrixWorld()}
+const dummy=new THREE.Object3D();
+function poseOf(fn){fn(dummy);dummy.updateMatrixWorld();return{p:dummy.position.clone(),q:dummy.quaternion.clone()}}
+function applyPose(o,A,B,f,arc=0){o.position.lerpVectors(A.p,B.p,f);o.position.y+=Math.sin(Math.PI*f)*arc;o.quaternion.slerpQuaternions(A.q,B.q,f)}
+
+// ---------- estado en función del tiempo ----------
+const camGoal={t:v3(0,1,0),e:v3(-38,34,48)};
+function update(t){
+  const ch=chapOf(t);placeStair(t);
+  // marcado
+  const um=seg(t,...T.mark);paintArc(ss(seg(um,0.2,0.85)));
+  const ra=TS+Math.PI*2*ss(seg(um,0.2,0.85));rope.visible=um>0.15&&um<0.9;rope.geometry.setFromPoints([v3(0,0.3,0),v3(Math.cos(ra)*R,0.3,Math.sin(ra)*R)]);
+  sucMark.visible=um>0.9;
+  // tractor + carretón: ingresa por el acceso sur, se estaciona DENTRO de la locación (no sobre el camino), descarga y se retira por el acceso norte
+  {const ua=seg(t,...T.arrive);const vis=t>=T.arrive[0]&&t<EXT1();trailer.visible=tractor.visible=vis;
+   if(t<T.dist[1]+1.5){rig(ARR,ARL,1-Math.pow(1-seg(ua,0,0.7),2.2))}
+   else{rig(EXI,EXL,Math.pow(seg(t,EXT0(),EXT1()),1.8))}
+   L.tr.p.copy(trailer.position).add(v3(0,4,0));L.tr.e.hidden=!trailer.visible;
+   trailer.updateMatrixWorld()}
+  cones.visible=t>T.arrive[0]+(T.arrive[1]-T.arrive[0])*0.75&&t<T.dist[1]+1.2;
+  // placas
+  let placed=0,active=-1,au=0,distK=-1,du=0;
+  for(let k=0;k<N;k++){const p=plates[k];const a=th(k);const slot=loadSlot(N-1-k);
+    load[N-1-k].visible=t<DS[k][0]+dD(k)*0.2;
+    const ak=k<LAST?T['p'+k]:T.close;
+    if(t<DS[k][0]+dD(k)*0.2){p.visible=false;continue}
+    p.visible=true;
+    if(t<DS[k][1]){distK=k;du=seg(t,...DS[k]);
+      const A=poseOf(d=>{d.position.copy(trailer.localToWorld(slot.clone().add(v3(0,0.06,0))));d.quaternion.copy(trailer.quaternion);d.rotateY(Math.PI/2);d.rotateZ(-Math.PI/2);d.translateX(-0.0)});
+      const B=poseOf(d=>setPlatePile(d,a,0));
+      const f=du<0.25?0:du>0.8?1:ss((du-0.25)/0.55);applyPose(p,A,B,f,4.5);if(du>0.2&&du<0.85)p.position.y+=1.2*ss(seg(du,0.2,0.3))*(1-ss(seg(du,0.75,0.85)));continue}
+    if(t<ak[0]){setPlatePile(p,a,0);continue}
+    if(t>=ak[1]){setPlateFinal(p,a);placed++;continue}
+    active=k;au=seg(t,...ak);
+    if(au<0.25)setPlatePile(p,a,0);
+    else if(au<0.45){const f=ss(seg(au,0.25,0.45));setPlateFinal(p,a,f*0.6,RP,-Math.PI/2*(1-f))}
+    else if(au<0.6){const f=ss(seg(au,0.45,0.6));setPlateFinal(p,a,0.6+f*0.6,lerp(RP,R,f))}
+    else if(au<0.72){const f=ss(seg(au,0.6,0.72));setPlateFinal(p,a,1.2*(1-f),R)}
+    else setPlateFinal(p,a);
+    if(au>=0.72)placed++}
+  $('pc').textContent=placed+' / 22';
+  // estabilizadores de la primera placa
+  const bu=seg(t,...T.bolt);
+  stab.visible=t>T.p0[0]+(T.p0[1]-T.p0[0])*0.74&&t<T.close[1]-0.3;
+  // bulones: 3 de agarre al colocar cada placa; bulonado completo con el anillo cerrado
+  const setAt=k=>{const ak=k<LAST?T['p'+k]:T.close;return ak[0]+(ak[1]-ak[0])*0.8};
+  const bj=Math.floor(bu*N*1.0);
+  bolts.forEach((g,k)=>{const k2=(k+1)%N;const tj=Math.max(setAt(k),setAt(k2));g.visible=t>tj;
+    const glow=(t>tj&&t<tj+1.2)?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.6)});
+  boltsFull.forEach((g,k)=>{g.visible=t>T.bolt[0]&&(bu>=1||k<bj||(k===bj&&bu*N-bj>0.5));const glow=k===bj&&bu<1?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.2)});
+  wedges.forEach((w,k)=>w.visible=t>T.bolt[0]&&(bu>=1||k<bj));cable.visible=t>T.bolt[0]&&bu>0.95||t>=T.bolt[1];
+  // manipulador
+  const lu=seg(t,...T.liner);
+  const teleVis=t>=T.arrive[0]+(T.arrive[1]-T.arrive[0])*0.8;[tele,boomA,boomB,liftCyl,hookPlate,hookBlock,hook,hookCable].forEach(o=>o.visible=teleVis);
+  let ka=active>=0?active:(t<asmStart?0:(t<T.close[0]?LAST-1:LAST));
+  {let ang,loaded=false,load3=null,lift=0;
+   const trailerAng=Math.atan2(trailer.position.z,trailer.position.x);
+   if(distK>=0){const a=th(distK);const goA=trailerAng,goB=a;
+     ang=du<0.25?lerp(distK?th(distK-1):goA,goA,ss(du/0.25)):du<0.8?lerp(goA,goB,ss((du-0.25)/0.55)):goB;
+     loaded=du>0.12&&du<0.92;load3=plates[distK]}
+   else if(t<asmStart){ang=trailerAng-0.45}
+   else{ang=th(ka);if(active>=0&&au<0.15){const prev=ka===LAST?th(LAST-1):th(Math.max(0,ka-1));ang=lerp(prev,th(ka),ss(au/0.15))}
+     if(t>T['p'+(LAST-1)][1]&&t<T.close[0])ang=th(LAST-1)+ss(seg(t,T['p'+(LAST-1)][1],T['p'+(LAST-1)][1]+3))*(DT);
+     if(t>T.close[1])ang=th(LAST)+0.35;
+     loaded=active>=0&&au>=0.18&&au<0.86;load3=active>=0?plates[active]:null}
+   let RR=distK>=0?RTH-0.5:RTH;
+   const inLiner=t>=T.liner[0]&&lu<0.5;
+   const eu=seg(t,...T.esc),inEsc=t>=T.esc[0]&&t<T.esc[1];
+   if(inEsc){const L0=stairPose(eu);ang=eu<0.15?lerp(th(LAST)+0.35,LPA,ss(eu/0.15)):L0.a;RR=eu<0.12?RTH:eu<0.86?lerp(RTH,L0.r+5.2,ss(seg(eu,0.12,0.2))):lerp(L0.r+5.2,RTH,ss(seg(eu,0.88,1)));loaded=false;load3=null}
+   if(inLiner){ang=th(LAST);RR=lu<0.1?RTH:lu<0.3?lerp(RTH,5,ss(seg(lu,0.1,0.3))):lu<0.36?5:lerp(5,RTH,ss(seg(lu,0.36,0.5)));loaded=false;load3=null}const [x,z]=polar(ang,RR);tele.position.set(x,0,z);tele.rotation.y=-ang+Math.PI/2;tele.updateMatrixWorld();
+   // resguardo físico: el manipulador nunca invade el carretón ni la zona de conos (separación mínima 6 m)
+   if(trailer.visible){const lp=trailer.worldToLocal(tele.position.clone());const dx=Math.max(0,Math.abs(lp.x)-1.3-1.6),dz=Math.max(0,lp.z>3?lp.z-3-3:(lp.z<-12?-12-lp.z-3:0));
+     if(dx<6&&dz<6){const push=6-dx;const dir=new THREE.Vector3(Math.sign(lp.x)||-1,0,0).applyQuaternion(trailer.quaternion);tele.position.addScaledVector(dir,push);tele.updateMatrixWorld()}}
+   {const ax=LX;roll.rotation.set(0,-ax+Math.PI/2,Math.PI/2);roll2.rotation.copy(roll.rotation);
+    if(t<T.liner[0]){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75,rz);roll.visible=t>T.suc[0];roll.scale.set(1,1,1)}
+    else if(lu<0.08){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75+ss(seg(lu,0.05,0.08))*0.9,rz);roll.visible=true}
+    else if(lu<0.36){const c=tele.localToWorld(v3(0,0,-5.0));const down=ss(seg(lu,0.3,0.36));roll.position.set(c.x,1.65-down*0.9,c.z);roll.visible=true}
+    else{// se desenrolla desde el centro hacia ambos extremos: dos medios rollos que se alejan y se achican
+      const cu=ss(seg(lu,0.38,0.55)),d=cu*(R-1.6),sc=Math.max(0.25,0.72*(1-cu)+0.25);const dir=v3(Math.cos(LX),0,Math.sin(LX));
+      roll.visible=roll2.visible=lu<0.56;roll.scale.set(sc,1,sc);roll2.scale.set(sc,1,sc);
+      roll.position.copy(dir).multiplyScalar(d).setY(0.36+0.75*sc);roll2.position.copy(dir).multiplyScalar(-d).setY(0.36+0.75*sc)}}
+   if(lu<0.36)roll2.visible=false;
+   const piv=tele.localToWorld(v3(0.55,2.05,2.3));let hookP;
+   const stabDown=loaded?1:0;outr.forEach(o=>o.position.y=0.95-0.0*stabDown);outr.forEach(o=>o.scale.y=loaded?1.0:0.35);
+   if(loaded&&load3){load3.updateMatrixWorld();const top=load3.localToWorld(v3(0.05,PH,0));const lugs=[load3.localToWorld(v3(0.05,PH+0.08,-1.8)),load3.localToWorld(v3(0.05,PH+0.08,1.8))];
+     const uu=distK>=0?du:au;const up=distK>=0?(uu<0.2?ss(seg(uu,0.12,0.2)):uu>0.85?1-ss(seg(uu,0.85,0.92)):1):(uu<0.25?ss(seg(uu,0.18,0.25)):uu>0.8?1-ss(seg(uu,0.8,0.86)):1);
+     const mid=lugs[0].clone().lerp(lugs[1],0.5);hookP=mid.clone().add(v3(0,2.3*up+0.4,0));slings.forEach((s,i)=>{s.visible=up>0.5;aimY(s,hookP,lugs[i])})}
+   else if(inEsc&&eu>0.18&&eu<0.86){const top=stair.localToWorld(v3(0,4.05,0));const up=ss(seg(eu,0.18,0.24))*(1-ss(seg(eu,0.8,0.86)));hookP=top.clone().add(v3(0,0.4+1.6*up,0));[stair.localToWorld(v3(0.6,4.0,-0.6)),stair.localToWorld(v3(-0.6,4.0,0.6))].forEach((e,i)=>{slings[i].visible=true;aimY(slings[i],hookP,e)})}
+   else if(inLiner&&lu>0.06&&lu<0.37){const rp=roll.position;const ax=v3(Math.cos(LX),0,Math.sin(LX));hookP=rp.clone().add(v3(0,1.6,0));[rp.clone().addScaledVector(ax,2.4),rp.clone().addScaledVector(ax,-2.4)].forEach((e,i)=>{slings[i].visible=true;aimY(slings[i],hookP,e.add(v3(0,0.7,0)))})}
+   else{slings.forEach(s=>s.visible=false);hookP=tele.localToWorld(v3(0,4.2,-3.6))}
+   const tip=hookP.clone().add(v3(0,1.7,0));const dl=tip.distanceTo(piv);const mid=piv.clone().lerp(tip,Math.min(0.58,5.2/dl));
+   aim(boomA,piv,mid);aim(boomB,mid,tip);aim(liftCyl,tele.localToWorld(v3(0.55,1.4,-0.6)),piv.clone().lerp(tip,Math.min(0.3,2.6/dl)));
+   hookPlate.position.copy(tip).add(v3(0,-0.1,0));hookPlate.lookAt(piv.x,hookPlate.position.y,piv.z);
+   hookBlock.position.copy(hookP).add(v3(0,0.35,0));hook.position.copy(hookP);hookCable.geometry.setFromPoints([tip,hookP.clone().add(v3(0,0.6,0))]);
+   excl.visible=(loaded&&(distK>=0?du>0.15&&du<0.88:au>0.22&&au<0.75))||(inLiner&&lu>0.06&&lu<0.36)||(inEsc&&eu>0.2&&eu<0.84);const lp=load3?load3.position:(inEsc?stair.position:tele.position);excl.position.set((tele.position.x+lp.x)/2,0.05,(tele.position.z+lp.z)/2);
+   L.th.p.copy(tele.position).add(v3(0,4.6,0));L.th.e.hidden=!teleVis}
+  hcrane.visible=crA.visible=crB.visible=crCyl.visible=crCable.visible=false;L.hc.e.hidden=true;
+  // chorizo y apertura de la lona
+  {const cu=ss(seg(lu,0.38,0.55));chorizo.visible=lu>0.38&&lu<0.6;chorizo.rotation.set(0,-LX,0);chorizo.scale.set(Math.max(0.01,cu*2*(R-1.6)),1,1);chorizo.position.set(0,0.46,0);
+   const op=ss(seg(lu,0.55,0.70));linerFloor.visible=lu>0.55;{const sy=0.25+0.75*op;linerFloor.scale.set(1,sy,Math.max(2/(2*R),op));linerFloor.position.y=0.36*(1-sy)+0.01}
+   linerWall.visible=lu>0.80;const wu=ss(seg(lu,0.80,0.93));linerWall.scale.y=Math.max(0.001,wu);linerWall.position.y=1.6+wu*(PH-1.6)/2;linerLip.visible=lu>0.92;ties.visible=lu>0.92;
+   ballast.children.forEach((b,i)=>b.visible=t>T.liner[0]&&lu>0.70+0.095*i/ballast.children.length);
+   // sector del cierre: lona media baja hasta colocar la última placa; después se sube con sogas desde afuera
+   const cl=seg(t,...T.close);const fu2=t<T.close[0]?0:ss(seg(cl,0.84,1));const fh=lerp(0.35,PH-1.5,fu2);
+   const done=t>=T.close[0]&&fu2>=0.999;const wh=(PH-1.5)*linerWall.scale.y;
+   flap.visible=lu>0.80&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
+   linerWall.geometry=done?wallFull:wallPart;linerLip.geometry=done?lipFull:lipPart;
+   const ropeOn=t>=T.close[0]&&cl>0.8&&cl<1;flapRopes.forEach((r,i)=>{r.visible=ropeOn;if(ropeOn){const a=th(LAST)+(i?1:-1)*(DT/2+2/R)*0.9;const [x1,z1]=polar(a,R-0.3);const [x2,z2]=polar(a,R+5);r.geometry.setFromPoints([v3(x1,1.55+fh,z1),v3(x2,1.2,z2)])}})}
+  // personas dentro del tanque (control de seguridad)
+  {let n=0;for(const k of['sen','sog','int','ext','asi']){const p=crew[k].position;if(Math.hypot(p.x,p.z)<R-0.4&&t>T.sand[0])n++}
+   const el=$('inside');el.textContent=n;el.style.color=n>0?(t>=T.close[0]?'#ef5350':'#f2b33d'):'#4fd18b'}
+  // cuadrilla
+  {const a=th(ka);const P=(da,r)=>polar(a+da/R,r);let q;const working=t>=T.arrive[1];
+   ['m1','m2'].forEach(k=>crew[k].visible=t<T.arrive[0]+2);
+   if(t<T.mark[1]){const [x,z]=polar(ra,R+0.4);put(crew.m1,x,z,faceTo(x,z,0,0)+Math.PI);put(crew.m2,0.6,0.4,faceTo(0.6,0.4,x,z));['sen','sog','int','ext','asi'].forEach((k,i)=>put(crew[k],-6+i*1.4,-R-8,0))}
+   else if(!working){['sen','sog','int','ext','asi'].forEach((k,i)=>put(crew[k],-6+i*1.4,-R-8,0));const [x,z]=polar(AP+0.12,R+4);put(crew.sen,x,z,faceTo(x,z,trailer.position.x,trailer.position.z))}
+   else{const tgt=distK>=0?plates[distK].position:(active>=0?plates[active].position:tele.position);
+     if(distK>=0){const pa=Math.atan2(plates[distK].position.z,plates[distK].position.x);const [sx,sz]=polar(pa-0.5,R+13);put(crew.sen,sx,sz,faceTo(sx,sz,tele.position.x,tele.position.z));
+       const [gx,gz]=polar(pa+0.3,R-2.5);put(crew.sog,gx,gz,faceTo(gx,gz,tgt.x,tgt.z));[['int',0.42],['ext',0.48],['asi',0.54]].forEach(([k,o])=>{const [xx,zz]=polar(pa+o,R-5);put(crew[k],xx,zz,faceTo(xx,zz,tgt.x,tgt.z))})}
+     else{// armado: esperan fuera de la zona de exclusión y se acercan con la placa a ras del piso
+       const jw=ss(seg(au,0.6,0.68))*(1-ss(seg(au,0.96,1)));const atJ=active>=0&&active>0;
+       const mix=(A,B)=>[lerp(A[0],B[0],jw),lerp(A[1],B[1],jw)];
+       q=P(-9,R+11);put(crew.sen,q[0],q[1],faceTo(q[0],q[1],tele.position.x,tele.position.z));
+       q=P(8.5,R+3);put(crew.sog,q[0],q[1],faceTo(q[0],q[1],tgt.x,tgt.z));
+       const jd=active===0?3.2:-3.1;// lado de la unión (la primera placa: extremo libre)
+       q=mix(P(-10,R+2.5),P(jd,active===LAST?R+1.6:R-1.0));put(crew.int,q[0],q[1],faceTo(q[0],q[1],0,0)+Math.PI);
+       q=mix(P(-10.5,R+2),P(jd-0.8,R+1.4));put(crew.ext,q[0],q[1],faceTo(q[0],q[1],0,0));
+       q=mix(P(-11.5,R+3),P(jd,R+1.15));put(crew.asi,q[0],q[1],faceTo(q[0],q[1],0,0));
+       const climb=active>0?ss(seg(au,0.72,0.76))*(1-ss(seg(au,0.94,0.98))):0;crew.asi.position.y=climb*1.12;
+       gun.visible=false}
+     poles.forEach(p=>p.visible=false);ladder2.visible=false;
+     if(t>T['p'+(LAST-1)][1]&&t<T.close[0]){const ga=th(LAST);
+       // adentro solo cuando el manipulador ya salió (lu>0.52) y hasta que la lona está arriba (lu<0.93); salen por el panel abierto
+       const inF=ss(seg(lu,0.52,0.6))*(1-ss(seg(lu,0.92,0.99)));const wall=lu>0.74&&lu<0.93;
+       const sweep=wall?ss(seg(lu,0.74,0.9)):0;
+       [['int',-1],['asi',1]].forEach(([k,sg],i)=>{const aIn=ga+sg*(0.25+sweep*1.1),rIn=R-1.8;const aOut=ga+sg*0.32,rOut=R+5;
+         const [xi,zi]=polar(aIn,rIn),[xo,zo]=polar(aOut,rOut);const [xg,zg]=polar(ga,R);
+         let x,z;if(inF<=0.001){x=xo;z=zo}else if(inF>=0.999){x=xi;z=zi}else{const f=inF;const mid=[xg,zg];if(f<0.5){x=lerp(xo,mid[0],f*2);z=lerp(zo,mid[1],f*2)}else{x=lerp(mid[0],xi,(f-0.5)*2);z=lerp(mid[1],zi,(f-0.5)*2)}}
+         put(crew[k],x,z,faceTo(x,z,x*2,z*2));
+         if(wall){const p=poles[i];p.visible=true;const hand=crew[k].position.clone().add(v3(0,1.3,0));const [wx,wz]=polar(aIn,R-0.3);aimY(p,hand,v3(wx,2.9,wz));p.scale.y=Math.min(p.scale.y,2)}});
+       // afuera: dos operadores en escalera burrito atan cada extremo al anillo exterior
+       const tieA=wall?th(LAST)+0.3+sweep*1.1:th(LAST)+0.36,tieB=wall?th(LAST)-0.3-sweep*1.1:th(LAST)-0.36;
+       [['ext',tieA,ladder],['sog',tieB,ladder2]].forEach(([k,aa,ld])=>{const [x,z]=polar(aa,R+1.15);put(crew[k],x,z,faceTo(x,z,0,0));if(wall){crew[k].position.y=1.12;ld.visible=true;const [lx,lz]=polar(aa,R+0.75);ld.position.set(lx,0,lz);ld.rotation.set(0,-aa+Math.PI/2,0)}});
+       const [sx,sz]=polar(ga+0.5,R+11);put(crew.sen,sx,sz,faceTo(sx,sz,tele.position.x,tele.position.z))}
+     if(t>=T.close[0]&&t<T.bolt[0]){const cl=seg(t,...T.close);// nadie adentro al cerrar; luego se tira la soga desde afuera
+       const ga=th(LAST);(cl<0.58||cl>0.97?[['int',-1,4.5],['asi',1,4.5]]:[['int',-1,4.5]]).forEach(([k,sg,dr])=>{const [x,z]=polar(ga+sg*(cl>0.8?DT/2+2/R:0.62),R+dr);put(crew[k],x,z,faceTo(x,z,0,0))});
+       if(cl<0.8){[['ext',-0.75,6],['sog',0.75,6]].forEach(([k,o,dr])=>{const [x,z]=polar(ga+o,R+dr);put(crew[k],x,z,faceTo(x,z,0,0))})}}
+     if(t>=T.bolt[0]&&t<T.fill[0]){const ja=th(Math.min(N-1,bj))+DT/2;const [lx,lz]=polar(ja,R+1.15);put(crew.asi,lx,lz,faceTo(lx,lz,0,0)+0);crew.asi.position.y=1.12;
+       const [ex,ez]=polar(ja-0.05,R+2.2);put(crew.ext,ex,ez,faceTo(ex,ez,lx,lz));const [ix,iz]=polar(ja+0.07,R+2.4);put(crew.int,ix,iz,faceTo(ix,iz,0,0));
+       gun.visible=bu<1;gun.position.copy(crew.asi.position).add(v3(0,1.25+Math.sin(t*9)*0.25,0)).add(v3(-Math.cos(ja)*0.35,0,-Math.sin(ja)*0.35))}else if(t>=T.fill[0]){gun.visible=false;crew.asi.position.y=0}}
+   if(t>=T.esc[0]&&t<T.esc[1]){const eu=seg(t,...T.esc);gun.visible=false;crew.asi.position.y=0;
+     let q=polar(LADA+0.75,R+15);put(crew.sen,q[0],q[1],faceTo(q[0],q[1],tele.position.x,tele.position.z));
+     const near=eu>0.87;[['ext',-0.5],['asi',-0.62],['int',-0.74],['sog',0.95]].forEach(([k,o],i)=>{const qq=near&&k!=='sog'?polar(LADA+0.14+i*0.11,R+3.4):polar(LADA+o,R+12);put(crew[k],qq[0],qq[1],faceTo(qq[0],qq[1],stair.position.x,stair.position.z))})}
+   crew.sen.userData.arms[1].rotation.z=(working||t>T.mark[1])?2.4+Math.sin(t*4)*0.5:0;crew.sen.userData.arms[0].rotation.z=(working||t>T.mark[1])?-0.4:0;
+   {let ja=null;if(active>0)ja=th(active)-DT/2;else if(t>=T.bolt[0]&&t<T.esc[0])ja=th(Math.min(N-1,bj))+DT/2;
+    if(ja!==null){const near=active>0?ss(seg(au,0.62,0.7)):1;const [lx,lz]=polar(ja-(1-near)*0.4,R+0.75);ladder.position.set(lx,0,lz);ladder.rotation.set(0,-ja+Math.PI/2,0);ladder.visible=true}
+    else ladder.visible=false}
+   let corner=null;if(distK>=0&&du>0.2&&du<0.85)corner=plates[distK].localToWorld(v3(0.05,0.3,2.8));else if(active>=0&&au>0.2&&au<0.8)corner=plates[active].localToWorld(v3(0.05,0.3,2.8));
+   sogRope.visible=!!corner;if(corner){sogRope.geometry.setFromPoints([crew.sog.position.clone().add(v3(0,1.2,0)),corner]);crew.sog.userData.arms[1].rotation.x=-1.0}else crew.sog.userData.arms[1].rotation.x=0}
+  // arena y taludes
+  const su=seg(t,...T.sand);sand.visible=su>0.15;sand.scale.y=Math.max(0.001,ss(seg(su,0.15,0.9)));grav.visible=su>0.5;grav.scale.y=Math.max(0.001,ss(seg(su,0.5,1)));
+  sandPiles.forEach((m,i)=>{m.visible=t>T.sand[0]&&su<0.6;m.scale.setScalar(Math.max(0.001,1-ss(seg(su,0.1+i*0.08,0.55))))});
+  loader.visible=su>0.05&&su<0.95;{const a=su*7;loader.position.set(Math.cos(a)*10,0,Math.sin(a)*10);loader.rotation.y=-a}
+  // succión
+  const cu=seg(t,...T.suc);trench.visible=t>T.sand[0]+(T.sand[1]-T.sand[0])*0.8&&cu<0.85;sucGroup.visible=cu>0.1;sucGroup.position.y=1.2*(1-ss(seg(cu,0.1,0.55)));bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=pst.visible&&Math.floor(t*2+i)%2===0);
+  // llenado
+  const wu=seg(t,...T.fill);water.visible=wu>0.05;water.position.y=0.4+ss(seg(wu,0.05,1))*2.1;goose.visible=t>T.close[1]-2;stream.visible=wu>0.05&&wu<1;
+  {const [x,z]=polar(GA,R-0.9);stream.position.set(x,(3.1+water.position.y)/2,z);stream.scale.y=Math.max(0.1,(3.1-water.position.y)/2.8)}
+  {const [x,z]=polar(GA,R+18);L.lay.p.set(x,1.5,z);L.lay.e.hidden=!(t>T.fill[0])}
+  L.suc.p.set(Math.cos(TS)*R,1.2,Math.sin(TS)*R);L.suc.e.hidden=!(t>T.mark[0]+8&&t<T.dist[1]);
+  // cámara automática
+  const cn=CH[ch].k;const a0=th(ka);
+  if(cn==='mark'){camGoal.t.set(0,0,0);camGoal.e.set(-30,40,40)}
+  else if(cn==='arrive'){camGoal.t.copy(trailer.position).add(v3(0,1,0));camGoal.e.copy(trailer.position).add(v3(-22,14,-18))}
+  else if(cn==='dist'){const p=distK>=0?plates[distK].position:trailer.position;camGoal.t.set(p.x*0.6+tele.position.x*0.4,2,p.z*0.6+tele.position.z*0.4);const aa=Math.atan2(p.z,p.x);const [ex,ez]=polar(aa-0.35,R+44);camGoal.e.set(ex,26,ez)}
+  else if(cn==='bolt'){const ja=th(Math.min(N-1,bj))+DT/2;const [x,z]=polar(ja,R+1);camGoal.t.set(x,1.5,z);const [ex,ez]=polar(ja-0.25,R+13);camGoal.e.set(ex,6.5,ez)}
+  else if(cn==='esc'){const eu=seg(time,...T.esc);const P=stairPose(eu);const [x,z]=polar(P.a,P.r);camGoal.t.set(x,2,z);const [ex,ez]=polar(P.a-0.45,R+24);camGoal.e.set(ex,13,ez)}
+  else if(cn==='suc'){const [x,z]=polar(TS,R+1);camGoal.t.set(x,0.3,z);const [ex,ez]=polar(TS-0.3,R+10);camGoal.e.set(ex,7,ez)}
+  else if(cn==='p0'||cn==='close'){const [x,z]=polar(a0,R+4);camGoal.t.set(x,2,z);const [ex,ez]=polar(a0-0.55,R+30);camGoal.e.set(ex,17,ez)}
+  else if(cn==='liner'){const ga=th(LAST);const [ex,ez]=polar(ga+0.5,R+26);camGoal.t.set(0,0.5,0);camGoal.e.set(ex,24,ez)}
+  else if(cn==='fill'){const fu=seg(time,...T.fill);if(fu<0.55){const [x,z]=polar(TS,R+14);camGoal.t.set(x,1,z);const [ex,ez]=polar(TS-0.55,R+30);camGoal.e.set(ex,16,ez)}else{const [ex,ez]=polar(GA+0.9,R+34);camGoal.t.set(0,1,0);camGoal.e.set(ex,24,ez)}}
+  else {camGoal.t.set(0,1,0);camGoal.e.set(-36,30,44)}
+  return ch}
+
+// ---------- interfaz ----------
+const chapNav=$('chap');CH.forEach((c,i)=>{const b=document.createElement('button');b.textContent=c.t;b.onclick=()=>{time=T[c.k][0]+0.01;auto=true;$('cam').classList.add('on')};chapNav.appendChild(b)});
+let curCh=-1;function showCh(i){if(i===curCh)return;curCh=i;const c=CH[i];$('ph').innerHTML=c.h+`<small>${i+1} / ${CH.length}</small>`;$('steps').innerHTML=c.s.map(s=>`<li>${s}</li>`).join('');$('safe').textContent='⚠ '+c.w;[...chapNav.children].forEach((b,j)=>b.setAttribute('aria-current',String(j===i)))}
+let time=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,speed=2;
+const setPlayLbl=()=>$('play').textContent=playing?'❚❚ Pausa':(time>=TOT?'▶ Repetir':'▶ Reproducir');
+$('play').onclick=()=>{if(!playing&&time>=TOT)time=0;playing=!playing;setPlayLbl()};setPlayLbl();
+document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{speed=+b.dataset.sp;document.querySelectorAll('[data-sp]').forEach(x=>x.classList.toggle('on',x===b))});
+$('tl').oninput=e=>{time=e.target.value/1000*TOT};
+$('cam').onclick=()=>{auto=!auto;$('cam').classList.toggle('on',auto)};
+const fmtT=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;if(!w)return;if(canvas.width!==Math.round(w*renderer.getPixelRatio())||canvas.height!==Math.round(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}}
+const vv=new THREE.Vector3();
+function render(dt=0){const ch=update(time);showCh(ch);
+  if(auto){const k=Math.min(1,dt*1.6||1);controls.target.lerp(camGoal.t,k);camera.position.lerp(camGoal.e,k*0.8)}
+  controls.update();resize();renderer.render(scene,camera);
+  const W=canvas.clientWidth,H=canvas.clientHeight;for(const k in L){const l=L[k];if(l.e.hidden)continue;vv.copy(l.p).project(camera);if(vv.z>1||Math.abs(vv.x)>1.1||Math.abs(vv.y)>1.1){l.e.style.display='none';continue}l.e.style.display='';l.e.style.left=((vv.x+1)/2*W)+'px';l.e.style.top=((1-vv.y)/2*H)+'px'}
+  $('tl').value=Math.round(time/TOT*1000);$('tm').textContent=fmtT(time)+' / '+fmtT(TOT)}
+const clock=new THREE.Clock();
+function loop(){const dt=Math.min(0.05,clock.getDelta());if(playing){time+=dt*speed;if(time>=TOT){time=TOT;playing=false;setPlayLbl()}}render(dt);requestAnimationFrame(loop)}
+window.__cam=(t,e)=>{auto=false;controls.target.set(...t);camera.position.set(...e);render(0)};window.__mt=s=>{time=s;auto=true;playing=false;setPlayLbl();render(1)};
+loop();
+})();
+</script>
+
+</body>
+</html>
