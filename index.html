@@ -68,7 +68,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--water);outline-
   <div class="top">
     <div class="title glass"><h1>Montaje de tanque australiano</h1><p>22 placas de 6 × 3 m · manipulador telescópico con gancho y fajas · carretón · hidrogrúa · Lic. Víctor Javier Paredes</p></div>
     <nav class="chap glass" id="chap" aria-label="Etapas"></nav>
-    <div class="clk glass" aria-live="off"><div class="r1"><span class="d" id="cday">DÍA 1</span><span class="h" id="chr">07:30</span><span class="w" id="cnote"></span></div><div class="dbar" id="dbar"></div><div class="cnt"><span>Placas <b id="cpl">0/22</b></span><span>Bulones <b id="cbo">0/396</b></span><span>Horas-hombre <b id="chh">0</b></span><span id="cagua">Agua en cuello de cisne: <b>disponible</b></span></div></div>
+    <div class="clk glass" aria-live="off"><div class="r1"><span class="d" id="cday">DÍA 1</span><span class="h" id="chr">07:30</span><span class="w" id="cnote"></span></div><div class="dbar" id="dbar"></div><div class="cnt"><span>Placas <b id="cpl">0/22</b></span><span>Bulones <b id="cbo">0/396</b></span><span>Horas-hombre <b id="chh">0</b></span><span id="cagua">Agua en cuello de cisne: <b style="color:#9fb0bd">sin instalar</b></span></div></div>
   </div>
   <div id="stage"><canvas id="gl" aria-label="Animación 3D del montaje de un tanque australiano"></canvas><div id="night"></div><div id="labels"></div><div id="pz" class="glass" hidden></div></div>
   <section class="foot glass" aria-live="polite">
@@ -119,7 +119,7 @@ const KS=0.5;// segundos de animación (a 1×) por minuto real de obra
 add('mark',45*KS);add('arrive',30*KS);
 const dD=k=>75*KS/N;T.dist=[t0,0];const DS=[];for(let k=0;k<N;k++){DS.push([t0,t0+dD(k)]);t0+=dD(k)}T.dist[1]=t0;
 const asmStart=t0;const dA=k=>k<1?20*KS:10*KS;for(let k=0;k<LAST;k++)add('p'+k,dA(k));
-add('sand',15*KS);add('suc',15*KS);add('liner',195*KS);add('close',30*KS);add('bolt',285*KS);add('esc',8);add('fill',14);const TOT=t0;
+add('sand',15*KS);add('suc',40*KS);add('goose',26*KS);add('liner',195*KS);add('close',30*KS);add('bolt',285*KS);add('esc',8);add('fill',14);const TOT=t0;
 // ---------- cronograma real: dos jornadas ----------
 const SCH=[];let a0=0;
 const W=(ta,tb,c0,c1,day,note)=>{SCH.push({k:'w',a0,a1:a0+(tb-ta),t0:ta,t1:tb,c0,c1,day,note});a0+=tb-ta};
@@ -132,20 +132,24 @@ const P=(ts,c0,c1,day,lab,d)=>{SCH.push({k:'p',a0,a1:a0+d,t0:ts,t1:ts,c0,c1,day,
  P(T.p9[1],c,c+60,1,'Almuerzo (1 h)',6);c+=60;
  W(T.p10[0],T['p'+(LAST-1)][1],c,c+110,1);c+=110;
  P(T['p'+(LAST-1)][1],c,c+20,1,'Pausa de hidratación · mate (20 min)',4);c+=20;
- W(T.sand[0],T.suc[1],c,c+15,1,'Distribución de arena con retropala; la succión se hizo en paralelo durante el día');c+=15;
+ W(T.sand[0],T.sand[1],c,c+15,1,'Distribución de arena con retropala');c+=15;
+ W(T.suc[0],T.suc[1],c,c+40,1,'Succión: zanja de 40 cm con retropala, el manipulador baja la pipa con faja, la retro tapa y se retira');c+=40;
+ W(T.goose[0],T.goose[1],c,c+25,1,'Cuello de cisne: el manipulador lo posiciona con faja y se abulona a la placa con 3 bulones');c+=25;
  const LM=T.liner[0]+(T.liner[1]-T.liner[0])*0.38;
- W(T.liner[0],LM,c,c+30,1,'Último paso del día: el manipulador ingresa la lona y la deja en el centro');c+=30;
+ W(T.liner[0],LM,c,c+30,1,'Último paso del día: el manipulador ingresa la lona y la deja adentro, junto al panel abierto');c+=30;
  P(LM-0.05,c,c+15,1,'Fin de la jornada · orden y limpieza; la cuadrilla se retira en las camionetas',4);c+=15;
- P(LM-0.05,c,1440+410,1,'Noche · anillo con 3 bulones por unión, lona enrollada en el centro',7);c=1440+410;
+ P(LM-0.05,c,1440+410,1,'Noche · anillo con 3 bulones por unión, lona enrollada adentro junto al panel',7);c=1440+410;
  P(LM-0.05,c,1440+430,2,'La cuadrilla regresa en las camionetas (7:10)',3);c=430;
  P(LM-0.05,c,c+30,2,'Charla de seguridad · conteo de personal y control de viento',4);c+=30;
- W(LM,T.liner[1],c,c+165,2,'Solo con agua disponible en el cuello de cisne: sin agua no se desenrolla la lona');c+=165;
+ W(LM,T.liner[1],c,c+165,2,'Con agua disponible en el cuello de cisne se desenrolla la lona: sin agua no se abre');c+=165;
  P(T.liner[1],c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
  W(T.close[0],T.close[1],c,c+30,2);c+=30;
- P(T.close[1],c,c+60,2,'Almuerzo (1 h)',6);c+=60;
- const bm=(T.bolt[0]+T.bolt[1])/2;W(T.bolt[0],bm,c,c+142.5,2,'Abulonado con 2 equipos en paralelo, cada uno con su escalera burrito');c+=142.5;
- P(bm,c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
- W(bm,T.bolt[1],c,c+142.5,2,'Abulonado con 2 equipos en paralelo, cada uno con su escalera burrito');c+=142.5;
+ {const bd=T.bolt[1]-T.bolt[0],b1=T.bolt[0]+bd*105/285,b2=b1+bd*90/285,AB='Abulonado con 2 equipos en paralelo, cada uno con su escalera burrito';
+ W(T.bolt[0],b1,c,c+105,2,AB);c+=105;
+ P(b1,c,c+60,2,'Almuerzo (1 h)',6);c+=60;
+ W(b1,b2,c,c+90,2,AB);c+=90;
+ P(b2,c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
+ W(b2,T.bolt[1],c,c+90,2,AB);c+=90}
  W(T.esc[0],T.esc[1],c,c,2,'En simultáneo con el abulonado: no suma tiempo');
  P(T.fill[0]+0.01,c,c+15,2,'Fin del montaje (17:20) · orden y limpieza; la cuadrilla se retira en las camionetas',5);c+=15;
  W(T.fill[0]+0.01,T.fill[1],c,c+240,2,'Llenado: ~4 h a 860 m³/h, controlado por telemetría (fuera del tiempo de montaje)');c+=240;
@@ -162,8 +166,9 @@ const CH=[
  {k:'dist',t:'Descarga',h:'Descarga de placas una a una',s:['El manipulador con gancho y fajas toma cada placa del carretón.','La lleva suspendida y la deja junto a su posición sobre la circunferencia, en el sentido de armado.','La misma tarea puede hacerla la hidrogrúa; el procedimiento de izaje es el mismo.'],w:'La cuadrilla espera dentro del anillo marcado, lejos del recorrido de la carga: nadie bajo la placa suspendida ni dentro del radio de giro.'},
  {k:'p0',t:'Anillo',h:'Armado del anillo con manipulador',s:['Primera placa con estabilizadores clavados al piso en ambos extremos.','El manipulador iza la placa con gancho y dos fajas; el soguero, ubicado en el extremo libre de la placa, la lleva con la soga guía hasta la línea marcada sin entrar a la zona de exclusión.','La cuadrilla espera fuera de la zona de exclusión y se acerca recién cuando la placa está a ras del piso, en su posición.','Se arrima la escalera burrito y un operario coloca los 3 bulones de agarre inicial: superior, medio e inferior.'],w:'Nadie bajo la carga suspendida ni dentro del radio de giro. Nadie toca la placa con las manos mientras está colgada. Dotación mínima 5, recomendada 6.'},
  {k:'sand',t:'Arena',h:'Arena y taludes',s:['Durante el armado del anillo llegan 4 camiones batea de 22 m³: entran por el acceso sur, retroceden con banderillero por el panel abierto (donde va la última placa) y descargan adentro, lejos de la cuadrilla y del manipulador (5 viajes si hay rocas filosas).','Retropala: colchón de arena que protege la lona.','Talud interno a 45° con arena; talud externo a 45° con material grueso.','Zanjeo en la 5.ª placa, donde va la succión.'],w:'Retirar piedras: cualquier filo bajo la lona termina en pinchazo.'},
- {k:'suc',t:'Succión',h:'Succión (pipa) en la 5.ª placa, antes de la lona',s:['El caño se entierra bajo el nivel de platea y pasa por el borde inferior de la placa, trabado con cuña metálica.','Adentro, la boca queda al ras del piso, con malla antivórtice y sombrero bulonado sobre la brida.','Afuera: válvula de corte, derivación con brida ciega de inspección y segunda válvula; tipo lug, colocadas abiertas para centrar.','Nunca en la última placa: ese hueco queda libre para que entre el manipulador con la lona.'],w:'Un pegado apurado no pierde agua: chupa aire. El lastre con bolsas durante el curado es parte del procedimiento.'},
- {k:'liner',t:'Lona',h:'Lona: chorizo, apertura, izaje y atado',s:['Con el tanque vacío de personal, el manipulador entra por el panel abierto con la lona colgada del gancho, la deja en el medio y sale.','El rollo (2 m de ancho, eje perpendicular al diámetro) se desenrolla desde el centro hacia ambos extremos: queda una lonja de 2 m de pared a pared. Después se abren los pliegues de cada mitad hacia los costados.','Con la lona abierta y antes de levantar las paredes, se reparten unas 40 bolsas blancas de rafia con lastre sobre toda la superficie, para que el viento no la levante.','Dos operadores adentro levantan la lona con hisopos (palos de 2 m con punta redondeada, para no romperla).','Afuera, dos operadores en escalera burrito atan las cintas de la lona a la varilla horizontal exterior, a 40 cm del borde.','En el cierre la lona queda media baja: por ahí salen los dos de adentro.'],w:'El tanque queda sin un panel durante esta tarea: paso para el equipo y salida libre, sin espacio confinado. Nadie adentro mientras el manipulador circula.'},
+ {k:'suc',t:'Succión',h:'Succión (pipa) en la 5.ª placa, antes de la lona',s:['La retroexcavadora abre la zanja de 40 cm de profundidad de los dos lados de la 5.ª placa: primero afuera; después entra por el panel abierto y excava adentro. Sin la zanja interior la pipa no pasa.','El manipulador, con gancho y faja, baja la pipa armada a la zanja con la punta contra la placa; la retro se corre para que la carga no pase sobre ella.','Dos operadores la instalan: uno afuera la empuja de a tramos cortos y la enhebra por debajo de la placa; el otro, adentro, recibe la punta y coloca la malla antivórtice y el sombrero bulonado.','La retroexcavadora tapa la zanja interior, sale por el panel abierto, tapa la exterior y se retira: recién ahí entra la lona.','El caño se entierra bajo el nivel de platea y pasa por el borde inferior de la placa, trabado con cuña metálica.','Adentro, la boca queda al ras del piso, con malla antivórtice y sombrero bulonado sobre la brida.','Afuera: válvula de corte, derivación con brida ciega de inspección y segunda válvula; tipo lug, colocadas abiertas para centrar.','Nunca en la última placa: ese hueco queda libre para que entre el manipulador con la lona.'],w:'Un pegado apurado no pierde agua: chupa aire. El lastre con bolsas durante el curado es parte del procedimiento.'},
+ {k:'goose',t:'Cuello',h:'Cuello de cisne con manipulador',s:['El manipulador toma el cuello de cisne con gancho y faja y lo pasa por encima de la placa, sin rozar el borde.','Se posiciona apoyado sobre la placa y un operario, desde la escalera burrito, lo abulona con 3 bulones.','Se conecta la layflat que viene del campo: queda agua disponible para abrir la lona.','El manipulador vuelve al panel abierto para ingresar la lona.'],w:'Nadie bajo la carga suspendida ni entre el cuello y la placa al apoyarlo; señalero único a la vista del operador.'},
+ {k:'liner',t:'Lona',h:'Lona: chorizo, apertura, izaje y atado',s:['Con el tanque vacío de personal, el manipulador entra por el panel abierto con la lona colgada del gancho, la deja adentro junto al panel y sale.','Al día siguiente, con agua disponible en el cuello de cisne, el manipulador vuelve a enganchar el rollo (2 m de ancho) y lo desenrolla a lo largo, de pared a pared: queda una lonja de 2 m sobre el diámetro.','El operador deja el manipulador afuera y se suma: todo el personal que interviene (seis personas) abre los pliegues, primero hacia un lado y después hacia el otro.','Con la lona abierta y antes de levantar las paredes, se reparten unas 40 bolsas blancas de rafia con lastre sobre toda la superficie, para que el viento no la levante.','Un solo equipo de cuatro levanta la lona en forma secuencial y progresiva, de la placa 1 a la 21: dos adentro con hisopos (palos de 2 m con punta redondeada, para no romperla).','Los otros dos, afuera en escalera burrito, avanzan a la par y atan las cintas de la lona a la varilla horizontal exterior, a 40 cm del borde.','En el cierre la lona queda media baja: por ahí salen los dos de adentro.'],w:'El tanque queda sin un panel durante esta tarea: paso para el equipo y salida libre, sin espacio confinado. Nadie adentro mientras el manipulador circula.'},
  {k:'close',t:'Cierre',h:'Cierre del anillo y última lona',s:['Antes de izar: conteo de personal, nadie adentro del tanque.','El manipulador coloca la última placa; escalera burrito y 3 bulones de agarre en cada unión. Con el anillo cerrado se retiran los estabilizadores de la primera placa.','Con sogas atadas a 2 m de cada lado del cierre, desde afuera se termina de subir la lona sobre la última placa.'],w:'Nunca cerrar el anillo con una persona adentro: con el tanque cerrado no hay salida, y al llenar hay riesgo de ahogamiento. Señalero, soguero y nadie bajo la carga.'},
  {k:'bolt',t:'Abulonado',h:'Abulonado completo del anillo (2 equipos)',s:['Con el anillo cerrado, se colocan todos los bulones de cada unión.','El operario trabaja siempre desde la escalera burrito, unión por unión.','Pistola a batería para el aproche y el torque; control final por “sin luz” en la unión completa.','Cinta multipropósito del lado interno, cuñas y pines según fabricante, cable acerado con tensor.'],w:'Escalera burrito apoyada y estable en cada unión; nunca trepar por la placa ni trabajar desde el talud.'},
  {k:'esc',t:'Escalera',h:'Instalación de la escalera de acceso',s:['La escalera de acceso (torre con plataforma, escalera con barandas a ambos lados) se iza con el manipulador, gancho y fajas.','Se apoya contra la cara exterior de una placa, lejos de la succión, del cuello de cisne y del cierre.','El señalero guía la maniobra; la cuadrilla espera fuera de la zona de exclusión y se acerca recién con la escalera apoyada en el piso.','Se nivela, se fija y se verifica la baranda antes de habilitarla.'],w:'Nadie bajo la escalera suspendida ni dentro del radio de giro del manipulador. La escalera es el único acceso habilitado al borde del tanque.'},
@@ -464,8 +469,37 @@ function updTrucks(t){let any=null;
     pile.userData.grow=dumped});
   return any}
 const sandPiles=[0,1,2,3].map(i=>{const m=mesh(new THREE.ConeGeometry(2.6,1.8,20),sandMat,[0,0.9,0]);m.visible=false;return m});
-const loader=new THREE.Group();scene.add(loader);mesh(new THREE.BoxGeometry(1.8,1.2,3.2),yel,[0,1.1,0],loader);mesh(new THREE.BoxGeometry(1.1,1.2,1.2),glass,[0,2.2,0.3],loader);mesh(new THREE.BoxGeometry(2.3,0.6,0.6),M(0x555555),[0,0.6,2.0],loader);[[-0.9,1],[0.9,1],[-0.9,-1],[0.9,-1]].forEach(([x,z])=>wheel(loader,x,0.5,z,0.5,0.35,0xf2b21c));
+// retroexcavadora (pala cargadora adelante, retro atrás): chasis, capot, cabina vidriada, ruedas traseras grandes, estabilizadores y brazo articulado
+function backhoe(){const g=new THREE.Group();scene.add(g);const Y=M(0xf0b020,{metalness:.25,roughness:.45}),K=blk,D=M(0x2a2c2e,{roughness:.6}),G=M(0xbfe3f2,{transparent:true,opacity:.35,roughness:.05}),Ch=chrome;
+ const bx=(w,h,d,m,x,y,z,p=g)=>mesh(new THREE.BoxGeometry(w,h,d),m,[x,y,z],p);
+ bx(1.9,0.5,4.3,D,0,0.95,-0.15);bx(2.0,0.35,2.6,Y,0,1.32,-0.5);// chasis y piso
+ const hood=bx(1.15,0.85,1.7,Y,0,1.62,1.25);bx(1.0,0.55,0.05,K,0,1.55,2.12);[-0.3,0.3].forEach(x=>bx(0.18,0.08,0.03,M(0xf4f6ff,{emissive:0xeef2ff,emissiveIntensity:.3}),x,1.92,2.12));// capot, parrilla y faros
+ bx(0.12,0.9,0.12,K,0.4,2.4,0.9);// escape
+ bx(1.7,0.22,1.75,Y,0,1.55,-0.75);[[-0.8,0.1],[0.8,0.1],[-0.8,-1.6],[0.8,-1.6]].forEach(([x,z])=>bx(0.08,1.55,0.08,Y,x,2.42,z));bx(1.85,0.14,1.95,Y,0,3.22,-0.75);
+ bx(1.55,1.35,0.03,G,0,2.4,0.12);bx(1.55,1.35,0.03,G,0,2.4,-1.62);[-0.8,0.8].forEach(x=>bx(0.03,1.35,1.65,G,x,2.4,-0.75));bx(0.3,0.12,0.2,M(0xff9a1a,{emissive:0xff7a00,emissiveIntensity:.8}),0.55,3.35,-0.2);
+ bx(0.5,0.6,0.5,K,0,1.95,-0.6);// asiento y comandos
+ const wh=[];[[-1.08,0.82,-0.95,0.82,0.52],[1.08,0.82,-0.95,0.82,0.52],[-0.98,0.56,1.45,0.56,0.38],[0.98,0.56,1.45,0.56,0.38]].forEach(([x,y,z,r,w])=>wh.push(wheel(g,x,y,z,r,w,0xf0b020)));
+ [-1.08,1.08].forEach(x=>bx(0.56,0.08,1.4,Y,x,1.72,-0.95));// guardabarros
+ // pala cargadora delantera
+ const fl=new THREE.Group();fl.position.set(0,1.75,-0.25);g.add(fl);[-1.02,1.02].forEach(x=>{const a=bx(0.14,0.26,3.0,Y,x,-0.25,1.45,fl);a.rotation.x=0.32});
+ const fb=new THREE.Group();fb.position.set(0,-1.15,2.95);fl.add(fb);bx(2.35,0.7,0.12,Y,0,0.1,0.4,fb);bx(2.35,0.1,0.75,Y,0,-0.25,0.05,fb);[-1.17,1.17].forEach(x=>bx(0.06,0.7,0.75,Y,x,0.1,0.05,fb));bx(2.35,0.05,0.12,Ch,0,-0.3,-0.33,fb);
+ // brazo retro: giro → pluma → balancín → cucharón
+ bx(1.3,0.7,0.6,D,0,1.25,-2.45);const sw=new THREE.Group();sw.position.set(0,1.35,-2.75);g.add(sw);bx(0.5,0.5,0.4,Y,0,0.1,-0.1,sw);
+ const bm=new THREE.Group();bm.position.set(0,0.25,-0.15);sw.add(bm);const b1=bx(0.3,0.42,1.6,Y,0,0.45,-0.7,bm);b1.rotation.x=0.55;const b2=bx(0.3,0.42,1.5,Y,0,0.72,-2.05,bm);b2.rotation.x=-0.3;
+ const cyl=bx(0.1,0.1,1.4,Ch,0,0.15,-0.9,bm);cyl.rotation.x=0.25;
+ const st=new THREE.Group();st.position.set(0,0.48,-2.75);bm.add(st);bx(0.26,2.0,0.3,Y,0,-0.95,0,st);bx(0.08,1.3,0.08,Ch,0,-0.4,0.22,st);
+ const bk=new THREE.Group();bk.position.set(0,-1.95,0);st.add(bk);bx(0.6,0.45,0.5,K,0,-0.2,-0.12,bk);bx(0.6,0.08,0.4,K,0,-0.45,-0.32,bk);[-0.22,-0.07,0.07,0.22].forEach(x=>bx(0.06,0.12,0.06,Ch,x,-0.5,-0.52,bk));
+ // estabilizadores traseros
+ const stab=[-1,1].map(sx=>{const l=new THREE.Group();l.position.set(sx*1.05,1.2,-2.25);g.add(l);bx(0.22,1.1,0.22,Y,0,-0.4,0,l);const pad=bx(0.45,0.08,0.45,K,0,-0.95,0,l);return l});
+ g.userData={sw,bm,st,bk,fl,stab,wh};return g}
+function setBH(g,{sw=0,bm=0.7,st=0.4,bk=0.3,stab=0,fl=0.15}={}){const u=g.userData;u.sw.rotation.y=sw;u.bm.rotation.x=bm;u.st.rotation.x=st;u.bk.rotation.x=bk;u.stab.forEach(l=>l.position.y=1.2-0.32*stab);u.fl.rotation.x=fl}
+// ciclo de excavación: baja la pluma, cierra el balancín, levanta y descarga al costado
+function digCycle(p,dumpSide){const q=p%1;if(q<0.35){const f=q/0.35;return {sw:0,bm:lerp(0.55,-0.05,f),st:lerp(-0.2,0.85,f),bk:lerp(-0.3,0.9,f)}}
+ if(q<0.6){const f=(q-0.35)/0.25;return {sw:dumpSide*f*1.0,bm:lerp(-0.05,0.65,f),st:0.85,bk:0.9}}if(q<0.75){return {sw:dumpSide,bm:0.65,st:0.85,bk:lerp(0.9,-0.6,(q-0.6)/0.15)}}
+ const f=(q-0.75)/0.25;return {sw:dumpSide*(1-f),bm:lerp(0.65,0.55,f),st:lerp(0.85,-0.2,f),bk:lerp(-0.6,-0.3,f)}}
+const loader=backhoe();setBH(loader);
 const sucGroup=new THREE.Group();scene.add(sucGroup);const trench=new THREE.Group();scene.add(trench);
+const dirt=new THREE.Mesh(new THREE.ConeGeometry(1.4,0.8,14),M(0x7a6248,{roughness:1}));dirt.castShadow=true;dirt.receiveShadow=true;scene.add(dirt);const dirt2=dirt.clone();scene.add(dirt2);{const [x,z]=polar(TS+0.2,R-4.2);dirt2.position.set(x,0.75,z)}{const [x,z]=polar(TS+0.12,R+4.6);dirt.position.set(x,0.4,z)}
 {const a=TS;const [x,z]=polar(a,R);sucGroup.position.set(x,0,z);sucGroup.rotation.y=-a;trench.position.set(x,0,z);trench.rotation.y=-a;
  const pm=M(0x5e666b,{metalness:.6,roughness:.4}),fm=M(0x444b50,{metalness:.6});
  const pipeX=(x0,x1,y)=>{const p=mesh(new THREE.CylinderGeometry(0.17,0.17,Math.abs(x1-x0),16),pm,[(x0+x1)/2,y,0],sucGroup);p.rotation.z=Math.PI/2};
@@ -475,7 +509,7 @@ const sucGroup=new THREE.Group();scene.add(sucGroup);const trench=new THREE.Grou
  pipeY(-2.4,-0.45,0.3);// boca interior al ras
  mesh(new THREE.CylinderGeometry(0.42,0.42,0.06,24),fm,[-2.4,0.33,0],sucGroup);// brida
  const mesh_=mesh(new THREE.CylinderGeometry(0.3,0.3,0.02,24),new THREE.MeshStandardMaterial({color:0x9aa3a8,metalness:.6,wireframe:true}),[-2.4,0.37,0],sucGroup,false);
- const hat=mesh(new THREE.TorusGeometry(0.4,0.06,6,20),M(0x2b3035,{metalness:.6}),[-2.4,0.38,0],sucGroup);hat.rotation.x=Math.PI/2;// sombrero bulonado
+ const hat=new THREE.Group();hat.position.set(-2.4,0.38,0);sucGroup.add(hat);{const hm=M(0x2b3035,{metalness:.6});mesh(new THREE.CylinderGeometry(0.55,0.62,0.06,24),hm,[0,0.32,0],hat);[0,1,2,3].forEach(i=>{const a=i*Math.PI/2+0.4;mesh(new THREE.BoxGeometry(0.05,0.3,0.05),hm,[Math.cos(a)*0.4,0.16,Math.sin(a)*0.4],hat)});[0,1,2,3,4,5].forEach(i=>{const a=i*Math.PI/3;mesh(new THREE.CylinderGeometry(0.025,0.025,0.06,6),M(0xd9dde0,{metalness:.8}),[Math.cos(a)*0.37,0.01,Math.sin(a)*0.37],hat)})}sucGroup.userData.hat=hat;sucGroup.userData.malla=mesh_;// sombrero bulonado
  mesh(new THREE.BoxGeometry(0.35,0.18,0.5),M(0x9a7d3a,{metalness:.5}),[0,0.09,0],sucGroup);// cuña metálica en el borde inferior de la placa
  pipeY(2.2,-0.45,0.4);elbow(2.2,0.4);pipeX(2.2,5.2,0.4);
  const valve=(xv)=>{const v=mesh(new THREE.CylinderGeometry(0.32,0.32,0.22,16),M(0x2a4fa8),[xv,0.4,0],sucGroup);v.rotation.z=Math.PI/2;mesh(new THREE.CylinderGeometry(0.03,0.03,0.45,6),M(0x777777),[xv,0.8,0],sucGroup);const hw=mesh(new THREE.TorusGeometry(0.17,0.03,6,16),M(0x1f9a4a),[xv,1.03,0],sucGroup);hw.rotation.x=Math.PI/2};
@@ -483,7 +517,7 @@ const sucGroup=new THREE.Group();scene.add(sucGroup);const trench=new THREE.Grou
  mesh(new THREE.CylinderGeometry(0.15,0.15,0.55,12),pm,[3.65,0.68,0],sucGroup);mesh(new THREE.CylinderGeometry(0.3,0.3,0.06,16),fm,[3.65,0.97,0],sucGroup);// derivación con brida ciega
  const cp=mesh(new THREE.TorusGeometry(0.22,0.06,8,16),M(0xc94a22),[5.2,0.4,0],sucGroup);cp.rotation.y=Math.PI/2;
  // zanja
- const tr=mesh(new THREE.BoxGeometry(8.2,0.02,0.9),M(0x5a4a38,{roughness:1}),[1.4,0.035,0],trench,false)}
+ const tr=mesh(new THREE.BoxGeometry(8.2,0.06,1.0),M(0x3e3022,{roughness:1}),[1.4,0.04,0],trench,false);const tr2=mesh(new THREE.BoxGeometry(1,0.06,1.0),M(0x3e3022,{roughness:1}),[-1.4,0.37,0],trench,false)}
 // ---------- bombeo exterior en la pipa: manifold, 2 manguerotes Bauer, 2 bombas, cisterna, telemetría ----------
 const beacons2=[];const pst=new THREE.Group();scene.add(pst);
 {const [x,z]=polar(TS,R);pst.position.set(x,0,z);pst.rotation.y=-TS;
@@ -523,7 +557,15 @@ const beacons2=[];const pst=new THREE.Group();scene.add(pst);
 const bags=new THREE.Group();scene.add(bags);{const [x,z]=polar(TS,R-2.4);bags.position.set(x,0.38,z);bags.rotation.y=-TS;for(let i=0;i<4;i++)mesh(new THREE.BoxGeometry(0.5,0.25,0.35),M(0xe9e4d6),[(i%2)*0.5-0.25,0.12+Math.floor(i/2)*0.25,(i<2?-0.3:0.3)],bags)}
 const linerMat=M(0x1d4fa8,{roughness:.35,metalness:.1,side:THREE.DoubleSide});
 const LX=th(LAST);// eje del chorizo: desde el panel abierto hacia el lado opuesto
+const OPENERS=[['sen',-12.5],['sog',-7.5],['int',-2.5],['asi',2.5],['ext',7.5],['op',12.5]];
+function OPEN(lu){const d=v3(Math.cos(LX),0,Math.sin(LX)),gate=d.clone().multiplyScalar(R+1.5),gin=d.clone().multiplyScalar(R-3);
+ const side=lu<0.74?1:-1;const op=ss(seg(lu,side>0?0.705:0.74,side>0?0.74:0.79));const nrm=v3(-Math.sin(LX),0,Math.cos(LX)).multiplyScalar(side);const enter=ss(seg(lu,0.69,0.705)),leave=ss(seg(lu,0.79,0.805));
+ OPENERS.forEach(([k,xa],i)=>{const p=crew[k];p.visible=true;const half=(R-1.45)*Math.sqrt(Math.max(0,1-(xa/(R-1.45))**2));const e=Math.min(half-0.6,half*op+0.8);
+  const edge=d.clone().multiplyScalar(xa).addScaledVector(nrm,e);let q=edge;
+  if(enter<1){q=enter<0.5?gate.clone().lerp(gin,enter*2):gin.clone().lerp(edge,enter*2-1)}else if(leave>0){q=leave<0.5?edge.clone().lerp(gin,leave*2):gin.clone().lerp(gate,leave*2-1)}
+  put(p,q.x,q.z,faceTo(q.x,q.z,q.x-nrm.x,q.z-nrm.z));p.position.y=0;p.userData.arms.forEach(a=>a.rotation.set(enter>=1&&leave<=0?-1.2:0,0,0))})}
 const _lf=0;const linerFloor=lathe([[0,0.36],[R-1.45,0.36],[R-0.2,1.6]],linerMat);linerFloor.rotation.y=-LX;
+const linerHalf=[-Math.PI/2,Math.PI/2].map(ps=>{const m=new THREE.Mesh(new THREE.LatheGeometry([[0,0.36],[R-1.45,0.36],[R-0.2,1.6]].map(p=>new THREE.Vector2(p[0],p[1])),90,ps,Math.PI),linerMat);m.receiveShadow=true;m.rotation.y=-LX;scene.add(m);return m});
 const GHW=DT/2+2/R,GTH=Math.PI/2-th(LAST);// sector del cierre: panel abierto ± 2 m
 const linerWall=new THREE.Mesh(new THREE.CylinderGeometry(R-0.06,R-0.06,PH-1.5,140,1,true,GTH+GHW,2*Math.PI-2*GHW),linerMat);linerWall.position.y=1.6+(PH-1.6)/2;scene.add(linerWall);
 const linerLip=new THREE.Mesh(new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,140,1,true,GTH+GHW,2*Math.PI-2*GHW),linerMat);linerLip.position.y=PH-0.2;scene.add(linerLip);
@@ -531,8 +573,11 @@ const flap=new THREE.Mesh(new THREE.CylinderGeometry(R-0.06,R-0.06,1,24,1,true,G
 const flapLip=new THREE.Mesh(new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,24,1,true,GTH-GHW,2*GHW),linerMat);flapLip.position.y=PH-0.2;scene.add(flapLip);
 const wallPart=linerWall.geometry,lipPart=linerLip.geometry,wallFull=new THREE.CylinderGeometry(R-0.06,R-0.06,PH-1.5,160,1,true),lipFull=new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,160,1,true);
 const flapRopes=[-1,1].map(()=>line(0xeee6b0));
+const wallSeg=[],lipSeg=[];for(let k=0;k<LAST;k++){const t0=Math.PI/2-(th(k)+DT/2);const w=new THREE.Mesh(new THREE.CylinderGeometry(R-0.06,R-0.06,PH-1.5,10,1,true,t0,DT),linerMat);scene.add(w);w.visible=false;wallSeg.push(w);
+ const l=new THREE.Mesh(new THREE.CylinderGeometry(R+0.12,R+0.12,0.5,10,1,true,t0,DT),linerMat);l.position.y=PH-0.2;scene.add(l);l.visible=false;lipSeg.push(l)}
 const poles=[0,1].map(()=>{const p=mesh(new THREE.CylinderGeometry(0.03,0.03,2,6),M(0xc8a46a),null,scene,false);mesh(new THREE.SphereGeometry(0.08,8,6),M(0xf0e6d0),[0,1,0],p,false);return p});
 const roll=mesh(new THREE.CylinderGeometry(0.75,0.75,2,20),linerMat,null);const roll2=mesh(new THREE.CylinderGeometry(0.75,0.75,2,20),linerMat,null);roll2.visible=false;
+{const rb=mesh(new THREE.CylinderGeometry(0.045,0.045,2.7,10),M(0x6b7075,{metalness:.8,roughness:.35}),null,roll);[-1.32,1.32].forEach(y=>mesh(new THREE.CylinderGeometry(0.09,0.09,0.06,12),M(0x3a3f44,{metalness:.7}),[0,y,0],roll))}// barra pasante por el núcleo del rollo
 const chorizo=mesh(new THREE.BoxGeometry(1,0.18,2),linerMat,null);// lonja de 2 m de ancho, plegada en acordeón
 // bolsas blancas de rafia con lastre (~40) sobre toda la lona, antes de levantar las paredes
 const ballast=new THREE.Group();scene.add(ballast);
@@ -559,11 +604,24 @@ const stair=new THREE.Group();scene.add(stair);
 stair.visible=false;
 const goose=new THREE.Group();scene.add(goose);goose.rotation.y=-GA;
 {const gm=M(0x585e63,{metalness:.5});
- const tube=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[R+3,0.4,0],[R+1.6,0.45,0],[R+0.9,1.5,0],[R+0.6,3.4,0],[R-0.2,3.7,0],[R-0.9,3.1,0]].map(a=>v3(...a))),40,0.2,10),gm);tube.castShadow=true;goose.add(tube);
- const cp=mesh(new THREE.TorusGeometry(0.28,0.07,8,20),M(0xc94a22),[R+3,0.4,0],goose);cp.rotation.y=Math.PI/2;
- const pts=[];for(let i=0;i<=40;i++){const s=i/40;pts.push(v3(R+3+s*120,0.22,Math.sin(s*7)*4*s))}
- const lay=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),160,0.32,10),M(0x17191b,{roughness:.5}));lay.scale.y=1;lay.castShadow=true;goose.add(lay);
- lay.geometry.scale(1,0.55,1)}
+ const tube=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[R+3,0.24,0],[R+2.2,0.24,0],[R+1.3,0.5,0],[R+0.9,1.5,0],[R+0.6,3.4,0],[R-0.2,3.7,0],[R-0.9,3.1,0]].map(a=>v3(...a))),40,0.2,10),gm);tube.castShadow=true;goose.add(tube);
+ // apoyo del tramo horizontal y acople ranurado Victaulic (2 medias lunas rojas, junta, orejas con bulón y tuerca)
+ const sup=mesh(new THREE.BoxGeometry(0.3,0.06,0.6),M(0x8a6a44),[R+2.4,0.03,0],goose);
+ const red=M(0xc8231e,{metalness:.3,roughness:.4}),bm=M(0xb9bec2,{metalness:.9,roughness:.3});const vic=new THREE.Group();vic.position.set(R+3.02,0.24,0);goose.add(vic);
+ {const sh=mesh(new THREE.CylinderGeometry(0.235,0.235,0.12,28,1,true),red,[0,0,0],vic);sh.rotation.z=Math.PI/2;sh.material.side=THREE.DoubleSide;
+  [-0.055,0.055].forEach(dx=>{const lip=mesh(new THREE.TorusGeometry(0.215,0.02,6,28),red,[dx,0,0],vic);lip.rotation.y=Math.PI/2});
+  [1,-1].forEach(s=>{[0.025,-0.025].forEach(dy=>mesh(new THREE.BoxGeometry(0.09,0.04,0.08),red,[0,dy,0.27*s],vic));const b=mesh(new THREE.CylinderGeometry(0.016,0.016,0.16,8),M(0x333333,{metalness:.8}),[0,0,0.27*s],vic);
+   mesh(new THREE.CylinderGeometry(0.026,0.026,0.025,6),bm,[0,0.075,0.27*s],vic);mesh(new THREE.CylinderGeometry(0.03,0.03,0.02,6),bm,[0,-0.075,0.27*s],vic)})}
+ // puntera de aluminio de la layflat
+ const pu=mesh(new THREE.CylinderGeometry(0.205,0.205,0.36,24),M(0x7d8388,{metalness:.7,roughness:.35}),[R+3.26,0.24,0],goose);pu.rotation.z=Math.PI/2;
+ const abs=[R+3.3,R+3.4].map(x=>{const ab=mesh(new THREE.TorusGeometry(0.21,0.018,6,24),M(0x9aa0a5,{metalness:.8}),[x,0.24,0],goose);ab.rotation.y=Math.PI/2;return ab});
+ // layflat: sale redonda de la puntera y se aplasta al apoyar en el suelo (sin cortes ni tramos en el aire)
+ const X0=R+3.3,sm=x=>{const t=Math.min(1,Math.max(0,(x-X0)/1.1));return t*t*(3-2*t)},cy=x=>0.24-0.06*sm(x),zc=x=>{const q=Math.max(0,(x-X0)/120);return Math.sin(q*7)*4*q};
+ const pts=[];for(let i=0;i<=60;i++){const q=Math.pow(i/60,1.6);const x=X0+q*120;pts.push(v3(x,cy(x),zc(x)))}
+ const lg=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),260,0.3,12);{const p=lg.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),k=sm(x),rf=(0.2+0.1*k)/0.3,c=cy(x),z0=zc(x);p.setY(i,c+(p.getY(i)-c)*rf*(1-0.42*k));p.setZ(i,z0+(p.getZ(i)-z0)*rf)}p.needsUpdate=true;lg.computeVertexNormals()}
+ const lay=new THREE.Mesh(lg,M(0x17191b,{roughness:.5}));lay.castShadow=true;goose.add(lay);goose.userData.lay=lay;
+ goose.userData.conn=[pu,vic,sup,...abs];
+ const br=mesh(new THREE.BoxGeometry(0.06,0.5,0.55),M(0x3a3f44,{metalness:.6}),[R+0.06,2.72,0],goose);goose.userData.bolts=[-0.18,0,0.18].map(z=>{const b=mesh(new THREE.CylinderGeometry(0.035,0.035,0.08,8),M(0xd9dde0,{metalness:.8,emissive:0xffd060,emissiveIntensity:0}),[R+0.12,2.72,z],goose);b.rotation.z=Math.PI/2;return b})}
 const stream=mesh(new THREE.CylinderGeometry(0.16,0.28,2.8,12,1,true),new THREE.MeshStandardMaterial({color:0xcfe8f5,transparent:true,opacity:.75,emissive:0x8ab8d0,emissiveIntensity:.3}),null,scene,false);
 
 // ---------- etiquetas ----------
@@ -645,51 +703,61 @@ function update(t){
      if(t>T.close[1])ang=th(LAST)+0.35;
      loaded=active>=0&&au>=0.18&&au<0.86;load3=active>=0?plates[active]:null}
    let RR=distK>=0?RTH-0.5:RTH;
-   const inLiner=t>=T.liner[0]&&lu<0.5;
+   const inLiner=t>=T.liner[0]&&lu<0.7;
    const eu=seg(t,...T.esc),inEsc=t>=T.esc[0]&&t<T.esc[1];
    if(inEsc){const L0=stairPose(eu);ang=eu<0.15?lerp(th(LAST)+0.35,LPA,ss(eu/0.15)):L0.a;RR=eu<0.12?RTH:eu<0.86?lerp(RTH,L0.r+5.2,ss(seg(eu,0.12,0.2))):lerp(L0.r+5.2,RTH,ss(seg(eu,0.88,1)));loaded=false;load3=null}
-   if(inLiner){ang=th(LAST);RR=lu<0.1?RTH:lu<0.3?lerp(RTH,5,ss(seg(lu,0.1,0.3))):lu<0.355?5:lerp(5,RTH,ss(seg(lu,0.355,0.378)));loaded=false;load3=null}const [x,z]=polar(ang,RR);tele.position.set(x,0,z);tele.rotation.y=-ang+Math.PI/2;tele.updateMatrixWorld();
+   const cuS=seg(t,...T.suc),guS=seg(t,...T.goose),inSuc=t>=T.suc[0]&&t<T.suc[1],inGo=t>=T.goose[0]&&t<T.goose[1];const TSP=TS+0.17+2*Math.PI,GAP=GA+0.17+2*Math.PI;
+   if(inSuc){ang=cuS<0.3?lerp(th(LAST),th(LAST)+0.3,ss(seg(cuS,0,0.08))):lerp(th(LAST)+0.3,TSP,ss(seg(cuS,0.3,0.44)));RR=RTH;loaded=false;load3=null}
+   if(inGo){ang=guS<0.6?lerp(TSP,GAP,ss(seg(guS,0,0.24))):lerp(GAP,th(LAST)+2*Math.PI,ss(seg(guS,0.62,0.97)));RR=RTH;loaded=false;load3=null}
+   if(inLiner){ang=th(LAST);const RIN=R-0.5,RFAR=-(R-6.6);// día 1: deja el rollo adentro junto al panel; día 2: lo engancha y lo desenrolla a lo largo, de pared a pared
+     RR=lu<0.1?RTH:lu<0.3?lerp(RTH,RIN,ss(seg(lu,0.1,0.3))):lu<0.355?RIN:lu<0.38?lerp(RIN,RTH,ss(seg(lu,0.355,0.378))):lu<0.42?lerp(RTH,RIN,ss(seg(lu,0.38,0.42))):lu<0.45?RIN:lu<0.53?lerp(RIN,RFAR,ss(seg(lu,0.45,0.53))):lu<0.555?RFAR:lu<0.66?lerp(RFAR,R+3.4,ss(seg(lu,0.555,0.66))):lu<0.675?R+3.4:lerp(R+3.4,RTH,ss(seg(lu,0.675,0.69)));/* lleva el rollo hasta la pared opuesta y retrocede: la lona queda detrás del rollo, nunca la pisa */loaded=false;load3=null}const [x,z]=polar(ang,RR);tele.position.set(x,0,z);tele.rotation.y=-ang+Math.PI/2;tele.updateMatrixWorld();
    // resguardo físico: el manipulador nunca invade el carretón ni la zona de conos (separación mínima 6 m)
    if(trailer.visible){const lp=trailer.worldToLocal(tele.position.clone());const dx=Math.max(0,Math.abs(lp.x)-1.3-1.6),dz=Math.max(0,lp.z>3?lp.z-3-3:(lp.z<-12?-12-lp.z-3:0));
      if(dx<6&&dz<6){const push=6-dx;const dir=new THREE.Vector3(Math.sign(lp.x)||-1,0,0).applyQuaternion(trailer.quaternion);tele.position.addScaledVector(dir,push);tele.updateMatrixWorld()}}
-   {const ax=LX;roll.rotation.set(0,-ax+Math.PI/2,Math.PI/2);roll2.rotation.copy(roll.rotation);
+   {const ax=LX;roll.rotation.set(0,-ax+Math.PI/2,Math.PI/2);roll2.visible=false;const dir=v3(Math.cos(LX),0,Math.sin(LX));const RIN=R-0.5;
     if(t<T.liner[0]){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75,rz);roll.visible=t>T.suc[0];roll.scale.set(1,1,1)}
-    else if(lu<0.1){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75+ss(seg(lu,0.05,0.1))*0.9,rz);roll.visible=true}
-    else if(lu<0.36){const c=tele.localToWorld(v3(0,0,-5.0));if(lu<0.12){const [rx,rz]=polar(LX,R+7.6);c.x=lerp(rx,c.x,ss(seg(lu,0.1,0.12)));c.z=lerp(rz,c.z,ss(seg(lu,0.1,0.12)))}const down=ss(seg(lu,0.3,0.34));if(lu>0.34){roll.userData.rest=roll.userData.rest||c.clone();}else roll.userData.rest=null;if(roll.userData.rest){roll.position.set(roll.userData.rest.x,0.75,roll.userData.rest.z)}else roll.position.set(c.x,1.65-down*0.9,c.z);roll.visible=true}
-    else{// se desenrolla desde el centro hacia ambos extremos: dos medios rollos que se alejan y se achican
-      const cu=ss(seg(lu,0.38,0.55)),d=cu*(R-1.6),sc=Math.max(0.25,0.72*(1-cu)+0.25);const dir=v3(Math.cos(LX),0,Math.sin(LX));
-      roll.visible=roll2.visible=lu<0.56;roll.scale.set(sc,1,sc);roll2.scale.set(sc,1,sc);
-      roll.position.copy(dir).multiplyScalar(d).setY(0.36+0.75*sc);roll2.position.copy(dir).multiplyScalar(-d).setY(0.36+0.75*sc)}}
-   if(lu<0.36)roll2.visible=false;
+    else if(lu<0.1){const [rx,rz]=polar(LX,R+7.6);roll.position.set(rx,0.75+ss(seg(lu,0.05,0.1))*0.9,rz);roll.visible=true;roll.scale.set(1,1,1)}
+    else if(lu<0.34){const c=tele.localToWorld(v3(0,0,-5.0));if(lu<0.12){const [rx,rz]=polar(LX,R+7.6);c.x=lerp(rx,c.x,ss(seg(lu,0.1,0.12)));c.z=lerp(rz,c.z,ss(seg(lu,0.1,0.12)))}const down=ss(seg(lu,0.3,0.34));roll.position.set(c.x,1.65-down*0.9,c.z);roll.visible=true;roll.scale.set(1,1,1)}
+    else if(lu<0.42){roll.position.copy(dir).multiplyScalar(RIN-5).setY(0.75);roll.visible=true;roll.scale.set(1,1,1)}
+    else if(lu<0.675){const c=tele.localToWorld(v3(0,0,-5.0));const up=ss(seg(lu,0.42,0.45))*(1-ss(seg(lu,0.53,0.555)));const pr=seg(lu,0.555,0.66);const sc=lerp(1,0.3,pr);roll.scale.set(sc,1,sc);roll.position.set(c.x,0.75*sc+0.9*up,c.z);roll.visible=true}
+    else roll.visible=false}
    const piv=tele.localToWorld(v3(0.55,2.05,2.3));let hookP;
    const stabDown=loaded?1:0;outr.forEach(o=>o.position.y=0.95-0.0*stabDown);outr.forEach(o=>o.scale.y=loaded?1.0:0.35);
    if(loaded&&load3){load3.updateMatrixWorld();const top=load3.localToWorld(v3(0.05,PH,0));const lugs=[load3.localToWorld(v3(0.05,PH+0.08,-1.8)),load3.localToWorld(v3(0.05,PH+0.08,1.8))];
      const uu=distK>=0?du:au;const up=distK>=0?(uu<0.2?ss(seg(uu,0.12,0.2)):uu>0.85?1-ss(seg(uu,0.85,0.92)):1):(uu<0.25?ss(seg(uu,0.18,0.25)):uu>0.8?1-ss(seg(uu,0.8,0.86)):1);
      const mid=lugs[0].clone().lerp(lugs[1],0.5);hookP=mid.clone().add(v3(0,2.3*up+0.4,0));slings.forEach((s,i)=>{s.visible=up>0.5;aimY(s,hookP,lugs[i])})}
    else if(inEsc&&eu>0.18&&eu<0.86){const top=stair.localToWorld(v3(0,4.05,0));const up=ss(seg(eu,0.18,0.24))*(1-ss(seg(eu,0.8,0.86)));hookP=top.clone().add(v3(0,0.4+1.6*up,0));[stair.localToWorld(v3(0.6,4.0,-0.6)),stair.localToWorld(v3(-0.6,4.0,0.6))].forEach((e,i)=>{slings[i].visible=true;aimY(slings[i],hookP,e)})}
-   else if(inLiner&&lu>0.06&&lu<0.355){const rp=roll.position;const ax=v3(Math.cos(LX),0,Math.sin(LX));const rest=tele.localToWorld(v3(0,4.2,-3.6));const k=ss(seg(lu,0.342,0.355));hookP=rp.clone().add(v3(0,1.6,0)).lerp(rest,k);// desengancha y recoge el gancho antes de retirarse
-     [rp.clone().addScaledVector(ax,2.4),rp.clone().addScaledVector(ax,-2.4)].forEach((e,i)=>{slings[i].visible=k<0.05;aimY(slings[i],hookP,e.add(v3(0,0.7,0)))})}
+   else if(inSuc&&cuS>0.44&&cuS<0.6){const ends=[sucGroup.localToWorld(v3(-1.6,0.45,0)),sucGroup.localToWorld(v3(4.6,0.55,0))];const top=sucGroup.localToWorld(v3(1.5,0.5,0));const up=ss(seg(cuS,0.44,0.47))*(1-ss(seg(cuS,0.57,0.6)));hookP=top.clone().add(v3(0,2.6+0.8*up,0));
+     slings.forEach((s,i)=>{s.visible=cuS>0.46&&cuS<0.58;aimY(s,hookP,ends[i])})}
+   else if(inGo&&guS>0.26&&guS<0.6){const ends=[goose.localToWorld(v3(R-0.1,3.75,0)),goose.localToWorld(v3(R+1.3,0.8,0))];const up=ss(seg(guS,0.26,0.33))*(1-ss(seg(guS,0.55,0.6)));hookP=goose.localToWorld(v3(R+0.5,5.0,0)).add(v3(0,0.6*up,0));
+     slings.forEach((s,i)=>{s.visible=guS>0.3&&guS<0.56;aimY(s,hookP,ends[i])})}
+   else if(inLiner&&((lu>0.06&&lu<0.355)||(lu>0.42&&lu<0.675))){const rp=roll.position;const ax=v3(Math.cos(LX),0,Math.sin(LX));const rest=tele.localToWorld(v3(0,4.2,-3.6));const k=lu<0.4?ss(seg(lu,0.342,0.355)):ss(seg(lu,0.66,0.675));hookP=rp.clone().add(v3(0,1.6,0)).lerp(rest,k);// desengancha y recoge el gancho antes de retirarse
+     const ra=v3(Math.sin(LX),0,-Math.cos(LX));/* eslingas a los extremos de la barra pasante: paralelas al eje del rollo */[rp.clone().addScaledVector(ra,1.25),rp.clone().addScaledVector(ra,-1.25)].forEach((e,i)=>{slings[i].visible=k<0.05;aimY(slings[i],hookP,e)})}
    else{slings.forEach(s=>s.visible=false);hookP=tele.localToWorld(v3(0,4.2,-3.6))}
    const tip=hookP.clone().add(v3(0,1.7,0));const dl=tip.distanceTo(piv);const mid=piv.clone().lerp(tip,Math.min(0.58,5.2/dl));
    aim(boomA,piv,mid);aim(boomB,mid,tip);aim(liftCyl,tele.localToWorld(v3(0.55,1.4,-0.6)),piv.clone().lerp(tip,Math.min(0.3,2.6/dl)));
    hookPlate.position.copy(tip).add(v3(0,-0.1,0));hookPlate.lookAt(piv.x,hookPlate.position.y,piv.z);
    hookBlock.position.copy(hookP).add(v3(0,0.35,0));hook.position.copy(hookP);hookCable.geometry.setFromPoints([tip,hookP.clone().add(v3(0,0.6,0))]);
-   excl.visible=(loaded&&(distK>=0?du>0.15&&du<0.88:au>0.22&&au<0.75))||(inLiner&&lu>0.06&&lu<0.36)||(inEsc&&eu>0.2&&eu<0.84);const lp=load3?load3.position:(inEsc?stair.position:tele.position);excl.position.set((tele.position.x+lp.x)/2,0.05,(tele.position.z+lp.z)/2);
+   excl.visible=(inSuc&&cuS>0.46&&cuS<0.58)||(inGo&&guS>0.3&&guS<0.56)||(loaded&&(distK>=0?du>0.15&&du<0.88:au>0.22&&au<0.75))||(inLiner&&((lu>0.06&&lu<0.36)||(lu>0.4&&lu<0.69)))||(inEsc&&eu>0.2&&eu<0.84);const lp=load3?load3.position:(inEsc?stair.position:tele.position);excl.position.set((tele.position.x+lp.x)/2,0.05,(tele.position.z+lp.z)/2);
    L.th.p.copy(tele.position).add(v3(0,4.6,0));L.th.e.hidden=!teleVis}
   hcrane.visible=crA.visible=crB.visible=crCyl.visible=crCable.visible=false;L.hc.e.hidden=true;
   // chorizo y apertura de la lona
-  {const cu=ss(seg(lu,0.38,0.55));chorizo.visible=lu>0.38&&lu<0.6;chorizo.rotation.set(0,-LX,0);chorizo.scale.set(Math.max(0.01,cu*2*(R-1.6)),1,1);chorizo.position.set(0,0.46,0);
-   const op=ss(seg(lu,0.5,0.6));linerFloor.visible=lu>0.5;{const sy=0.25+0.75*op;linerFloor.scale.set(1,sy,Math.max(2/(2*R),op));linerFloor.position.y=0.36*(1-sy)+0.01}
-   linerWall.visible=lu>0.84;const wu=ss(seg(lu,0.84,0.95));linerWall.scale.y=Math.max(0.001,wu);linerWall.position.y=1.6+wu*(PH-1.6)/2;linerLip.visible=lu>0.94;ties.visible=lu>0.94;
-   {const BW=['sen','sog','asi','m1'],NB=ballast.children.length,bf=seg(lu,0.60,0.83)*NB/BW.length;
-    ballast.children.forEach((b,i)=>{const w=i%BW.length,j=Math.floor(i/BW.length);b.visible=t>T.liner[0]&&(lu>0.83||j<Math.floor(bf)||(j===Math.floor(bf)&&bf-j>=0.5))});
-    BAGW.length=0;if(t>T.liner[0]&&lu>0.60&&lu<0.83){const FP=polar(th(LAST),R+5);BW.forEach((k,w)=>{const j=Math.floor(bf),f=bf-j,bi=Math.min(NB-1,j*BW.length+w),b=ballast.children[bi].position;
+  {const dir=v3(Math.cos(LX),0,Math.sin(LX));const s0=-(R-1.6);const s1=lu<0.66?roll.position.dot(dir):R-1.6;const len=Math.max(0.01,s1-s0);
+   chorizo.visible=lu>0.555&&lu<0.8;chorizo.rotation.set(0,-LX,0);chorizo.scale.set(len,1,lu>0.74?0.5:1);chorizo.position.copy(dir).multiplyScalar((s0+s1)/2).setY(0.46);
+   linerFloor.visible=lu>=0.8;linerFloor.scale.set(1,1,1);linerFloor.position.y=0.01;
+   [[0.68,0.74],[0.74,0.8]].forEach(([a0,a1],i)=>{const op=ss(seg(lu,a0,a1));const m=linerHalf[i];m.visible=lu>a0&&lu<0.8;const sy=0.25+0.75*op;m.scale.set(1,sy,Math.max(0.02,op));m.position.y=0.36*(1-sy)+0.01})
+   const sw=seg(lu,0.88,0.965)*LAST;const lifting=t>=T.liner[0]&&lu>0.88&&lu<0.965;// placa por placa, de la 1 a la 21
+   linerWall.visible=lu>=0.965;linerWall.scale.y=1;linerWall.position.y=1.6+(PH-1.6)/2;linerLip.visible=lu>=0.965;ties.visible=lu>0.97;
+   wallSeg.forEach((w,k)=>{const f=ss(C(0,1,sw-k));w.visible=lifting&&f>0.01;w.scale.y=Math.max(0.001,f);w.position.y=1.6+f*(PH-1.6)/2;lipSeg[k].visible=lifting&&f>0.98})
+   {const BW=['sen','sog','asi','m1'],NB=ballast.children.length,bf=seg(lu,0.80,0.875)*NB/BW.length;
+    ballast.children.forEach((b,i)=>{const w=i%BW.length,j=Math.floor(i/BW.length);b.visible=t>T.liner[0]&&(lu>0.875||j<Math.floor(bf)||(j===Math.floor(bf)&&bf-j>=0.5))});
+    BAGW.length=0;if(t>T.liner[0]&&lu>0.80&&lu<0.875){const FP=polar(th(LAST),R+5);BW.forEach((k,w)=>{const j=Math.floor(bf),f=bf-j,bi=Math.min(NB-1,j*BW.length+w),b=ballast.children[bi].position;
       const go=f<0.5,u=go?ss(f/0.5):ss((f-0.5)/0.5);const A=go?FP:[b.x,b.z],Bp=go?[b.x,b.z]:FP;const off=(w-1.5)*0.9;const x=lerp(A[0],Bp[0],u)+off*Math.sin(th(LAST)),z=lerp(A[1],Bp[1],u)-off*Math.cos(th(LAST));
       BAGW.push({k,x,z,face:faceTo(x,z,Bp[0],Bp[1]),carry:go})})}}
    // sector del cierre: lona media baja hasta colocar la última placa; después se sube con sogas desde afuera
    const cl=seg(t,...T.close);const fu2=t<T.close[0]?0:ss(seg(cl,0.84,1));const fh=lerp(0.35,PH-1.5,fu2);
    const done=t>=T.close[0]&&fu2>=0.999;const wh=(PH-1.5)*linerWall.scale.y;
-   flap.visible=lu>0.84&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
+   flap.visible=lu>0.88&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
    linerWall.geometry=done?wallFull:wallPart;linerLip.geometry=done?lipFull:lipPart;
    const ropeOn=t>=T.close[0]&&cl>0.8&&cl<1;flapRopes.forEach((r,i)=>{r.visible=ropeOn;if(ropeOn){const a=th(LAST)+(i?1:-1)*(DT/2+2/R)*0.9;const [x1,z1]=polar(a,R-0.3);const [x2,z2]=polar(a,R+5);r.geometry.setFromPoints([v3(x1,1.55+fh,z1),v3(x2,1.2,z2)])}})}
   // personas dentro del tanque (control de seguridad)
@@ -717,17 +785,43 @@ function update(t){
      poles.forEach(p=>p.visible=false);ladder2.visible=false;
      if(t>T['p'+(LAST-1)][1]&&t<T.close[0]){const ga=th(LAST);
        // adentro solo cuando el manipulador ya salió (lu>0.52) y hasta que la lona está arriba (lu<0.93); salen por el panel abierto
-       const inF=ss(seg(lu,0.52,0.6))*(1-ss(seg(lu,0.92,0.99)));const wall=lu>0.74&&lu<0.93;
-       const sweep=wall?ss(seg(lu,0.74,0.9)):0;
-       [['int',-1],['asi',1]].forEach(([k,sg],i)=>{const aIn=ga+sg*(0.25+sweep*1.1),rIn=R-1.8;const aOut=ga+sg*0.32,rOut=R+5;
+       const inF=ss(seg(lu,0.69,0.71))*(1-ss(seg(lu,0.965,0.995)));const wall=lu>0.88&&lu<0.965;
+       const sweep=wall?ss(seg(lu,0.88,0.96)):0;const sa=th(0)+Math.min(LAST-1,seg(lu,0.88,0.965)*LAST)*DT;// frente de trabajo único: avanza de la placa 1 a la 21
+       [['int',-1],['asi',1]].forEach(([k,sg],i)=>{const aIn=wall?sa+(i?-0.12:0)+2*Math.PI*(sa<ga?1:0)-2*Math.PI*(sa<ga?1:0):ga+(i?0.25:0.1),rIn=R-1.8;const aOut=ga+sg*0.32,rOut=R+5;
          const [xi,zi]=polar(aIn,rIn),[xo,zo]=polar(aOut,rOut);const [xg,zg]=polar(ga,R);
          let x,z;if(inF<=0.001){x=xo;z=zo}else if(inF>=0.999){x=xi;z=zi}else{const f=inF;const mid=[xg,zg];if(f<0.5){x=lerp(xo,mid[0],f*2);z=lerp(zo,mid[1],f*2)}else{x=lerp(mid[0],xi,(f-0.5)*2);z=lerp(mid[1],zi,(f-0.5)*2)}}
          put(crew[k],x,z,faceTo(x,z,x*2,z*2));
          if(wall){const p=poles[i];p.visible=true;const hand=crew[k].position.clone().add(v3(0,1.3,0));const [wx,wz]=polar(aIn,R-0.3);aimY(p,hand,v3(wx,2.9,wz));p.scale.y=Math.min(p.scale.y,2)}});
        // afuera: dos operadores en escalera burrito atan cada extremo al anillo exterior
-       const tieA=wall?th(LAST)+0.3+sweep*1.1:th(LAST)+0.36,tieB=wall?th(LAST)-0.3-sweep*1.1:th(LAST)-0.36;
+       const tieA=wall?sa+0.02:th(LAST)+0.36,tieB=wall?sa-0.12:th(LAST)-0.36;
        [['ext',tieA,ladder],['sog',tieB,ladder2]].forEach(([k,aa,ld])=>{const [x,z]=polar(aa,R+1.15);put(crew[k],x,z,faceTo(x,z,0,0));if(wall){crew[k].position.y=1.12;ld.visible=true;const [lx,lz]=polar(aa,R+0.75);ld.position.set(lx,0,lz);ld.rotation.set(0,-aa+Math.PI/2,0)}});
-       const [sx,sz]=polar(ga+0.5,R+11);put(crew.sen,sx,sz,faceTo(sx,sz,tele.position.x,tele.position.z))}
+       const [sx,sz]=polar(ga+0.5,R+11);put(crew.sen,sx,sz,faceTo(sx,sz,tele.position.x,tele.position.z))
+       // apertura: con el manipulador afuera entra toda la cuadrilla (también el operador del manipulador) y tiran del borde, primero hacia un lado y después hacia el otro
+       if(lu>0.69&&lu<0.805){OPEN(lu)}}
+     if(t>=T.suc[0]&&t<T.goose[1]){const inS=t<T.suc[1],g=inS?seg(t,...T.suc):seg(t,...T.goose);const ga=th(LAST);
+       const W2=(a,r)=>({a,r});const wrapTo=(a,ref)=>ref+Math.atan2(Math.sin(a-ref),Math.cos(a-ref));
+       const home={int:W2(ga-0.32,R+5),asi:W2(ga+0.32,R+5),ext:W2(ga+0.36,R+1.15),sog:W2(ga-0.36,R+1.15),sen:W2(ga+0.5,R+11)};
+       const sucW={sen:W2(TS-0.42,R+17),sog:W2(TS-0.5,R+4.6),asi:W2(TS-0.62,R+4.6),ext:W2(TS-0.36,R+4.4),int:home.int};
+       const gooW={sen:W2(GA-0.42,R+17),sog:W2(GA-0.5,R+4.6),int:W2(GA+0.5,R+4.2),ext:W2(GA+0.06,R+2.3),asi:W2(GA+0.04,R+1.15)};
+       const ring=(A,B,f)=>{const b=wrapTo(B.a,A.a);return polar(lerp(A.a,b,f),lerp(A.r,B.r,f))};
+       const look=(k,p)=>k==='sen'?faceTo(p[0],p[1],tele.position.x,tele.position.z):faceTo(p[0],p[1],0,0)+Math.PI;
+       for(const k of ['sen','sog','int','ext','asi']){let p;
+         if(inS){if(k==='sen'){const f=ss(seg(g,0.18,0.3));const b=wrapTo(sucW.sen.a,home.sen.a);p=polar(lerp(home.sen.a,b,ss(seg(f,0.3,1))),lerp(home.sen.r,sucW.sen.r,ss(seg(f,0,0.3))))}else p=ring(home[k],sucW[k],ss(seg(g,0.3,0.44)))}
+         else p=g<0.86?ring(sucW[k],gooW[k],ss(seg(g,0,0.22))):ring(gooW[k],home[k],ss(seg(g,0.86,1)));
+         put(crew[k],p[0],p[1],look(k,p));crew[k].position.y=0}
+       if(inS){// operador de adentro: entra por el panel abierto, recibe la punta y coloca malla y sombrero
+         const gate=polar(ga,R+2),gin=polar(ga,R-3),wait=W2(TS-0.38,R-3),inner=W2(TS-0.08,R-3.1);const hp=polar(home.int.a,home.int.r);let p;
+         const L2=(A,B,f)=>[lerp(A[0],B[0],f),lerp(A[1],B[1],f)];
+         if(g<0.34)p=hp;else if(g<0.37)p=L2(hp,gate,ss((g-0.34)/0.03));else if(g<0.39)p=L2(gate,gin,ss((g-0.37)/0.02));else if(g<0.45)p=ring(W2(ga,R-3),wait,ss((g-0.39)/0.06));
+         else if(g<0.47)p=polar(wait.a,wait.r);else if(g<0.5)p=ring(wait,inner,ss((g-0.47)/0.03));else if(g<0.79)p=polar(inner.a,inner.r);
+         else if(g<0.9)p=ring(inner,W2(ga,R-3),ss((g-0.79)/0.11));else if(g<0.93)p=polar(ga,R-3);else{const f2=ss((g-0.93)/0.07);p=f2<0.5?L2(gin,gate,f2*2):L2(gate,hp,f2*2-1)}
+         const tip=sucGroup.localToWorld(v3(-2.4,0.4,0));put(crew.int,p[0],p[1],g>0.47&&g<0.79?faceTo(p[0],p[1],tip.x,tip.z):faceTo(p[0],p[1],0,0));
+         if(g>0.62&&g<0.78){crew.int.userData.arms.forEach((a,i)=>a.rotation.set(-1.1-0.3*Math.sin(t*5+i),0,0))}
+         // operador de afuera: empuja la pipa por detrás, de a tramos cortos
+         if(g>0.57&&g<0.71){const back=sucGroup.localToWorld(v3(6.0,0,0.35));put(crew.ext,back.x,back.z,faceTo(back.x,back.z,0,0));crew.ext.userData.arms.forEach(a=>a.rotation.set(-1.4,0,0))}
+         else if(g>=0.71&&g<0.8){const back=sucGroup.localToWorld(v3(5.9,0,0.9));put(crew.ext,back.x,back.z,faceTo(back.x,back.z,0,0))}}
+       else{const bolt=g>0.6&&g<0.86;const [lx,lz]=polar(GA+0.04,R+0.75);ladder.position.set(lx,0,lz);ladder.rotation.set(0,-(GA+0.04)+Math.PI/2,0);ladder.visible=g>0.56&&g<0.88;
+         if(g>0.58&&g<0.86){const [x,z]=polar(GA+0.04,R+1.15);put(crew.asi,x,z,faceTo(x,z,0,0));crew.asi.position.y=1.12;gun.visible=bolt;gun.position.copy(crew.asi.position).add(v3(0,1.3+Math.sin(t*9)*0.12,0)).add(v3(-Math.cos(GA)*0.35,0,-Math.sin(GA)*0.35))}}}
      if(t>=T.close[0]&&t<T.bolt[0]){const cl=seg(t,...T.close);// nadie adentro al cerrar; luego se tira la soga desde afuera
        const ga=th(LAST);(cl<0.58||cl>0.97?[['int',-1,4.5],['asi',1,4.5]]:[['int',-1,4.5]]).forEach(([k,sg,dr])=>{const [x,z]=polar(ga+sg*(cl>0.8?DT/2+2/R:0.62),R+dr);put(crew[k],x,z,faceTo(x,z,0,0))});
        if(cl<0.8){[['ext',-0.75,6],['sog',0.75,6]].forEach(([k,o,dr])=>{const [x,z]=polar(ga+o,R+dr);put(crew[k],x,z,faceTo(x,z,0,0))})}}
@@ -739,6 +833,7 @@ function update(t){
      const near=eu>0.87;[['ext',-0.5],['asi',-0.62],['int',-0.74],['sog',0.95]].forEach(([k,o],i)=>{const qq=near&&k!=='sog'?polar(LADA+0.14+i*0.11,R+3.4):polar(LADA+o,R+12);put(crew[k],qq[0],qq[1],faceTo(qq[0],qq[1],stair.position.x,stair.position.z))})}
    {// chofer en la cabina del manipulador
     crew.op.visible=tele.visible;if(tele.visible){const p=tele.localToWorld(v3(-0.72,0.55,0.25));crew.op.position.copy(p);crew.op.rotation.y=tele.rotation.y+Math.PI}
+    if(t>=T.liner[0]&&lu>0.69&&lu<0.805){OPEN(lu)}
     // supervisores: recorren la periferia observando la tarea, fuera de las zonas de riesgo
     {// HSE con tablilla: la mira y anota; supervisor: llama, mira el plano o indica señalando
      const ah=crew.hse.userData.arms;ah[0].rotation.set(-1.0,0,0);ah[1].rotation.set(-0.8+0.15*Math.sin(t*5),0,0.25);
@@ -751,7 +846,7 @@ function update(t){
    if(!(t>=T.bolt[0]&&t<T.esc[0]))crew.sen.userData.arms[1].rotation.z=(working||t>T.mark[1])?2.4+Math.sin(t*4)*0.5:0;crew.sen.userData.arms[0].rotation.z=(working||t>T.mark[1])?-0.4:0;
    {let ja=null;if(active>0)ja=th(active)-DT/2;else if(t>=T.bolt[0]&&t<T.esc[0])ja=th(Math.min(N-1,bj))+DT/2;
     if(ja!==null){const near=active>0?ss(seg(au,0.62,0.7)):1;const [lx,lz]=polar(ja-(1-near)*0.4,R+0.75);ladder.position.set(lx,0,lz);ladder.rotation.set(0,-ja+Math.PI/2,0);ladder.visible=true}
-    else ladder.visible=false}
+    else if(!(t>=T.goose[0]&&t<T.goose[1]))ladder.visible=false}
    let corner=null;if(distK>=0&&du>0.2&&du<0.85)corner=plates[distK].localToWorld(v3(0.05,0.3,2.8));else if(active>=0&&au>0.2&&au<0.8)corner=plates[active].localToWorld(v3(0.05,0.3,2.8));
    sogRope.visible=!!corner;if(corner){sogRope.geometry.setFromPoints([crew.sog.position.clone().add(v3(0,1.2,0)),corner]);crew.sog.userData.arms[1].rotation.x=-1.0}else crew.sog.userData.arms[1].rotation.x=0}
   carried.forEach(c=>c.visible=false);BAGW.forEach((q,i)=>{const p=crew[q.k];p.visible=true;put(p,q.x,q.z,q.face);p.position.y=0.36;const sw=Math.sin(t*9+i);p.userData.arms.forEach((a,s)=>a.rotation.set(q.carry?-1.1:sw*0.5*(s?1:-1),0,0));if(q.carry){carried[i].visible=true;carried[i].position.copy(p.position).add(v3(Math.sin(q.face)*0.35,1.05,Math.cos(q.face)*0.35));carried[i].rotation.y=q.face}});
@@ -763,9 +858,50 @@ function update(t){
   loader.visible=su>0.02&&su<0.98;{const AO2=th(LAST);if(su<0.12||su>0.88){const f=su<0.12?ss(seg(su,0.02,0.12)):1-ss(seg(su,0.88,0.98));const r=lerp(R+9,10,f);loader.position.set(Math.cos(AO2)*r,0,Math.sin(AO2)*r);loader.rotation.y=-AO2+(su<0.12?-Math.PI/2:Math.PI/2)}
    else{const a=AO2+(su-0.12)/0.76*Math.PI*2;loader.position.set(Math.cos(a)*10,0,Math.sin(a)*10);loader.rotation.y=-a}}
   // succión
-  const cu=seg(t,...T.suc);trench.visible=t>T.sand[0]+(T.sand[1]-T.sand[0])*0.8&&cu<0.85;sucGroup.visible=cu>0.1;sucGroup.position.y=1.2*(1-ss(seg(cu,0.1,0.55)));bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=pst.visible&&Math.floor(t*2+i)%2===0);
+  const cu=seg(t,...T.suc);{// retroexcavadora: zanja de 40 cm de los dos lados de la placa (afuera y adentro), después tapa los dos lados y se retira
+   const inS=t>=T.suc[0]&&t<T.liner[0];const AO2=th(LAST),TSu=TS+2*Math.PI,RL=R+8.4,RI=R-8.4;
+   const P3=(a,b,f)=>[lerp(a[0],b[0],f),lerp(a[1],b[1],f)];
+   // recorridos: por afuera a radio RL; por adentro a radio RI; el panel abierto une los dos
+   const outArc=(a0,a1,f)=>{const a=lerp(a0,a1,f);return {p:polar(a,RL),h:[-Math.sin(a)*Math.sign(a1-a0||1),Math.cos(a)*Math.sign(a1-a0||1)]}};
+   const inArc=(a0,a1,f)=>{const a=lerp(a0,a1,f);return {p:polar(a,RI),h:[-Math.sin(a)*Math.sign(a1-a0||1),Math.cos(a)*Math.sign(a1-a0||1)]}};
+   const viaGate=(f,inward)=>{const A=polar(AO2,RL),B=polar(AO2,RI);const p=inward?P3(A,B,f):P3(B,A,f);const d=inward?-1:1;return {p,h:[Math.cos(AO2)*d,Math.sin(AO2)*d]}};
+   if(inS){loader.visible=t<T.goose[1];let st,pose={fl:0.12};
+    if(t>=T.suc[1])st={p:polar(TS+0.5,R+22),h:[Math.cos(TS+0.5),Math.sin(TS+0.5)]};
+    else if(cu<0.1)st=outArc(AO2,TSu,ss(cu/0.1));// por afuera hasta la 5.ª placa
+    else if(cu<0.22){st={p:polar(TS,RL),h:[Math.cos(TS),Math.sin(TS)]};pose=Object.assign({stab:1,fl:-0.12},digCycle((cu-0.105)/0.115*3,1))}// zanja exterior
+    else if(cu<0.27)st=outArc(TSu,AO2+2*Math.PI,ss(seg(cu,0.22,0.27)));// vuelve por afuera al panel
+    else if(cu<0.29)st=viaGate(ss(seg(cu,0.27,0.29)),true);// entra
+    else if(cu<0.33)st=inArc(AO2,TSu,ss(seg(cu,0.29,0.33)));// por adentro hasta la 5.ª placa
+    else if(cu<0.43){st={p:polar(TS,RI),h:[-Math.cos(TS),-Math.sin(TS)]};pose=Object.assign({stab:1,fl:-0.12},digCycle((cu-0.335)/0.095*2,1))}// zanja interior
+    else if(cu<0.46)st=inArc(TSu,TSu+0.5,ss(seg(cu,0.43,0.46)));// se corre adentro
+    else if(cu<0.8)st={p:polar(TS+0.5,RI),h:[-Math.cos(TS+0.5),-Math.sin(TS+0.5)]};
+    else if(cu<0.82)st=inArc(TSu+0.5,TSu,ss(seg(cu,0.8,0.82)));
+    else if(cu<0.86){st={p:polar(TS,RI),h:[-Math.cos(TS),-Math.sin(TS)]};const q=(cu-0.82)/0.04;pose={stab:1,fl:-0.12,sw:0,bm:lerp(0.25,0.05,(Math.sin(q*Math.PI*4)+1)/2),st:0.3+0.5*q,bk:-0.6}}// tapa adentro
+    else if(cu<0.88)st=inArc(TSu,AO2+2*Math.PI,ss(seg(cu,0.86,0.88)));
+    else if(cu<0.895)st=viaGate(ss(seg(cu,0.88,0.895)),false);// sale por el panel
+    else if(cu<0.925)st=outArc(AO2,TSu,ss(seg(cu,0.895,0.925)));
+    else if(cu<0.97){st={p:polar(TS,RL),h:[Math.cos(TS),Math.sin(TS)]};const q=(cu-0.925)/0.045;pose={stab:1,fl:-0.12,sw:0,bm:lerp(0.25,0.05,(Math.sin(q*Math.PI*4)+1)/2),st:0.3+0.5*q,bk:-0.6}}// tapa afuera
+    else{const f=ss(seg(cu,0.97,1));st={p:P3(polar(TS,RL),polar(TS+0.5,R+22),f),h:[Math.cos(TS+0.2),Math.sin(TS+0.2)]}}
+    loader.position.set(st.p[0],0,st.p[1]);loader.rotation.y=Math.atan2(st.h[0],st.h[1]);setBH(loader,pose)}
+   else if(t>=T.sand[0]&&t<T.suc[0])setBH(loader,{fl:-0.05});
+   // zanjas: la exterior crece desde la retro hasta la placa; la interior desde la placa hasta la boca; se tapan en orden inverso
+   const dO=ss(seg(cu,0.11,0.22)),dI=ss(seg(cu,0.34,0.43)),fI=ss(seg(cu,0.82,0.86)),fO=ss(seg(cu,0.925,0.97));
+   trench.visible=t>=T.suc[0]&&t<T.suc[1]&&(dO>0.02||dI>0.02);const tr0=trench.children[0],tr1=trench.children[1];const Lo=5.6*dO*(1-fO);tr0.visible=Lo>0.02;tr0.scale.x=Math.max(0.01,Lo/8.2);tr0.position.x=5.4-Lo/2;
+   const Li=3.1*dI*(1-fI);tr1.visible=Li>0.02;tr1.scale.x=Math.max(0.01,Li);tr1.position.x=-Li/2;
+   dirt.visible=t>=T.suc[0]&&cu>0.12&&fO<0.98;dirt.scale.setScalar(Math.max(0.01,dO*(1-fO)));dirt2.visible=t>=T.suc[0]&&cu>0.35&&fI<0.98;dirt2.scale.setScalar(Math.max(0.01,dI*(1-fI))*0.7);
+   // pipa: apoyada afuera; el manipulador la baja a la zanja con la punta contra la placa; dos operadores la enhebran por debajo de a poco
+   const S=polar(TS-0.17,R+7.5),F=polar(TS,R);const lift=ss(seg(cu,0.46,0.49)),mv=ss(seg(cu,0.49,0.54)),down=ss(seg(cu,0.54,0.57));
+   const n=5,pf=seg(cu,0.58,0.7),k=Math.min(n-1,Math.floor(pf*n)),push=pf>=1?1:(k+ss(Math.min(1,(pf*n-k)/0.6)))/n;const off=2.6*(1-push);
+   const Fo=polar(TS,R+off);sucGroup.visible=t>=T.sand[0];sucGroup.position.set(lerp(S[0],Fo[0],mv),3.7*lift*(1-down),lerp(S[1],Fo[1],mv));if(t>=T.suc[1])sucGroup.position.set(F[0],0,F[1]);
+   sucGroup.userData.malla.visible=t>=T.suc[1]||cu>0.72;sucGroup.userData.hat.visible=t>=T.suc[1]||cu>0.74;sucGroup.userData.hat.position.y=0.38+(t<T.suc[1]?0.5*(1-ss(seg(cu,0.74,0.78))):0)}
+  {// cuello de cisne: apoyado afuera, el manipulador lo iza con faja, se apoya sobre la placa y se abulona con 3 bulones
+   const g=seg(t,...T.goose);const lift=ss(seg(g,0.33,0.39)),mv=ss(seg(g,0.39,0.5)),down=ss(seg(g,0.5,0.56));const off=7*(1-mv);
+   goose.visible=t>=T.suc[0];goose.position.set(Math.cos(GA)*off,0.7*lift*(1-down),Math.sin(GA)*off);if(t>=T.goose[1])goose.position.set(0,0,0);
+   goose.userData.bolts.forEach((b,i)=>{const tb=0.64+i*0.08;b.visible=g>tb||t>=T.goose[1];b.material.emissiveIntensity=(g>tb&&g<tb+0.06)?1.6:0});
+   goose.userData.lay.visible=t>=T.goose[0]&&g>0.9||t>=T.goose[1];goose.userData.conn.forEach(o=>o.visible=goose.userData.lay.visible)}
+bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=pst.visible&&Math.floor(t*2+i)%2===0);
   // llenado
-  const wu=seg(t,...T.fill);water.visible=wu>0.05;water.position.y=0.4+ss(seg(wu,0.05,1))*2.1;goose.visible=t>T.close[1]-2;stream.visible=wu>0.05&&wu<1;
+  const wu=seg(t,...T.fill);water.visible=wu>0.05;water.position.y=0.4+ss(seg(wu,0.05,1))*2.1;const gT=T.goose[0]+(T.goose[1]-T.goose[0])*0.9;{const e=document.getElementById('cagua');if(e){const v=t<=gT?'<b style="color:#9fb0bd">sin instalar</b>':wu<=0.05?'<b>disponible</b>':wu<1?'<b style="color:#41b8ea">ingresando al tanque</b>':'<b style="color:#4fd18b">tanque lleno</b>';const h='Agua en cuello de cisne: '+v;if(e.innerHTML!==h)e.innerHTML=h}}stream.visible=wu>0.05&&wu<1;
   {const [x,z]=polar(GA,R-0.9);stream.position.set(x,(3.1+water.position.y)/2,z);stream.scale.y=Math.max(0.1,(3.1-water.position.y)/2.8)}
   {const [x,z]=polar(GA,R+18);L.lay.p.set(x,1.5,z);L.lay.e.hidden=!(t>T.fill[0])}
   L.suc.p.set(Math.cos(TS)*R,1.2,Math.sin(TS)*R);L.suc.e.hidden=!(t>T.mark[0]+8&&t<T.dist[1]);
@@ -860,6 +996,7 @@ window.__cam=(t,e)=>{auto=false;controls.target.set(...t);camera.position.set(..
 loop();
 })();
 </script>
+
 
 </body>
 </html>
