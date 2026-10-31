@@ -70,6 +70,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--water);outline-
 </style>
 </head>
 <body style="margin:0">
+
 <div id="app">
   <div class="top">
     <div class="title glass"><h1>Montaje de tanque australiano</h1><p>22 placas de 6 × 3 m · manipulador telescópico con gancho y fajas · carretón · hidrogrúa · Lic. Víctor Javier Paredes</p></div>
@@ -287,7 +288,14 @@ function person(band,vest=false){const g=new THREE.Group();const w=THREE.Skeleto
  const B=n=>w.getObjectByName(n);const prox=b=>{const p=new THREE.Object3D();p.userData.bone=b;p.userData.rest=b.quaternion.clone();PROX.push(p);return p};
  const arms=['ruarm','luarm'].map(n=>prox(B(n))),legs=['rthigh','lthigh'].map(n=>prox(B(n)));arms.forEach((a,i)=>a.userData.elbow=prox(B(i?'lfarm':'rfarm')));legs.forEach((l,i)=>l.userData.knee=prox(B(i?'lshin':'rshin')));
  const hand=['rhand','lhand'].map(n=>{const o=new THREE.Object3D();o.rotation.x=Math.PI;B(n).add(o);return o});const spine=['spine0','spine1','spine2'].map(n=>prox(B(n))),neck=prox(B('neck')),head=prox(B('head')),feet=['rfoot','lfoot'].map(n=>prox(B(n)));
- g.userData={arms,legs,hand,hipY:0.958,spine,neck,head,feet,root:w,last:null,dist:0};PEOPLE.push(g);scene.add(g);return g}
+ const bn={};['ruarm','rfarm','rhand','luarm','lfarm','lhand'].forEach(n=>bn[n]=B(n));g.updateMatrixWorld(true);const L_=(a,b)=>bn[a].getWorldPosition(new THREE.Vector3()).distanceTo(bn[b].getWorldPosition(new THREE.Vector3()));
+ g.userData={arms,legs,hand,hipY:0.958,spine,neck,head,feet,root:w,last:null,dist:0,bn,La:L_('ruarm','rfarm'),Lf:L_('rfarm','rhand'),ik:[null,null],pole:[null,null]};PEOPLE.push(g);scene.add(g);return g}
+const _q=new THREE.Quaternion(),_q2=new THREE.Quaternion(),_v=new THREE.Vector3();
+function aimBone(b,dir){b.updateMatrixWorld(true);b.getWorldQuaternion(_q);_v.set(0,1,0).applyQuaternion(_q);_q2.setFromUnitVectors(_v,dir.clone().normalize());_q.premultiply(_q2);b.parent.getWorldQuaternion(_q2);b.quaternion.copy(_q2.invert().multiply(_q));b.updateMatrixWorld(true)}
+function solveArm(p,i,T_){const u=p.userData,s=i?'l':'r';const ua=u.bn[s+'uarm'],fa=u.bn[s+'farm'];const S=ua.getWorldPosition(new THREE.Vector3());const a=u.La,b=u.Lf;
+ const d=T_.clone().sub(S);const D=Math.min(d.length(),a+b-0.002);d.normalize();const ca=C(-1,1,(a*a+D*D-b*b)/(2*a*D)),sa=Math.sqrt(1-ca*ca);
+ const pole=u.pole[i]||new THREE.Vector3(0,-1,0);const vv=pole.clone().sub(d.clone().multiplyScalar(pole.dot(d)));if(vv.lengthSq()<1e-6)vv.set(0,-1,0);vv.normalize();
+ const E=S.clone().addScaledVector(d,a*ca).addScaledVector(vv,a*sa);aimBone(ua,E.clone().sub(S));aimBone(fa,S.clone().addScaledVector(d,D).sub(E))}
 function holdProp(p,mesh_,side){p.userData.hand[side].add(mesh_);mesh_.position.set(0,0.0,0.06);return mesh_}
 function sitPose(p){const u=p.userData;u.seated=true;u.legs.forEach(l=>{l.rotation.x=-1.5;l.userData.knee.rotation.x=1.45});u.arms.forEach((a,i)=>{a.rotation.set(-0.75,0,i?0.12:-0.12);a.userData.elbow.rotation.x=-0.75})}
 function seatedZ(parent,band,x,seatY,z){const p=person(band);parent.add(p);p.position.set(x,seatY-p.userData.hipY+0.03,z);sitPose(p);return p}
@@ -299,7 +307,9 @@ function rigFrame(){PEOPLE.forEach(p=>{const u=p.userData;if(u.seated||!p.visibl
   const ph=u.dist/0.68*Math.PI;const a=Math.sin(ph)*0.5*(u.mv||0);u.legs[0].rotation.x=a;u.legs[1].rotation.x=-a;u.legs.forEach((l,i)=>l.userData.knee.rotation.x=Math.max(0,Math.sin(ph+(i?Math.PI:0)+0.6))*0.55*(u.mv||0));
   u.arms.forEach((ar,i)=>{if(Math.abs(ar.rotation.x)<1e-6&&Math.abs(ar.rotation.z)<1e-6&&(u.mv||0)>0.05)ar.userData.sw=true;else if((u.mv||0)<0.05)ar.userData.sw=false;
    if(ar.userData.sw){ar.rotation.x=(i?a:-a)*0.6;ar.userData.elbow.rotation.x=-0.25}});u.root.position.y=-0.02*Math.abs(Math.sin(ph))*(u.mv||0)});
- PROX.forEach(p=>p.userData.bone.quaternion.copy(p.userData.rest).multiply(p.quaternion))}
+ PEOPLE.forEach(p=>{const u=p.userData;const k=u.crouch||0;if(k>0){u.legs.forEach((l,i)=>{l.rotation.x=-1.25*k;l.userData.knee.rotation.x=2.0*k});u.root.position.y=-0.42*k;u.spine[0].rotation.x=0.35*k;u.wc=true}else if(u.wc){u.spine[0].rotation.x=0;u.wc=false}u.crouch=0});
+ PROX.forEach(p=>p.userData.bone.quaternion.copy(p.userData.rest).multiply(p.quaternion));
+ PEOPLE.forEach(p=>{const u=p.userData;if(p.visible&&(u.ik[0]||u.ik[1])){p.updateMatrixWorld(true);u.ik.forEach((T_,i)=>{if(T_)solveArm(p,i,T_)})}u.ik=[null,null]})}
 // ---------- tractor y carretón ----------
 const yel=M(0xf2b21c,{metalness:.25,roughness:.5}),blk=M(0x181818,{roughness:.8}),chrome=M(0xcfd4d8,{metalness:.9,roughness:.25}),glass=M(0xa8c8d8,{transparent:true,opacity:.26,roughness:.04,metalness:.2,depthWrite:false});
 const tireTex=(()=>{const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');x.fillStyle='#161616';x.fillRect(0,0,256,64);x.fillStyle='#050505';
@@ -451,8 +461,17 @@ const boltMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:.7,emissi
 const bolts=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const g=new THREE.Group();[0.35,1.5,2.65].forEach(y=>mesh(new THREE.SphereGeometry(0.07,6,5),boltMat.clone(),[Math.cos(a)*(R+0.12),y,Math.sin(a)*(R+0.12)],g,false));g.visible=false;scene.add(g);bolts.push(g)}
 const wedges=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const w=mesh(new THREE.ConeGeometry(0.12,0.35,4),M(0xb8902a,{metalness:.5}),[Math.cos(a)*(R+0.25),2.4,Math.sin(a)*(R+0.25)],scene,false);w.visible=false;wedges.push(w)}
 const boltsFull=[];for(let k=0;k<N;k++){const a=th(k)+DT/2;const g=new THREE.Group();for(let i=0;i<8;i++)for(const s of[-1,1]){const b=mesh(new THREE.SphereGeometry(0.055,6,5),boltMat.clone(),[0,0.2+i*0.37,0],g,false);const aa=a+s*0.004;b.position.x=Math.cos(aa)*(R+0.12);b.position.z=Math.sin(aa)*(R+0.12)}g.visible=false;scene.add(g);boltsFull.push(g)}
-const gun2=mesh(new THREE.BoxGeometry(0.12,0.22,0.3),M(0xd83b2a),null,scene,false);gun2.visible=false;
-const gun=mesh(new THREE.BoxGeometry(0.12,0.22,0.3),M(0xd83b2a),null,scene,false);
+ // pistola de impacto a batería (encastre 1/2", tubo de 24 mm) y llave combinada de 24 mm
+ function impactGun(){const g=new THREE.Group();scene.add(g);const red=M(0xd8362a,{roughness:.45,metalness:.1}),blk_=M(0x1b1c1e,{roughness:.6}),alu=M(0xc4c8cc,{metalness:.85,roughness:.3}),soc=M(0x2a2c2e,{metalness:.8,roughness:.35});
+  const cx=(r1,r2,l,m,x)=>{const o=mesh(new THREE.CylinderGeometry(r1,r2,l,20),m,[x,0,0],g,false);o.rotation.z=Math.PI/2;return o};
+  cx(0.021,0.021,0.055,soc,-0.0275);mesh(new THREE.BoxGeometry(0.02,0.016,0.016),alu,[-0.064,0,0],g,false);cx(0.036,0.05,0.09,alu,-0.115);for(let k=0;k<5;k++){const r=mesh(new THREE.TorusGeometry(0.046,0.004,4,16),alu,[-0.1-k*0.012,0,0],g,false);r.rotation.y=Math.PI/2}
+  cx(0.056,0.056,0.12,red,-0.22);cx(0.058,0.05,0.035,blk_,-0.295);mesh(new THREE.BoxGeometry(0.11,0.025,0.1),blk_,[-0.22,0.045,0],g,false);
+  const h=mesh(new THREE.BoxGeometry(0.05,0.15,0.045),blk_,[-0.24,-0.11,0],g,false);h.rotation.z=-0.2;mesh(new THREE.BoxGeometry(0.02,0.03,0.02),red,[-0.205,-0.07,0],g,false);
+  mesh(new THREE.BoxGeometry(0.13,0.075,0.095),red,[-0.25,-0.215,0],g,false);mesh(new THREE.BoxGeometry(0.132,0.02,0.097),blk_,[-0.25,-0.19,0],g,false);g.visible=false;return g}
+ function comboWrench(){const g=new THREE.Group();scene.add(g);const st=M(0xd2d6da,{metalness:.95,roughness:.22});
+  const r=mesh(new THREE.TorusGeometry(0.023,0.008,6,18),st,[0,0,0],g,false);r.rotation.y=Math.PI/2;mesh(new THREE.BoxGeometry(0.008,0.25,0.022),st,[0,-0.145,0],g,false);
+  [-1,1].forEach(q=>mesh(new THREE.BoxGeometry(0.008,0.035,0.009),st,[0,-0.28,q*0.016],g,false));mesh(new THREE.BoxGeometry(0.008,0.012,0.04),st,[0,-0.262,0],g,false);g.visible=false;return g}
+ const gun=impactGun(),gun2=impactGun(),wrench=comboWrench(),wrench2=comboWrench();const ladder3=burrito(),ladder4=burrito();ladder3.visible=ladder4.visible=false;
 const cable=mesh(new THREE.TorusGeometry(R+0.2,0.035,6,200),M(0x555555,{metalness:.8}),[0,1.5,0],scene,false);cable.rotation.x=Math.PI/2;cable.visible=false;
 
 // ---------- arena, taludes, succión, lona, agua ----------
@@ -666,9 +685,56 @@ const dummy=new THREE.Object3D();
 function poseOf(fn){fn(dummy);dummy.updateMatrixWorld();return{p:dummy.position.clone(),q:dummy.quaternion.clone()}}
 function applyPose(o,A,B,f,arc=0){o.position.lerpVectors(A.p,B.p,f);o.position.y+=Math.sin(Math.PI*f)*arc;o.quaternion.slerpQuaternions(A.q,B.q,f)}
 
+
+// ===== manipulador: la pluma solo sube, baja y extiende en el plano vertical del equipo; siempre corta (alcance ~5,7 m) =====
+const SLG=2.7,REACH=5.65,PIVL=v3(0.55,2.05,2.3),lugL=v3(0.05,PH+0.08,0);
+function telePose(pv,fwd){const yaw=Math.atan2(-fwd.x,-fwd.z);const off=PIVL.clone().applyAxisAngle(v3(0,1,0),yaw);return {tp:v3(pv.x-off.x,0,pv.z-off.z),ty:yaw}}
+const pivAt=(ang,r)=>{const [x,z]=polar(ang,r);return v3(x,2.05,z)};const radDir=ang=>v3(-Math.cos(ang),0,-Math.sin(ang));
+function tiltPose(a,rb,phi,lift){const d=new THREE.Object3D();setPlateFinal(d,a,lift,rb,-Math.PI/2+phi);d.updateMatrixWorld();return {p:d.position.clone(),q:d.quaternion.clone(),lug:d.localToWorld(lugL.clone())}}
+const wrapA=(a,ref)=>ref+Math.atan2(Math.sin(a-ref),Math.cos(a-ref));
+const pileInfo=k=>k===LAST?{a:th(1),rb:R+7.6}:{a:th(k),rb:RP};
+const rvOf=(rb,phi)=>rb+(PH+0.08)*Math.cos(phi)+REACH;
+function restHookOf(P){const yaw=P.ty;const f=v3(-Math.sin(yaw),0,-Math.cos(yaw)),r=v3(Math.cos(yaw),0,-Math.sin(yaw));return P.tp.clone().addScaledVector(r,0.55).addScaledVector(f,1.2).setY(3.1)}
+function mk(pv,fwd,hook,pose,att,still,k,phase){const P=telePose(pv,fwd);return Object.assign(P,{hook:hook||restHookOf(P),pp:pose.p,pq:pose.q,att,still,k,phase})}
+function polarLerp(A,B,f){const aA=Math.atan2(A.z,A.x),aB=wrapA(Math.atan2(B.z,B.x),aA),rA=Math.hypot(A.x,A.z),rB=Math.hypot(B.x,B.z);const a=lerp(aA,aB,f),r=lerp(rA,rB,f);return v3(Math.cos(a)*r,2.05,Math.sin(a)*r)}
+function yawLerpDir(dA,dB,f){const a=Math.atan2(dA.z,dA.x),b=wrapA(Math.atan2(dB.z,dB.x),a);const c=lerp(a,b,f);return v3(Math.cos(c),0,Math.sin(c))}
+function trailerPose(k,phi,lift){const slot=loadSlot(N-1-k);const c=trailer.localToWorld(slot.clone());const ax=v3(1,0,0).applyQuaternion(trailer.quaternion),az=v3(0,0,1).applyQuaternion(trailer.quaternion);
+ const lat=ax.dot(trailer.position.clone().negate())>0?ax.clone():ax.clone().negate();// lado que mira al tanque
+ const up=v3(0,1,0);const y=lat.clone().multiplyScalar(Math.cos(phi)).addScaledVector(up,Math.sin(phi)).normalize();const z=az.clone();const x=y.clone().cross(z).normalize();
+ const q=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));const base=c.clone().addScaledVector(lat,-1.47);base.y=c.y+0.06+lift;
+ const lug=base.clone().addScaledVector(y,PH+0.08).addScaledVector(x,0.05);return {p:base,q,lug,base:base.clone()}}
+function distStep(k,u){const P=pileInfo(k);const A0=trailerPose(k,0,0);const dBL=A0.lug.clone().sub(A0.base).setY(0).normalize();
+ const pick=phi=>{const T_=trailerPose(k,phi,0);return {T:T_,pv:T_.lug.clone().addScaledVector(dBL,REACH).setY(2.05)}};
+ const prevPv=k===0?pivAt(Math.atan2(trailer.position.z,trailer.position.x)-0.45,RTH+2.3):pivAt(pileInfo(k-1).a,rvOf(pileInfo(k-1).rb,0));const prevF=k===0?radDir(Math.atan2(trailer.position.z,trailer.position.x)-0.45):radDir(pileInfo(k-1).a);
+ const fPick=dBL.clone().negate();
+ if(u<0.12){const f=ss(u/0.12);return mk(polarLerp(prevPv,pick(0).pv,f),yawLerpDir(prevF,fPick,f),null,A0,false,false,k,'dist')}
+ if(u<0.2){const f=ss(seg(u,0.12,0.2));const pk=pick(0);const P0=telePose(pk.pv,fPick);return mk(pk.pv,fPick,restHookOf(P0).lerp(A0.lug.clone().add(v3(0,SLG,0)),f),A0,f>0.95,true,k,'dist')}
+ if(u<0.32){const phi=ss(seg(u,0.2,0.32))*Math.PI/2;const pk=pick(phi);return mk(pk.pv,fPick,pk.T.lug.clone().add(v3(0,SLG,0)),pk.T,true,true,k,'dist')}
+ const TV=trailerPose(k,Math.PI/2,0);const pvV=pick(Math.PI/2).pv;
+ if(u<0.38){const f=ss(seg(u,0.32,0.38));const T_=trailerPose(k,Math.PI/2,0.5*f);return mk(pvV,fPick,T_.lug.clone().add(v3(0,SLG,0)),T_,true,true,k,'dist')}
+ const D0=tiltPose(P.a,P.rb,Math.PI/2,0.62),pvD=pivAt(P.a,rvOf(P.rb,Math.PI/2));
+ if(u<0.8){const f=ss(seg(u,0.38,0.8));const pv=polarLerp(pvV,pvD,f);const fw=yawLerpDir(fPick,radDir(P.a),f);const q=TV.q.clone().slerp(D0.q,f);
+  const hk=pv.clone().addScaledVector(fw,REACH);hk.y=lerp(TV.lug.y+0.5,D0.lug.y,f)+SLG;const off=lugL.clone().applyQuaternion(q);return mk(pv,fw,hk,{p:hk.clone().sub(v3(0,SLG,0)).sub(off),q},true,false,k,'dist')}
+ if(u<0.84){const f=ss(seg(u,0.8,0.84));const T_=tiltPose(P.a,P.rb,Math.PI/2,lerp(0.62,0.12,f));return mk(pvD,radDir(P.a),T_.lug.clone().add(v3(0,SLG,0)),T_,true,true,k,'dist')}
+ if(u<0.94){const phi=(1-ss(seg(u,0.84,0.94)))*Math.PI/2;const T_=tiltPose(P.a,P.rb,phi,0.12);return mk(pivAt(P.a,rvOf(P.rb,phi)),radDir(P.a),T_.lug.clone().add(v3(0,SLG,0)),T_,true,true,k,'dist')}
+ const f=ss(seg(u,0.94,1));const T_=tiltPose(P.a,P.rb,0,0.12);return mk(pivAt(P.a,rvOf(P.rb,0)),radDir(P.a),T_.lug.clone().add(v3(0,SLG+0.9*f,0)),T_,f<0.3,true,k,'dist')}
+function asmStep(k,u){const a=th(k),P=pileInfo(k),L0=0.12;const prevA=k===0?pileInfo(N-1).a:k===LAST?th(LAST)+0.35:th(k-1);
+ const T0=tiltPose(P.a,P.rb,0,L0);
+ if(u<0.15){const f=ss(u/0.15);const ang=lerp(prevA,wrapA(P.a,prevA),f);const pv=pivAt(ang,lerp(R+12,rvOf(P.rb,0),f));return mk(pv,radDir(ang),null,T0,false,false,k,'asm')}
+ if(u<0.25){const f=ss(seg(u,0.15,0.25));const pv=pivAt(P.a,rvOf(P.rb,0));const P0=telePose(pv,radDir(P.a));return mk(pv,radDir(P.a),restHookOf(P0).lerp(T0.lug.clone().add(v3(0,SLG,0)),f),T0,f>0.95,true,k,'asm')}
+ if(u<0.45){const phi=ss(seg(u,0.25,0.45))*Math.PI/2;const T_=tiltPose(P.a,P.rb,phi,L0);return mk(pivAt(P.a,rvOf(P.rb,phi)),radDir(P.a),T_.lug.clone().add(v3(0,SLG,0)),T_,true,true,k,'asm')}
+ if(u<0.6){const f=ss(seg(u,0.45,0.6));const ang=lerp(P.a,wrapA(a,P.a),f),rb=lerp(P.rb,R,f);const T_=tiltPose(ang,rb,Math.PI/2,L0+0.35*ss(C(0,1,seg(u,0.45,0.5))));return mk(pivAt(ang,rvOf(rb,Math.PI/2)),radDir(ang),T_.lug.clone().add(v3(0,SLG,0)),T_,true,false,k,'asm')}
+ const pvF=pivAt(a,rvOf(R,Math.PI/2));
+ if(u<0.72){const f=ss(seg(u,0.6,0.72));const T_=tiltPose(a,R,Math.PI/2,lerp(L0+0.35,0,f));return mk(pvF,radDir(a),T_.lug.clone().add(v3(0,SLG,0)),T_,true,true,k,'asm')}
+ const TF=tiltPose(a,R,Math.PI/2,0);
+ if(u<0.86){const f=ss(seg(u,0.72,0.86));return mk(pvF,radDir(a),TF.lug.clone().add(v3(0,SLG+0.9*f,0)),TF,f<0.3,true,k,'asm')}
+ const f=ss(seg(u,0.86,1));return mk(pivAt(a,lerp(rvOf(R,Math.PI/2),R+12,f)),radDir(a),null,TF,false,false,k,'asm')}
+function teleOverride(t){for(let k=0;k<N;k++)if(t>=DS[k][0]&&t<DS[k][1])return distStep(k,seg(t,...DS[k]));
+ for(let k=0;k<N;k++){const ak=k<LAST?T['p'+k]:T.close;if(t>=ak[0]&&t<ak[1])return asmStep(k,seg(t,...ak))}return null}
+
 // ---------- estado en función del tiempo ----------
 const camGoal={t:v3(0,1,0),e:v3(-38,34,48)};
-function update(t){
+window.__T=T;function update(t){
   const ch=chapOf(t);placeStair(t);if(window.__rod)window.__rod.visible=t>=T.liner[0];gun2.visible=false;ladder2.visible=false;stake.visible=t<T.arrive[0];
   // marcado
   const um=seg(t,...T.mark);paintArc(ss(seg(um,0.2,0.85)));
@@ -682,31 +748,17 @@ function update(t){
    trailer.updateMatrixWorld()}
   cones.visible=t>T.arrive[0]+(T.arrive[1]-T.arrive[0])*0.75&&t<T.dist[1]+1.2;
   // placas
+  const TOV=teleOverride(t);
   let placed=0,active=-1,au=0,distK=-1,du=0;
   for(let k=0;k<N;k++){const p=plates[k];const a=th(k);const slot=loadSlot(N-1-k);
     load[N-1-k].visible=t<DS[k][0]+dD(k)*0.2;
     const ak=k<LAST?T['p'+k]:T.close;
     if(t<DS[k][0]+dD(k)*0.2){p.visible=false;continue}
     p.visible=true;
-    if(t<DS[k][1]){distK=k;du=seg(t,...DS[k]);
-      const A=poseOf(d=>{d.position.copy(trailer.localToWorld(slot.clone().add(v3(0,0.06,0))));d.quaternion.copy(trailer.quaternion);d.rotateY(Math.PI/2);d.rotateZ(-Math.PI/2);d.translateX(-0.0)});
-      const B=poseOf(d=>setPlatePile(d,a,0));
-      // traslado con pluma corta, por fuera de la circunferencia (radio ~R+7), siguiendo el giro del manipulador por el camino más corto
-      const tA=Math.atan2(trailer.position.z,trailer.position.x),wr=(x,r)=>r+Math.atan2(Math.sin(x-r),Math.cos(x-r)),aB=wr(a,tA);
-      const ac=lerp(tA,aB,ss(seg(du,0.25,0.8)));const [cx,cz]=polar(ac,R+7.2);
-      const Cq=poseOf(d=>setPlatePile(d,ac,0)).q;const Cp=v3(cx,2.6,cz);
-      if(du<0.32){const g=ss(seg(du,0.2,0.32));p.position.lerpVectors(A.p,Cp,g);p.position.y=lerp(A.p.y,2.6,ss(seg(du,0.18,0.26)));p.quaternion.slerpQuaternions(A.q,Cq,g)}
-      else if(du<0.78){p.position.copy(Cp);p.quaternion.copy(Cq)}
-      else{const g=ss(seg(du,0.78,0.88));p.position.lerpVectors(Cp,B.p,g);p.position.y=lerp(2.6,B.p.y,ss(seg(du,0.8,0.9)));p.quaternion.slerpQuaternions(Cq,B.q,g)}
-      continue}
+    if(t<DS[k][1]){distK=k;du=seg(t,...DS[k]);if(TOV&&TOV.k===k&&TOV.phase==='dist'){p.position.copy(TOV.pp);p.quaternion.copy(TOV.pq)}continue}
     if(t<ak[0]){setPlatePile(p,a,0);continue}
     if(t>=ak[1]){setPlateFinal(p,a);placed++;continue}
-    active=k;au=seg(t,...ak);
-    if(au<0.25)setPlatePile(p,a,0);
-    else if(au<0.45){const f=ss(seg(au,0.25,0.45));setPlateFinal(p,a,f*0.6,RP,-Math.PI/2*(1-f))}
-    else if(au<0.6){const f=ss(seg(au,0.45,0.6));setPlateFinal(p,a,0.6+f*0.6,lerp(RP,R,f))}
-    else if(au<0.72){const f=ss(seg(au,0.6,0.72));setPlateFinal(p,a,1.2*(1-f),R)}
-    else setPlateFinal(p,a);
+    active=k;au=seg(t,...ak);if(TOV&&TOV.k===k&&TOV.phase==='asm'){p.position.copy(TOV.pp);p.quaternion.copy(TOV.pq)}
     if(au>=0.72)placed++}
   $('pc').textContent=placed+' / 22';
   // estabilizadores de la primera placa
@@ -752,7 +804,8 @@ function update(t){
     else if(lu<0.42){roll.position.copy(dir).multiplyScalar(RIN-5).setY(0.75);roll.visible=true;roll.scale.set(1,1,1)}
     else if(lu<0.675){const c=tele.localToWorld(v3(0,0,-5.0));const up=ss(seg(lu,0.42,0.45))*(1-ss(seg(lu,0.53,0.555)));const pr=seg(lu,0.555,0.66);const sc=lerp(1,0.3,pr);roll.scale.set(sc,1,sc);roll.position.set(c.x,0.75*sc+0.9*up,c.z);roll.visible=true}
     else roll.visible=false}
-   const piv=tele.localToWorld(v3(0.55,2.05,2.3));let hookP;
+   if(TOV){tele.position.copy(TOV.tp);tele.rotation.set(0,TOV.ty,0);tele.updateMatrixWorld()}
+   let piv=tele.localToWorld(v3(0.55,2.05,2.3));let hookP;
    const stabDown=loaded?1:0;outr.forEach(o=>o.position.y=0.95-0.0*stabDown);outr.forEach(o=>o.scale.y=loaded?1.0:0.35);
    if(loaded&&load3){load3.updateMatrixWorld();const top=load3.localToWorld(v3(0.05,PH,0));const lugs=[load3.localToWorld(v3(0.05,PH+0.08,-1.8)),load3.localToWorld(v3(0.05,PH+0.08,1.8))];
      const uu=distK>=0?du:au;const up=distK>=0?(uu<0.2?ss(seg(uu,0.12,0.2)):uu>0.85?1-ss(seg(uu,0.85,0.92)):1):(uu<0.25?ss(seg(uu,0.18,0.25)):uu>0.8?1-ss(seg(uu,0.8,0.86)):1);
@@ -765,6 +818,10 @@ function update(t){
    else if(inLiner&&((lu>0.06&&lu<0.355)||(lu>0.42&&lu<0.675))){const rp=roll.position;const ax=v3(Math.cos(LX),0,Math.sin(LX));const rest=tele.localToWorld(v3(0,4.2,-3.6));const k=lu<0.4?ss(seg(lu,0.342,0.355)):ss(seg(lu,0.66,0.675));hookP=rp.clone().add(v3(0,1.6,0)).lerp(rest,k);// desengancha y recoge el gancho antes de retirarse
      const ra=v3(Math.sin(LX),0,-Math.cos(LX));/* eslingas a los extremos de la barra pasante: paralelas al eje del rollo */[rp.clone().addScaledVector(ra,1.25),rp.clone().addScaledVector(ra,-1.25)].forEach((e,i)=>{slings[i].visible=k<0.05;aimY(slings[i],hookP,e)})}
    else{slings.forEach(s=>s.visible=false);hookP=tele.localToWorld(v3(0,4.2,-3.6))}
+   if(TOV){hookP=TOV.hook.clone();const pl=plates[TOV.k];pl.updateMatrixWorld();slings.forEach((s_,i)=>{s_.visible=TOV.att;if(TOV.att)aimY(s_,hookP,pl.localToWorld(v3(0.05,PH+0.08,i?1.8:-1.8)))});outr.forEach(o=>o.scale.y=TOV.still?1:0.35)}
+   else{// fuera de las placas: el equipo se orienta hacia la carga (la pluma no gira respecto del chasis)
+     const dx=hookP.x-tele.position.x,dz=hookP.z-tele.position.z,dd=Math.hypot(dx,dz);if(dd>1.5&&slings.some(q=>q.visible)){const yaw=Math.atan2(-dx,-dz)+Math.asin(C(-1,1,0.55/dd));tele.rotation.set(0,yaw,0);tele.updateMatrixWorld();piv=tele.localToWorld(v3(0.55,2.05,2.3))}}
+   {const lt=tele.worldToLocal(hookP.clone());lt.x=0.55;hookP=tele.localToWorld(lt)}// en el plano de la pluma
    const tip=hookP.clone().add(v3(0,1.7,0));const dl=tip.distanceTo(piv);const mid=piv.clone().lerp(tip,Math.min(0.58,5.2/dl));
    aim(boomA,piv,mid);aim(boomB,mid,tip);aim(liftCyl,tele.localToWorld(v3(0.55,1.4,-0.6)),piv.clone().lerp(tip,Math.min(0.3,2.6/dl)));
    hookPlate.position.copy(tip).add(v3(0,-0.1,0));hookPlate.lookAt(piv.x,hookPlate.position.y,piv.z);
@@ -936,6 +993,26 @@ bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=ps
   {const [x,z]=polar(GA,R-0.9);stream.position.set(x,(3.1+water.position.y)/2,z);stream.scale.y=Math.max(0.1,(3.1-water.position.y)/2.8)}
   {const [x,z]=polar(GA,R+18);L.lay.p.set(x,1.5,z);L.lay.e.hidden=!(t>T.fill[0])}
   L.suc.p.set(Math.cos(TS)*R,1.2,Math.sin(TS)*R);L.suc.e.hidden=!(t>T.mark[0]+8&&t<T.dist[1]);
+  // abulonado: operario con pistola de impacto del lado de la cabeza y otro con llave combinada de 24 en la tuerca; filas de abajo hacia arriba, arriba suben a los burritos
+  wrench.visible=wrench2.visible=false;ladder3.visible=ladder4.visible=false;
+  if(t>=T.bolt[0]&&t<T.fill[0]&&!(t>=T.esc[0]&&t<T.esc[1])&&bu<1){const up=v3(0,1,0);
+   [[bj,gun,wrench,crew.asi,crew.ext,ladder,ladder3],[bj2,gun2,wrench2,crew.sen,crew.sog,ladder2,ladder4]].forEach(([j,G,Wr,pg,pw,LA,LB])=>{if(j>=N){G.visible=false;return}const ja=th(Math.min(N-1,j))+DT/2;const frac=C(0,0.999,bu*H2-Math.floor(bu*H2));
+    const row=Math.floor(frac*8),hb=0.2+row*0.37;const tg=v3(-Math.sin(ja),0,Math.cos(ja)),out=v3(Math.cos(ja),0,Math.sin(ja));
+    const at=(tang,rad,y)=>v3(Math.cos(ja)*rad,y,Math.sin(ja)*rad).addScaledVector(tg,tang);
+    const H=at(-0.09,R+0.12,hb),Nn=at(0.09,R+0.12,hb);
+    // burritos: afuera mientras se trabaja desde el piso, se arriman para las filas altas
+    const mv=seg(frac,0.47,0.53),inn=ss(mv),walking=mv>0&&mv<1,high=frac>=0.53;
+    [[LA,-0.58],[LB,0.58]].forEach(([L_,tn])=>{const rr=lerp(R+2.3,R+0.75,inn);L_.position.copy(at(tn,rr,0));L_.rotation.set(0,-ja+Math.PI/2,0);L_.visible=true});
+    const stand=(p,tn,face)=>{let P;if(walking)P=at(tn*1.9,R+1.6,0);else if(high)P=at(tn,R+0.62,1.125);else P=at(tn,R+0.55,0);put(p,P.x,P.z,faceTo(P.x,P.z,face.x,face.z));p.position.y=P.y;if(!high&&!walking&&row===0)p.userData.crouch=1;else if(!high&&!walking&&row===1)p.userData.crouch=0.45};
+    stand(pg,-0.52,H);stand(pw,0.52,Nn);
+    // pistola: tubo de 24 sobre la cabeza del bulón, eje tangencial, empuñadura hacia abajo
+    const z=tg.clone().cross(up).normalize();G.visible=!walking;G.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(tg,up,z));G.position.copy(H).addScaledVector(tg,-0.012+Math.sin(t*40)*0.002);if(G===gun)window.__gp=[H.x,H.y,H.z,out.x,out.z];
+    // llave combinada: estrella en la tuerca, mango hacia abajo y afuera
+    const hd=up.clone().multiplyScalar(-0.8).addScaledVector(out,0.6).normalize();const wx=tg.clone().negate(),wy=hd.clone().negate(),wz=wx.clone().cross(wy).normalize();
+    Wr.visible=!walking;Wr.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(wx,wy,wz));Wr.position.copy(Nn).addScaledVector(tg,0.012);
+    if(!walking){pg.updateMatrixWorld(true);G.updateMatrixWorld(true);Wr.updateMatrixWorld(true);
+     pg.userData.ik=[G.localToWorld(v3(-0.245,-0.12,0)),G.localToWorld(v3(-0.13,0.0,0.06))];pg.userData.pole=[v3(0,-1,0).addScaledVector(out,0.8),v3(0,-1,0).addScaledVector(out,0.8)];
+     pw.userData.ik=[Wr.localToWorld(v3(0,-0.245,0)),null];pw.userData.pole=[v3(0,-1,0).addScaledVector(out,0.8),null]}})}
   // cámara automática
   const cn=CH[ch].k;const a0=th(ka);
   if(cn==='mark'){camGoal.t.set(0,0,0);camGoal.e.set(-30,40,40)}
@@ -1023,7 +1100,7 @@ canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||e.buttons)
 canvas.addEventListener('pointerleave',()=>tipEl.hidden=true);
 const clock=new THREE.Clock();
 function loop(){const dt=Math.min(0.05,clock.getDelta());if(playing){time+=dt*speed;if(time>=ATOT){time=ATOT;playing=false;setPlayLbl()}}render(dt);requestAnimationFrame(loop)}
-window.__cam=(t,e)=>{auto=false;controls.target.set(...t);camera.position.set(...e);render(0)};window.__dbg=()=>({bw:BAGW.map(q=>[q.k,q.x.toFixed(1),q.z.toFixed(1)]),time,st:sceneAt(time),TKS,TKD,tr:trucks.map(g=>g.visible?[+g.position.x.toFixed(1),+g.position.z.toFixed(1),+g.rotation.y.toFixed(2)]:null)});window.__crewPos=k=>crew[k].position.toArray();window.__mtA=s=>{time=parseFloat(s);auto=true;playing=false;setPlayLbl();render(1)};window.__mt=s=>{time=aOfScene(s);auto=true;playing=false;setPlayLbl();render(1)};
+window.__cam=(t,e)=>{auto=false;controls.target.set(...t);camera.position.set(...e);render(0)};window.__dbg=()=>({bw:BAGW.map(q=>[q.k,q.x.toFixed(1),q.z.toFixed(1)]),time,st:sceneAt(time),TKS,TKD,tr:trucks.map(g=>g.visible?[+g.position.x.toFixed(1),+g.position.z.toFixed(1),+g.rotation.y.toFixed(2)]:null)});window.__tov=t=>{const o=teleOverride(t);return o?{k:o.k,ph:o.phase,tp:o.tp.toArray().map(v=>+v.toFixed(2)),ty:+o.ty.toFixed(2),hook:o.hook.toArray().map(v=>+v.toFixed(2)),reach:+Math.hypot(o.hook.x-(o.tp.x+0),o.hook.z-o.tp.z).toFixed(2),trl:trailer.position.toArray().map(v=>+v.toFixed(1))}:null};window.__crewPos=k=>crew[k].position.toArray();window.__mtA=s=>{time=parseFloat(s);auto=true;playing=false;setPlayLbl();render(1)};window.__mt=s=>{time=aOfScene(s);auto=true;playing=false;setPlayLbl();render(1)};
 loop();
 });
 </script>
