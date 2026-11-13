@@ -10,6 +10,21 @@ Borrador para validar en campo. No reemplaza al manual del fabricante ni al ATS.
 - **Referencia de industria (no WWS):** en tanques AST de Norteamérica es habitual tender la lona antes de levantar las paredes, replegarla hacia el centro, armar el anillo alrededor y después subirla sobre las placas ([Geosynthetics, jun/jul 2022](https://nxtbook.com/ifai/geosynthetics/geosynthetics-june-july-2022/index.php?startid=31)). Layfield insiste en lastrar la lona durante toda la instalación por el viento ([nota técnica](https://www.layfieldgroup.com/geosynthetics/tech-notes/handling-geomembranes-in-extremely-cold-temperatures.aspx)).
 - **Cifras marcadas "estimado":** son cálculos míos, sin medición de campo.
 
+## 1.1 La lona: Zonda 1100
+
+Datos de la [ficha del fabricante](https://www.zonda.com.ar/zonda/zonda-1100/); conviene confirmarlos con una ficha vigente porque la publicada es antigua.
+
+| Propiedad | Valor | Qué implica para el despliegue |
+|---|---|---|
+| Gramaje | 650 g/m² (±5 %) | Lona de unos 1,3–1,4 t (estimado para ~1.950 m²) |
+| Espesor | 0,56 mm | |
+| Ancho de rollo | 1,50 m | El fondo de 42 m lleva unas 28 a 30 soldaduras; la resistencia de la soldadura no figura en la ficha |
+| Tracción | 50 kg/cm urdimbre, 45 kg/cm trama | Sobra resistencia si la carga se reparte en un tramo de borde |
+| Desgarre | 70 kg (DIN 53356) | **Es el dato que manda:** un tiro puntual (ojal, cinta sola, mano) puede iniciar un rasgado con muy poca fuerza |
+| Elongación a rotura | 20–23 % | La lona estira antes de romper: tirar despacio y en etapas |
+
+Conclusión: la Zonda 1100 aguanta bien el tiro repartido y mal el tiro puntual. Por eso el tiro va siempre con barra de mordaza y nunca directo de una cinta o un ojal.
+
 ## 2. Proceso actual
 
 ### Cronograma (según la animación)
@@ -33,7 +48,7 @@ El día 1 termina cerca de las 18:10 y el día 2 a las 17:20. El llenado (unas 4
 
 ### Dónde se pierde tiempo, gente o seguridad
 
-1. **Apertura manual de la lona.** El rollo deja una lonja de 2 m sobre el diámetro y la cuadrilla arrastra cada mitad hasta 21 m sobre arena. Estimado: la lona completa pesa del orden de 1,5 a 2 t (unos 1.900 a 2.000 m² a 0,75–1 mm), así que cada mitad son 700 a 1.000 kg en arrastre. Por eso hacen falta 8 a 10 personas, con esfuerzo de espalda, tirando con las manos del borde y caminando sobre pliegues.
+1. **Apertura manual de la lona.** El rollo deja una lonja de 2 m sobre el diámetro y la cuadrilla arrastra cada mitad hasta 21 m sobre arena. Estimado: con Zonda 1100 (650 g/m²) y unos 1.950 m², la lona pesa cerca de 1,3 a 1,4 t con solapes y cintas, así que cada mitad son unos 650 a 700 kg en arrastre. Por eso hacen falta 8 a 10 personas, con esfuerzo de espalda, tirando con las manos del borde y caminando sobre pliegues.
 2. **Levantado con hisopos.** Dos personas adentro empujan la lona 3 m hacia arriba con palos, placa por placa, mientras dos afuera atan. Es lento y deja gente adentro justo antes del cierre.
 3. **40 bolsas de lastre.** Cerca de 1 t de carga manual que entra y después hay que sacar o dejar bajo el agua.
 4. **Abulonado todo al final.** Los 15 bulones restantes por unión se colocan recién con el anillo cerrado: 285 min con dos equipos. Es el bloque más largo del día 2 y es lo que lo lleva hasta las 17:20.
@@ -68,14 +83,18 @@ Las paredes siguen yendo **antes** de la lona. Descarté el método norteamerica
 
 1. **Plegado en doble acordeón hacia el eje central y luego enrollado**, con el borde perimetral como capa superior de cada mitad. Así, al tirar del borde, las capas se despegan desde arriba y no se arrastra el paquete entero.
 2. **Eje central y los cuatro cuartos marcados**, y el rollo rotulado con el extremo que va hacia el panel abierto.
-3. **Peso real de la lona** y **resistencia certificada de las cintas perimetrales** (o de ojales reforzados cada 3 m). Si las cintas no están calculadas para tiro, se usa barra de mordaza: el borde envuelto en un caño de 3 m apretado con dos listones, para repartir la carga.
+3. **Peso real de la lona** y **resistencia de las soldaduras** entre paños (la ficha de Zonda 1100 no la da).
+4. **Sentido de los paños:** pedir que las soldaduras queden perpendiculares a la lonja desenrollada. Así el tiro de apertura corre a lo largo de las soldaduras y no las abre.
+
+**Tiro siempre con barra de mordaza:** el borde se envuelve una vuelta en un caño de 3 m con las puntas redondeadas y se aprieta con dos listones. Una barra por placa. Con 3 m de agarre, 100 kg de tiro son 0,3 kg/cm contra los 45 kg/cm que resiste la tela. Las cintas quedan solo para atar a la varilla.
 
 ### 4.2 Kit de tiro
 
 - 6 caballetes con rodillo de nylon que calzan sobre el borde superior de la placa y lo cubren. La lona y la soga nunca tocan chapa.
 - 6 sogas de poliéster de 12 mm × 40 m, de bajo estiramiento, y 2 bridas de tres ramales.
 - 1 cabrestante portátil tipo capstan de 700–1.000 kg, anclado al enganche de la camioneta o del manipulador, a unos 15 m del anillo.
-- **Fusible mecánico o dinamómetro en cada tiro, calibrado en 150–200 kg** (estimado, a ajustar con el dato de las cintas). Si la lona se traba, se corta el fusible y no la lona.
+- 6 barras de mordaza de 3 m (ver 4.1).
+- **Fusible mecánico o dinamómetro en cada barra, calibrado en unos 100 kg** (estimado: el tiro esperado es de 35 a 60 kg por barra; ajustar con la prueba de tiro). Si la lona se traba, se corta el fusible y no la lona.
 - Radios para el operador del cabrestante y el guía interno.
 
 ### 4.3 Día 1 (cambios sobre lo actual)
@@ -89,11 +108,11 @@ Las paredes siguen yendo **antes** de la lona. Descarté el método norteamerica
 
 Roles: **operador del cabrestante** (afuera), **ayudante de sogas** (afuera, mueve caballetes y ata desde el burrito), **guía interno**, **señalero**. El operador del manipulador se suma como segundo guía cuando saca el equipo.
 
-1. **Control de viento.** Fijar en el ATS el límite para abrir lona. Sugerido: no abrir con ráfagas de más de 25–30 km/h. Empezar a primera hora.
+1. **Control de viento y temperatura.** El PVC se endurece con frío: con heladas, esperar a que la lona tome temperatura antes de abrir pliegues. Fijar en el ATS el límite para abrir lona. Sugerido: no abrir con ráfagas de más de 25–30 km/h. Empezar a primera hora.
 2. **Desenrollar** con el manipulador sobre el diámetro, igual que hoy. El manipulador sale y no vuelve a entrar.
-3. **Enganchar** las sogas a las cintas del borde de la primera mitad, una por placa (cada 6 m), de a tres placas contiguas por brida.
+3. **Colocar las barras de mordaza** en el borde de la primera mitad, una por placa (cada 6 m), y enganchar las sogas de a tres placas contiguas por brida.
 4. **Tirar en dos pasadas.** Empezar por las tres placas del centro de la mitad, que tienen el recorrido más largo (21 m), y seguir alternando hacia los extremos. Primera pasada hasta medio recorrido; segunda hasta el pie del talud. Son 4 grupos por mitad.
-5. **Seguir tirando y la lona sube sola** por el talud y la placa hasta el caballete. El ayudante, desde el burrito, ata las cintas a la varilla exterior y pasa el caballete a la placa siguiente.
+5. **Seguir tirando y la lona sube sola** por el talud y la placa hasta el caballete. El ayudante, desde el burrito, ata las cintas a la varilla exterior, retira la barra y pasa el caballete a la placa siguiente.
 6. **Repetir con la otra mitad.** Las 12–16 bolsas van solo sobre el borde de barlovento de la mitad que todavía no está atada.
 7. **Sector del cierre:** la lona queda media baja a 2 m de cada lado del panel abierto, como hoy. Salen los guías, conteo de personal, se coloca la última placa y se sube ese tramo con las sogas desde afuera.
 8. **Lámina de agua de 5–10 cm** apenas cerrado el anillo y hecho el conteo. Asienta la lona contra el viento mientras se termina el abulonado. No pasar de 10 cm hasta completar torque, cuñas y cable.
@@ -114,8 +133,8 @@ Evita los 22 izajes de descarga, pero el carretón queda unas 3 h más en locaci
 
 ## 5. Qué validar antes de usarlo
 
-1. **Fabricante de la lona:** resistencia de cintas u ojales al tiro, plegado pedido, peso real.
+1. **Confeccionista de la lona:** resistencia de las soldaduras, sentido de los paños, plegado pedido, peso real.
 2. **Fabricante del tanque (o WWS):** que admita bulones presentados antes del cierre y agua de 5–10 cm con torque incompleto.
-3. **Prueba de tiro** con dinamómetro en el primer montaje: medir la fuerza real por punto y ajustar el fusible. Si supera lo que aguantan las cintas, usar barra de mordaza o más puntos de tiro.
+3. **Prueba de tiro** con dinamómetro en el primer montaje: medir la fuerza real por punto y ajustar el fusible. Si supera los 100 kg por barra, sumar puntos de tiro o hacer más pasadas.
 4. **ATS nuevo** para sogas en tensión: zona de latigazo, anclaje del cabrestante, comunicación por radio, límite de viento.
 5. Primer montaje con el método nuevo y la cuadrilla completa presente como respaldo; reducir a 4 recién cuando el tiro esté medido.
