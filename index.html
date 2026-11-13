@@ -106,7 +106,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--water);outline-
       <div><i style="background:#ef5350;opacity:.6"></i>Zona de exclusión del izaje</div>
     </div>
     <p style="margin:0;font-size:11.5px;color:var(--muted)">EPP de todo el personal: mameluco azul, casco, gafas, guantes de alto impacto y botines. Color del brazalete = rol.</p>
-    <p style="margin:0;font-size:11.5px;color:var(--muted)">Secuencia según <i>Water Transfer en Vaca Muerta</i>, cap. 7. Animación ilustrativa, sin escala de tiempos real.</p>
+    <p style="margin:0;font-size:11.5px;color:var(--muted)">Secuencia según <i>Water Transfer en Vaca Muerta</i>, cap. 7, con la optimización propuesta (a validar en campo): abulonado progresivo durante el armado y lona Zonda 1100 abierta por tiro con sogas y cabrestante. Animación ilustrativa, sin escala de tiempos real.</p>
     <div class="credit">
       <div><span class="cl">Autor · contacto</span><b>Lic. Víctor Javier Paredes</b><small>HSE · Water transfer · Autor de “Water Transfer en Vaca Muerta”</small>
         <div class="cbtn"><a href="https://wa.me/5492994603071?text=Hola%20V%C3%ADctor%2C%20vi%20la%20animaci%C3%B3n%203D%20de%20montaje%20de%20tanque%20australiano%20y%20quiero%20consultarte." target="_blank" rel="noopener">WhatsApp</a><a href="mailto:vparedes2@gmail.com?subject=Montaje%20de%20tanque%20australiano%203D">vparedes2@gmail.com</a></div></div>
@@ -134,7 +134,7 @@ const KS=0.5;// segundos de animación (a 1×) por minuto real de obra
 add('mark',45*KS);add('arrive',30*KS);
 const dD=k=>75*KS/N;T.dist=[t0,0];const DS=[];for(let k=0;k<N;k++){DS.push([t0,t0+dD(k)]);t0+=dD(k)}T.dist[1]=t0;
 const asmStart=t0;const dA=k=>k<1?20*KS:10*KS;for(let k=0;k<LAST;k++)add('p'+k,dA(k));
-add('sand',15*KS);add('suc',40*KS);add('goose',26*KS);add('liner',195*KS);add('close',30*KS);add('bolt',285*KS);add('esc',8);add('fill',14);const TOT=t0;
+add('sand',15*KS);add('suc',40*KS);add('goose',26*KS);add('liner',195*KS);add('close',30*KS);add('bolt',160*KS);add('esc',8);add('fill',14);const TOT=t0;
 // ---------- cronograma real: dos jornadas ----------
 const SCH=[];let a0=0;
 const W=(ta,tb,c0,c1,day,note)=>{SCH.push({k:'w',a0,a1:a0+(tb-ta),t0:ta,t1:tb,c0,c1,day,note});a0+=tb-ta};
@@ -151,22 +151,22 @@ const P=(ts,c0,c1,day,lab,d)=>{SCH.push({k:'p',a0,a1:a0+d,t0:ts,t1:ts,c0,c1,day,
  W(T.suc[0],T.suc[1],c,c+40,1,'Succión: zanja de 40 cm con retropala, el manipulador baja la pipa con faja, la retro tapa y se retira');c+=40;
  W(T.goose[0],T.goose[1],c,c+25,1,'Cuello de cisne: el manipulador lo posiciona con faja y se abulona a la placa con 3 bulones');c+=25;
  const LM=T.liner[0]+(T.liner[1]-T.liner[0])*0.38;
- W(T.liner[0],LM,c,c+30,1,'Último paso del día: el manipulador ingresa la lona y la deja adentro, junto al panel abierto');c+=30;
+ W(T.liner[0],LM,c,c+45,1,'Último paso del día: el manipulador deja la lona adentro, junto al panel abierto, y se cuelgan caballetes y sogas en las placas del primer tiro');c+=45;
  P(LM-0.05,c,c+15,1,'Fin de la jornada · orden y limpieza; la cuadrilla se retira en las camionetas',4);c+=15;
  P(LM-0.05,c,1440+410,1,'Noche · anillo con 3 bulones por unión, lona enrollada adentro junto al panel',7);c=1440+410;
  P(LM-0.05,c,1440+430,2,'La cuadrilla regresa en las camionetas (7:10)',3);c=430;
  P(LM-0.05,c,c+30,2,'Charla de seguridad · conteo de personal y control de viento',4);c+=30;
- W(LM,T.liner[1],c,c+165,2,'Con agua disponible en el cuello de cisne se desenrolla la lona: sin agua no se abre');c+=165;
+ W(LM,T.liner[1],c,c+150,2,'Lona con 4 personas: tiro con sogas por encima del borde y cabrestante afuera; nadie arrastra a mano');c+=150;
  P(T.liner[1],c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
  W(T.close[0],T.close[1],c,c+30,2);c+=30;
- {const bd=T.bolt[1]-T.bolt[0],b1=T.bolt[0]+bd*105/285,b2=b1+bd*90/285,AB='Abulonado con 2 equipos en paralelo, cada uno con su escalera burrito';
- W(T.bolt[0],b1,c,c+105,2,AB);c+=105;
+ {const bd=T.bolt[1]-T.bolt[0],b1=T.bolt[0]+bd*120/160,AB='Bulones de las uniones que faltaban y torque final de las 22, con 2 equipos; lámina de agua de 5–10 cm asentando la lona';
+ W(T.bolt[0],b1,c,c+120,2,AB);c+=120;
  P(b1,c,c+60,2,'Almuerzo (1 h)',6);c+=60;
- W(b1,b2,c,c+90,2,AB);c+=90;
- P(b2,c,c+20,2,'Pausa de hidratación · mate (20 min)',4);c+=20;
- W(b2,T.bolt[1],c,c+90,2,AB);c+=90}
+ W(b1,T.bolt[1],c,c+40,2,AB);c+=40}
+
+
  W(T.esc[0],T.esc[1],c,c,2,'En simultáneo con el abulonado: no suma tiempo');
- P(T.fill[0]+0.01,c,c+15,2,'Fin del montaje (17:20) · orden y limpieza; la cuadrilla se retira en las camionetas',5);c+=15;
+ P(T.fill[0]+0.01,c,c+15,2,'Fin del montaje (14:40) · orden y limpieza; la cuadrilla se retira en las camionetas',5);c+=15;
  W(T.fill[0]+0.01,T.fill[1],c,c+240,2,'Llenado: ~4 h a 860 m³/h, controlado por telemetría (fuera del tiempo de montaje)');c+=240;
  P(T.fill[1],c,c+30,2,'Noche · Locación sin personal, tanque operativo',4)}
 const ATOT=a0;
@@ -179,13 +179,13 @@ const CH=[
  {k:'mark',t:'Marcado',h:'Charla inicial, chequeo de izaje y marcado',s:['Charla de seguridad y ATS junto a las camionetas; permiso de trabajo firmado.','Chequeo de certificados y estado de fajas, grilletes, gancho y del manipulador (habilitación del operador incluida).','Verificar nivelación y compactación; si no es óptima, pedir nivelación y dejarlo en minuta.','Liberar el área de piedras y objetos cortantes.','Clavar la estaca metálica en el centro y marcar la circunferencia con cuerda de 21,01 m tensa (22 placas), dos operadores.','Marcar con el cliente la ubicación de la succión: va en la 5.ª placa, nunca en la última.'],w:'Coordinar con el cliente si hay pozos activos o equipos operando en el sector.'},
  {k:'arrive',t:'Carretón',h:'Llegada del carretón con las placas',s:['La locación es rectangular, de unos 100 × 100 m, con acceso de ingreso y de egreso (un solo sentido de circulación).','El tractor con el carretón ingresa despacio por el acceso sur, guiado por el señalero, y se estaciona DENTRO de la locación: el camino queda libre.','Se cierra la zona del carretón con conos y cartel: solo ingresa el manipulador y la cuadrilla autorizada.','Cuando se descargó la última placa, se retiran los conos y el carretón sale por el acceso norte, despacio y con señalero, sin pisar nada ni pasar cerca de nadie.'],w:'Velocidad de paso dentro de la locación, sin derrapes ni giros. Señalero siempre a la vista del chofer. Revisar la manga de viento: con viento fuerte no se iza.'},
  {k:'dist',t:'Descarga',h:'Descarga de placas una a una',s:['El manipulador con gancho y fajas toma cada placa del carretón.','La lleva suspendida y la deja junto a su posición sobre la circunferencia, en el sentido de armado.','La misma tarea puede hacerla la hidrogrúa; el procedimiento de izaje es el mismo.'],w:'La cuadrilla espera dentro del anillo marcado, lejos del recorrido de la carga: nadie bajo la placa suspendida ni dentro del radio de giro.'},
- {k:'p0',t:'Anillo',h:'Armado del anillo con manipulador',s:['Primera placa con estabilizadores clavados al piso en ambos extremos.','El manipulador iza la placa con gancho y dos fajas; el soguero, ubicado en el extremo libre de la placa, la lleva con la soga guía hasta la línea marcada sin entrar a la zona de exclusión.','La cuadrilla espera fuera de la zona de exclusión y se acerca recién cuando la placa está a ras del piso, en su posición.','Se arrima la escalera burrito y un operario coloca los 3 bulones de agarre inicial: superior, medio e inferior.'],w:'Nadie bajo la carga suspendida ni dentro del radio de giro. Nadie toca la placa con las manos mientras está colgada. Dotación mínima 5, recomendada 6.'},
+ {k:'p0',t:'Anillo',h:'Armado del anillo con manipulador',s:['Primera placa con estabilizadores clavados al piso en ambos extremos.','El manipulador iza la placa con gancho y dos fajas; el soguero, ubicado en el extremo libre de la placa, la lleva con la soga guía hasta la línea marcada sin entrar a la zona de exclusión.','La cuadrilla espera fuera de la zona de exclusión y se acerca recién cuando la placa está a ras del piso, en su posición.','Se arrima la escalera burrito y dos operarios colocan los 3 bulones de agarre inicial: superior, medio e inferior.','Abulonado progresivo: una segunda pareja presenta los 15 bulones restantes de cada unión, sin torque final, al menos 3 placas (18 m) detrás del izaje. Quedan presentadas unas 12 uniones el primer día.'],w:'Nadie bajo la carga suspendida ni dentro del radio de giro. Nadie toca la placa con las manos mientras está colgada. Dotación mínima 5, recomendada 6.'},
  {k:'sand',t:'Arena',h:'Arena y taludes',s:['Durante el armado del anillo llegan 4 camiones batea de 22 m³: entran por el acceso sur, retroceden con banderillero por el panel abierto (donde va la última placa) y descargan adentro, lejos de la cuadrilla y del manipulador (5 viajes si hay rocas filosas).','Retropala: colchón de arena que protege la lona.','Talud interno a 45° con arena; talud externo a 45° con material grueso.','Zanjeo en la 5.ª placa, donde va la succión.'],w:'Retirar piedras: cualquier filo bajo la lona termina en pinchazo.'},
  {k:'suc',t:'Succión',h:'Succión (pipa) en la 5.ª placa, antes de la lona',s:['La retroexcavadora abre la zanja de 40 cm de profundidad de los dos lados de la 5.ª placa: primero afuera; después entra por el panel abierto y excava adentro. Sin la zanja interior la pipa no pasa.','El manipulador, con gancho y faja, baja la pipa armada a la zanja con la punta contra la placa; la retro se corre para que la carga no pase sobre ella.','Dos operadores la instalan: uno afuera la empuja de a tramos cortos y la enhebra por debajo de la placa; el otro, adentro, recibe la punta y coloca la malla antivórtice y el sombrero bulonado.','La retroexcavadora tapa la zanja interior, sale por el panel abierto, tapa la exterior y se retira: recién ahí entra la lona.','El caño se entierra bajo el nivel de platea y pasa por el borde inferior de la placa, trabado con cuña metálica.','Adentro, la boca queda al ras del piso, con malla antivórtice y sombrero bulonado sobre la brida.','Afuera: válvula de corte, derivación con brida ciega de inspección y segunda válvula; tipo lug, colocadas abiertas para centrar.','Nunca en la última placa: ese hueco queda libre para que entre el manipulador con la lona.'],w:'Un pegado apurado no pierde agua: chupa aire. El lastre con bolsas durante el curado es parte del procedimiento.'},
  {k:'goose',t:'Cuello',h:'Cuello de cisne con manipulador',s:['El manipulador toma el cuello de cisne con gancho y faja y lo pasa por encima de la placa, sin rozar el borde.','Se posiciona apoyado sobre la placa y un operario, desde la escalera burrito, lo abulona con 3 bulones.','Se conecta la layflat que viene del campo: queda agua disponible para abrir la lona.','El manipulador vuelve al panel abierto para ingresar la lona.'],w:'Nadie bajo la carga suspendida ni entre el cuello y la placa al apoyarlo; señalero único a la vista del operador.'},
- {k:'liner',t:'Lona',h:'Lona: chorizo, apertura, izaje y atado',s:['Con el tanque vacío de personal, el manipulador entra por el panel abierto con la lona colgada del gancho, la deja adentro junto al panel y sale.','Al día siguiente, con agua disponible en el cuello de cisne, el manipulador vuelve a enganchar el rollo (2 m de ancho) y lo desenrolla a lo largo, de pared a pared: queda una lonja de 2 m sobre el diámetro.','El operador deja el manipulador afuera y se suma: todo el personal que interviene (seis personas) abre los pliegues, primero hacia un lado y después hacia el otro.','Con la lona abierta y antes de levantar las paredes, se reparten unas 40 bolsas blancas de rafia con lastre sobre toda la superficie, para que el viento no la levante.','Un solo equipo de cuatro levanta la lona en forma secuencial y progresiva, de la placa 1 a la 21: dos adentro con hisopos (palos de 2 m con punta redondeada, para no romperla).','Los otros dos, afuera en escalera burrito, avanzan a la par y atan las cintas de la lona a la varilla horizontal exterior, a 40 cm del borde.','En el cierre la lona queda media baja: por ahí salen los dos de adentro.'],w:'El tanque queda sin un panel durante esta tarea: paso para el equipo y salida libre, sin espacio confinado. Nadie adentro mientras el manipulador circula.'},
- {k:'close',t:'Cierre',h:'Cierre del anillo y última lona',s:['Antes de izar: conteo de personal, nadie adentro del tanque.','El manipulador coloca la última placa; escalera burrito y 3 bulones de agarre en cada unión. Con el anillo cerrado se retiran los estabilizadores de la primera placa.','Con sogas atadas a 2 m de cada lado del cierre, desde afuera se termina de subir la lona sobre la última placa.'],w:'Nunca cerrar el anillo con una persona adentro: con el tanque cerrado no hay salida, y al llenar hay riesgo de ahogamiento. Señalero, soguero y nadie bajo la carga.'},
- {k:'bolt',t:'Abulonado',h:'Abulonado completo del anillo (2 equipos)',s:['Con el anillo cerrado, se colocan todos los bulones de cada unión.','El operario trabaja siempre desde la escalera burrito, unión por unión.','Pistola a batería para el aproche y el torque; control final por “sin luz” en la unión completa.','Cinta multipropósito del lado interno, cuñas y pines según fabricante, cable acerado con tensor.'],w:'Escalera burrito apoyada y estable en cada unión; nunca trepar por la placa ni trabajar desde el talud.'},
+ {k:'liner',t:'Lona',h:'Lona Zonda 1100: tiro con sogas y cabrestante',s:['Día 1: el manipulador deja el rollo adentro, junto al panel abierto, y se cuelgan caballetes con rodillo y sogas.','Día 2, con control de viento: el manipulador desenrolla la lonja de 2 m sobre el diámetro, sale y no vuelve a entrar. Lastre reducido: 14 bolsas del lado que todavía no se abre.','Una barra de mordaza de 3 m por placa toma el borde: la Zonda 1100 resiste el tiro repartido (45 kg/cm), no el puntual (desgarre 70 kg).','Las sogas pasan sobre los caballetes y se juntan de a 3 o 4 placas; el cabrestante tira desde afuera, con fusible de 100 kg por barra.','Dos pasadas hasta el pie del talud y el mismo tiro sube la lona al borde; el ayudante ata las cintas a la varilla desde el burrito. Se repite con la otra mitad.','En el cierre la lona queda media baja: por ahí salen los dos guías.'],w:'Nadie en la línea de una soga en tensión, ni entre la lona y la pared, ni sobre un pliegue en movimiento. El guía destraba pliegues solo con el tiro detenido, y lo pide por radio. Propuesta a validar con prueba de tiro y dinamómetro.'},
+ {k:'close',t:'Cierre',h:'Cierre del anillo y última lona',s:['Antes de izar: conteo de personal, nadie adentro del tanque.','El manipulador coloca la última placa; escalera burrito y 3 bulones de agarre en cada unión. Con el anillo cerrado se retiran los estabilizadores de la primera placa.','Con sogas atadas a 2 m de cada lado del cierre, desde afuera se termina de subir la lona sobre la última placa.','Con el anillo cerrado y el conteo hecho, entra una lámina de agua de 5 a 10 cm que asienta la lona contra el viento. No más de 10 cm hasta completar torque, cuñas y cable.'],w:'Nunca cerrar el anillo con una persona adentro: con el tanque cerrado no hay salida, y al llenar hay riesgo de ahogamiento. Señalero, soguero y nadie bajo la carga.'},
+ {k:'bolt',t:'Abulonado',h:'Bulones faltantes y torque final (2 equipos)',s:['Unas 12 uniones ya vienen con todos los bulones presentados desde el armado.','Los dos equipos completan primero las 10 uniones que faltan, desde la escalera burrito, unión por unión.','Después dan el torque final a las 22 con pistola a batería; control por “sin luz” en la unión completa.','Cinta multipropósito del lado interno, cuñas y pines según fabricante, cable acerado con tensor.'],w:'Escalera burrito apoyada y estable en cada unión; nunca trepar por la placa ni trabajar desde el talud. Validar con el fabricante que admite bulones presentados antes del cierre.'},
  {k:'esc',t:'Escalera',h:'Instalación de la escalera de inspección',s:['La escalera de inspección (torre con plataforma, escalera con barandas a ambos lados) se iza con el manipulador, gancho y fajas.','Se apoya contra la cara exterior de una placa, lejos de la succión, del cuello de cisne y del cierre.','El señalero guía la maniobra; la cuadrilla espera fuera de la zona de exclusión y se acerca recién con la escalera apoyada en el piso.','Se nivela, se fija y se verifica la baranda antes de habilitarla.'],w:'Nadie bajo la escalera suspendida ni dentro del radio de giro del manipulador. La escalera es el único acceso habilitado al borde del tanque.'},
  {k:'fill',t:'Llenado',h:'Llenado',s:['Conteo final de personal antes de abrir el ingreso de agua: nadie adentro.','Afuera, en la pipa: manifold 1→2, dos manguerotes Bauer a las bombas A (en marcha) y B (backup), impulsión por derivador 2→1, cisterna de gasoil de 5.000 L en batea y antena de telemetría.','La manguera layflat llega desde el campo y entra por el cuello de cisne sobre el borde, sin rozar la lona.','Volumen útil hasta 2,5 m: 50 cm de resguardo bajo el borde.','Tanque operativo: 3.466 m³ útiles.'],w:'Purga del fondo al final del llenado para eliminar el sedimento del montaje.'}];
 const chapOf=t=>{let c=0;CH.forEach((x,i)=>{if(t>=T[x.k][0])c=i});return c};
@@ -635,6 +635,43 @@ const ballast=new THREE.Group();scene.add(ballast);
  const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;const bm=M(0xffffff,{map:tx,roughness:.9});const bg=new THREE.BoxGeometry(0.6,0.2,0.4);
  [[4.5,6],[9.5,10],[14.5,12],[18.3,12]].forEach(([r,n],ri)=>{for(let i=0;i<n;i++){const a=i/n*Math.PI*2+ri*0.37;const b=new THREE.Mesh(bg,bm);b.position.set(Math.cos(a)*r,0.47,Math.sin(a)*r);b.rotation.y=-a+((i*7)%5-2)*0.3;b.castShadow=true;b.visible=false;ballast.add(b)}})}
 const BAGW=[];const carried=[0,1,2,3].map(()=>{const m=mesh(new THREE.BoxGeometry(0.55,0.2,0.38),M(0xecebe4,{roughness:.9}),null,scene);m.visible=false;return m});
+// ---------- lona optimizada: tiro con sogas por encima del borde, barras de mordaza y cabrestante afuera ----------
+const LNR=R-0.2,LNF=R-1.45,LD=v3(Math.cos(LX),0,Math.sin(LX)),LNm=v3(-Math.sin(LX),0,Math.cos(LX));
+const axW=(x,y,z)=>v3(LD.x*x+LNm.x*z,y,LD.z*x+LNm.z*z);// coordenadas del eje de la lonja → mundo
+const lnY=(x,z)=>{const r=Math.hypot(x,z);return 0.38+(r>LNF?(r-LNF)*1.24/1.25:0)};
+const LPH=k=>(k+1)*DT;// ángulo de la placa k medido desde el panel abierto
+const LGR=[[[3,4,5,6],[7,8,9],[2,1,0]],[[16,15,14,13],[12,11,10],[17,18,19,20]]],LT0=[0.72,0.85],LGW=0.0283;
+const SPH=(s,k)=>LPH(k)-(s?2*Math.PI:0);
+function linerState(lu){const p=new Array(LAST).fill(0),r=new Array(LAST).fill(0);let act=null;
+  LGR.forEach((gs,s)=>{const t0=LT0[s];gs.forEach((g,gi)=>{const a1=t0+gi*0.01,sg=t0+0.03+gi*LGW,u=seg(lu,sg,sg+LGW);
+    const pp=0.5*ss(seg(lu,a1,a1+0.01))+0.5*ss(seg(u,0,0.42)),rr=ss(seg(u,0.42,0.88));g.forEach(k=>{p[k]=pp;r[k]=rr});
+    if(lu>=a1&&lu<a1+0.01)act={s,gi,g,ph:'p1'};else if(lu>=sg&&lu<sg+LGW)act={s,gi,g,ph:u<0.42?'p2':u<0.88?'up':'tie'}})});
+  return {p,r,act}}
+function sogPhi(lu){const H=-0.36,F=SPH(0,LGR[0][0][0]);if(lu<0.69)return{a:H,up:0};if(lu<0.72)return{a:lerp(H,F,ss(seg(lu,0.69,0.72))),up:0};
+  let prev=F;for(let s=0;s<2;s++){const t0=LT0[s],first=SPH(s,LGR[s][0][0]);
+    if(s===1){if(lu<0.85)return{a:lerp(prev,first,ss(seg(lu,0.835,0.85))),up:0};prev=first}
+    if(lu<t0+0.03)return{a:first,up:0};
+    for(let gi=0;gi<3;gi++){const g=LGR[s][gi],sg=t0+0.03+gi*LGW,a0=SPH(s,g[0]),a1=SPH(s,g[g.length-1]);
+      if(lu<sg+LGW){const u=seg(lu,sg,sg+LGW);if(u<0.2)return{a:lerp(prev,a0,ss(u/0.2)),up:0};return{a:lerp(a0,a1,(u-0.2)/0.8),up:u>0.42?1:0}}prev=a1}}
+  return{a:lerp(prev,H,ss(seg(lu,0.965,0.995))),up:0}}
+const LNX=48,LNS=8;
+const linerSide=[1,-1].map(sd=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1,LNX,LNS),linerMat);m.receiveShadow=true;m.frustumCulled=false;m.visible=false;m.userData.sd=sd;scene.add(m);return m});
+function updLinerSide(m,p){const sd=m.userData.sd,pos=m.geometry.attributes.position;const cp=[[-LNR,0],[LNR,0]];
+  for(let k=0;k<LAST;k++){const z=Math.sin(LPH(k));if(Math.abs(z)<1e-6||Math.sign(z)!==sd)continue;const hz=LNR*Math.abs(z);cp.push([LNR*Math.cos(LPH(k)),lerp(Math.min(1,hz),hz,p[k])])}cp.sort((a,b)=>a[0]-b[0]);
+  let i=0;for(let ix=0;ix<=LNX;ix++){const x=-LNR+2*LNR*ix/LNX;while(i<cp.length-2&&x>cp[i+1][0])i++;const A=cp[i],B=cp[i+1];const e0=lerp(A[1],B[1],C(0,1,(x-A[0])/(B[0]-A[0]||1)));
+    const hz=Math.sqrt(Math.max(0,LNR*LNR-x*x)),e=Math.min(hz,Math.max(1,e0));
+    for(let is=0;is<=LNS;is++){const z=sd*e*is/LNS,w=axW(x,lnY(x,z),z);pos.setXYZ(is*(LNX+1)+ix,w.x,w.y,w.z)}}
+  pos.needsUpdate=true;m.geometry.computeVertexNormals()}
+const lnRopes=[0,1,2,3].map(()=>{const l=line(0xeee6b0);l.visible=false;l.frustumCulled=false;return l}),lnPull=line(0xeee6b0);lnPull.visible=false;lnPull.frustumCulled=false;
+const lnBars=[0,1,2,3].map(()=>{const b=mesh(new THREE.CylinderGeometry(0.05,0.05,3,8),M(0x9aa0a6,{metalness:.7,roughness:.4}),null);b.visible=false;return b});
+const lnSad=[0,1,2,3].map(()=>{const g=new THREE.Group();scene.add(g);mesh(new THREE.BoxGeometry(0.34,0.2,0.5),M(0xf08a1c,{metalness:.3}),[0,0,0],g);const ro=mesh(new THREE.CylinderGeometry(0.07,0.07,0.44,12),M(0xf4f4f0,{roughness:.4}),[0,0.13,0],g);ro.rotation.x=Math.PI/2;g.visible=false;return g});
+const winchTruck=pickup();winchTruck.visible=false;{const dr=mesh(new THREE.CylinderGeometry(0.16,0.16,0.4,14),M(0xd8362a,{metalness:.3}),[0,0.78,-2.95],winchTruck);dr.rotation.z=Math.PI/2;mesh(new THREE.BoxGeometry(0.6,0.3,0.4),M(0x2a2c2e),[0,0.55,-2.9],winchTruck)}
+function winchPose(lu){const f=seg(lu,0.835,0.848),w=Math.sin(Math.PI*f),a=lerp(Math.PI/2,-Math.PI/2,ss(f)),r=R+17+6*w;
+  const rad=axW(Math.cos(a),0,Math.sin(a)),tan=axW(Math.sin(a),0,-Math.cos(a));const h=rad.clone().multiplyScalar(1-w).addScaledVector(tan,w);return {p:rad.multiplyScalar(r),yaw:Math.atan2(h.x,h.z)}}
+ballast.children.forEach((b,i)=>{if(i<14){const w=axW(15-i*27/13,0.58,-0.6);b.position.copy(w);b.rotation.y=-LX+((i*7)%5-2)*0.25}});
+const PRE=12,SQA=[12,13,14,15,16,0,1,2,3,4,5],SQB=[17,18,19,20,21,6,7,8,9,10,11];
+const plateProg=t=>{let v=0;for(let k=0;k<LAST;k++){const a=T['p'+k];if(t>=a[0])v=k+seg(t,a[0],a[1])}return v};
+const bIdx=k=>{const a=SQA.indexOf(k);return a>=0?a:SQB.indexOf(k)};
 const ties=new THREE.Group();scene.add(ties);
 {const rod=new THREE.Mesh(new THREE.TorusGeometry(R+0.2,0.025,6,240),M(0x777777,{metalness:.8}));rod.rotation.x=Math.PI/2;rod.position.y=PH-0.4;scene.add(rod);rod.castShadow=false;window.__rod=rod;// varilla horizontal exterior a 40 cm del borde
  const tm=new THREE.MeshStandardMaterial({color:0xe8e0c0,roughness:.9});const nT=Math.round(2*Math.PI*R);// una cinta cada ~1 m
@@ -676,7 +713,7 @@ const stream=mesh(new THREE.CylinderGeometry(0.16,0.28,2.8,12,1,true),new THREE.
 
 // ---------- etiquetas ----------
 const labels=$('labels');const L={};const lab=(k,t)=>{const e=document.createElement('div');e.className='lbl';e.textContent=t;labels.appendChild(e);L[k]={e,p:new THREE.Vector3()}};
-lab('th','Manipulador telescópico');lab('tr','Carretón');lab('hc','Hidrogrúa');lab('suc','Marca de succión');lab('lay','Layflat desde el campo');lab('bd','Banderillero de camiones');lab('pk','Camionetas de la cuadrilla · estacionadas de culata');L.pk.p.set(-33.75,3.2,-44.2);
+lab('th','Manipulador telescópico');lab('tr','Carretón');lab('hc','Hidrogrúa');lab('suc','Marca de succión');lab('lay','Layflat desde el campo');lab('bd','Banderillero de camiones');lab('wn','Cabrestante portátil · tiro de la lona');lab('pb','Bulones presentados · sin torque final');lab('pk','Camionetas de la cuadrilla · estacionadas de culata');L.pk.p.set(-33.75,3.2,-44.2);
 
 // ---------- utilidades de pose ----------
 function stairPose(eu){if(eu<0.24)return{a:LPA,r:LRP,y:0};if(eu<0.8){const f=ss(seg(eu,0.24,0.8));return{a:lerp(LPA,LADA,f),r:lerp(LRP,LRF,f),y:1.2*Math.sin(Math.PI*f)+0.3}}if(eu<0.86)return{a:LADA,r:LRF,y:0.3*(1-ss(seg(eu,0.8,0.86)))};return{a:LADA,r:LRF,y:0}}
@@ -766,11 +803,11 @@ window.__T=T;function update(t){
   stab.visible=t>T.p0[0]+(T.p0[1]-T.p0[0])*0.74&&t<T.close[1]-0.3;
   // bulones: 3 de agarre al colocar cada placa; bulonado completo con el anillo cerrado
   const setAt=k=>{const ak=k<LAST?T['p'+k]:T.close;return ak[0]+(ak[1]-ak[0])*0.8};
-  const H2=Math.ceil(N/2),bj=Math.floor(bu*H2),bj2=H2+bj;
+  const bst=(()=>{const x=bu*18;if(x<12){const i=Math.min(4,Math.floor(x/2.4));return{i,f:x/2.4-i}}const i=Math.min(10,5+Math.floor(x-12));return{i,f:Math.min(0.999,x-12-(i-5))}})();const H2=11,bi=bst.i,bfr=bst.f,bj=SQA[bi],bj2=SQB[bi],ppB=Math.max(0,(plateProg(t)-4)*0.72);
   bolts.forEach((g,k)=>{const k2=(k+1)%N;const tj=Math.max(setAt(k),setAt(k2));g.visible=t>tj;
     const glow=(t>tj&&t<tj+1.2)?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.6)});
-  boltsFull.forEach((g,k)=>{const kk=k<H2?k:k-H2;g.visible=t>T.bolt[0]&&(bu>=1||kk<bj||(kk===bj&&bu*H2-bj>0.5));const glow=kk===bj&&bu<1?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.2)});
-  wedges.forEach((w,k)=>w.visible=t>T.bolt[0]&&(bu>=1||(k<H2?k:k-H2)<bj));cable.visible=t>T.bolt[0]&&bu>0.95||t>=T.bolt[1];
+  boltsFull.forEach((g,k)=>{const ix=bIdx(k);const pre=k<PRE&&ppB>=k+0.5;g.visible=pre||(t>T.bolt[0]&&(bu>=1||ix<bi||(ix===bi&&bfr>0.5)));const glow=(t>=T.bolt[0]&&bu<1&&ix===bi)||(pre&&ppB<k+1&&t<T.sand[0])?1:0;g.children.forEach(b=>b.material.emissiveIntensity=glow*1.2)});window.__BN=boltsFull.filter(g=>g.visible).length;
+  wedges.forEach((w,k)=>w.visible=t>T.bolt[0]&&(bu>=1||bIdx(k)<bi));cable.visible=t>T.bolt[0]&&bu>0.95||t>=T.bolt[1];
   // manipulador
   const lu=seg(t,...T.liner);
   const teleVis=t>=T.arrive[0]+(T.arrive[1]-T.arrive[0])*0.8;[tele,boomA,boomB,liftCyl,hookPlate,hookBlock,hook,hookCable].forEach(o=>o.visible=teleVis);
@@ -830,22 +867,32 @@ window.__T=T;function update(t){
    L.th.p.copy(tele.position).add(v3(0,4.6,0));L.th.e.hidden=!teleVis}
   hcrane.visible=crA.visible=crB.visible=crCyl.visible=crCable.visible=false;L.hc.e.hidden=true;
   // chorizo y apertura de la lona
-  {const dir=v3(Math.cos(LX),0,Math.sin(LX));const s0=-(R-1.6);const s1=lu<0.66?roll.position.dot(dir):R-1.6;const len=Math.max(0.01,s1-s0);
-   chorizo.visible=lu>0.555&&lu<0.8;chorizo.rotation.set(0,-LX,0);chorizo.scale.set(len,1,lu>0.74?0.5:1);chorizo.position.copy(dir).multiplyScalar((s0+s1)/2).setY(0.46);
-   linerFloor.visible=lu>=0.8;linerFloor.scale.set(1,1,1);linerFloor.position.y=0.01;
-   [[0.68,0.74],[0.74,0.8]].forEach(([a0,a1],i)=>{const op=ss(seg(lu,a0,a1));const m=linerHalf[i];m.visible=lu>a0&&lu<0.8;const sy=0.25+0.75*op;m.scale.set(1,sy,Math.max(0.02,op));m.position.y=0.36*(1-sy)+0.01})
-   const sw=seg(lu,0.88,0.965)*LAST;const lifting=t>=T.liner[0]&&lu>0.88&&lu<0.965;// placa por placa, de la 1 a la 21
-   linerWall.visible=lu>=0.965;linerWall.scale.y=1;linerWall.position.y=1.6+(PH-1.6)/2;linerLip.visible=lu>=0.965;ties.visible=lu>0.97;
-   wallSeg.forEach((w,k)=>{const f=ss(C(0,1,sw-k));w.visible=lifting&&f>0.01;w.scale.y=Math.max(0.001,f);w.position.y=1.6+f*(PH-1.6)/2;lipSeg[k].visible=lifting&&f>0.98})
-   {const BW=['sen','sog','asi','m1'],NB=ballast.children.length,bf=seg(lu,0.80,0.875)*NB/BW.length;
-    ballast.children.forEach((b,i)=>{const w=i%BW.length,j=Math.floor(i/BW.length);b.visible=t>T.liner[0]&&(lu>0.875||j<Math.floor(bf)||(j===Math.floor(bf)&&bf-j>=0.5))});
-    BAGW.length=0;if(t>T.liner[0]&&lu>0.80&&lu<0.875){const FP=polar(th(LAST),R+5);BW.forEach((k,w)=>{const j=Math.floor(bf),f=bf-j,bi=Math.min(NB-1,j*BW.length+w),b=ballast.children[bi].position;
-      const go=f<0.5,u=go?ss(f/0.5):ss((f-0.5)/0.5);const A=go?FP:[b.x,b.z],Bp=go?[b.x,b.z]:FP;const off=(w-1.5)*0.9;const x=lerp(A[0],Bp[0],u)+off*Math.sin(th(LAST)),z=lerp(A[1],Bp[1],u)-off*Math.cos(th(LAST));
-      BAGW.push({k,x,z,face:faceTo(x,z,Bp[0],Bp[1]),carry:go})})}}
+   {const dir=v3(Math.cos(LX),0,Math.sin(LX));const s0=-(R-1.6);const s1=lu<0.66?roll.position.dot(dir):R-1.6;const len=Math.max(0.01,s1-s0);
+    const inL=t>=T.liner[0],LS=linerState(lu),A=inL?LS.act:null,sd=A&&A.s?-1:1;
+    chorizo.visible=lu>0.555&&lu<0.69;chorizo.rotation.set(0,-LX,0);chorizo.scale.set(len,1,1);chorizo.position.copy(dir).multiplyScalar((s0+s1)/2).setY(0.46);
+    linerFloor.visible=lu>=0.965;linerFloor.scale.set(1,1,1);linerFloor.position.y=0.01;linerHalf.forEach(m=>m.visible=false);
+    linerSide.forEach(m=>{m.visible=inL&&lu>=0.69&&lu<0.965;if(m.visible)updLinerSide(m,LS.p)});
+    const lifting=inL&&lu>0.72&&lu<0.965;
+    linerWall.visible=lu>=0.965;linerWall.scale.y=1;linerWall.position.y=1.6+(PH-1.6)/2;linerLip.visible=lu>=0.965;ties.visible=lu>0.97;
+    wallSeg.forEach((w,k)=>{const f=LS.r[k];w.visible=lifting&&f>0.01;w.scale.y=Math.max(0.001,f);w.position.y=1.6+f*(PH-1.6)/2;lipSeg[k].visible=lifting&&f>0.98});
+    // camioneta con cabrestante: del lado de la mitad que se abre; cambia de lado rodeando por el panel abierto
+    winchTruck.visible=inL&&lu>0.4&&lu<0.985;{const W_=winchPose(lu);winchTruck.position.copy(W_.p);winchTruck.rotation.y=W_.yaw;winchTruck.updateMatrixWorld();L.wn.p.copy(W_.p).add(v3(0,3.2,0));L.wn.e.hidden=!(winchTruck.visible&&lu>0.69)}
+    // caballetes con rodillo sobre las placas del grupo activo, barras de mordaza en el borde y sogas hasta la brida
+    lnRopes.forEach(l=>l.visible=false);lnBars.forEach(b=>b.visible=false);lnPull.visible=false;
+    const sadG=A?A.g:(inL&&lu>0.34&&lu<0.72?LGR[0][0]:(inL&&lu>=0.835&&lu<0.85?LGR[1][0]:null));
+    lnSad.forEach((s,i)=>{s.visible=!!sadG&&sadG[i]!==undefined;if(s.visible){const k=sadG[i];const [x,z]=polar(th(k),R+0.03);s.position.set(x,PH+0.1,z);s.rotation.y=-th(k)}});
+    if(A&&A.ph!=='tie'){let xc=0;A.g.forEach(k=>xc+=LNR*Math.cos(LPH(k))/A.g.length);const Bd=axW(xc*0.75,1.0,sd*(R+9));
+     A.g.forEach((k,i)=>{const ph=LPH(k),x=LNR*Math.cos(ph),hz=LNR*Math.abs(Math.sin(ph)),e=lerp(Math.min(1,hz),hz,LS.p[k]);let E,bd=LD;
+      if(LS.r[k]>0.001){const [wx,wz]=polar(th(k),R-0.12);E=v3(wx,1.6+LS.r[k]*(PH-1.5),wz);bd=v3(-Math.sin(th(k)),0,Math.cos(th(k)))}else E=axW(x,lnY(x,sd*e)+0.07,sd*e);
+      const [sx,sz]=polar(th(k),R+0.03);lnRopes[i].visible=true;lnRopes[i].geometry.setFromPoints([E,v3(sx,PH+0.26,sz),Bd]);
+      lnBars[i].visible=LS.r[k]<0.93;lnBars[i].position.copy(E);lnBars[i].quaternion.setFromUnitVectors(v3(0,1,0),bd)});
+     lnPull.visible=true;lnPull.geometry.setFromPoints([Bd,winchTruck.localToWorld(v3(0,0.78,-2.95))])}
+    // lastre reducido: 14 bolsas sobre el borde de la mitad que todavía no se abre; se retiran antes de tirar de esa mitad
+    ballast.children.forEach((b,i)=>{b.visible=i<14&&inL&&lu>0.69+0.03*(i+1)/14&&lu<0.835+0.013*(i+1)/14});BAGW.length=0;
    // sector del cierre: lona media baja hasta colocar la última placa; después se sube con sogas desde afuera
    const cl=seg(t,...T.close);const fu2=t<T.close[0]?0:ss(seg(cl,0.84,1));const fh=lerp(0.35,PH-1.5,fu2);
    const done=t>=T.close[0]&&fu2>=0.999;const wh=(PH-1.5)*linerWall.scale.y;
-   flap.visible=lu>0.88&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
+   flap.visible=lu>0.936&&!done;flap.scale.y=Math.min(fh,wh||fh);flap.position.y=1.6+flap.scale.y/2;flapLip.visible=false;
    linerWall.geometry=done?wallFull:wallPart;linerLip.geometry=done?lipFull:lipPart;
    const ropeOn=t>=T.close[0]&&cl>0.8&&cl<1;flapRopes.forEach((r,i)=>{r.visible=ropeOn;if(ropeOn){const a=th(LAST)+(i?1:-1)*(DT/2+2/R)*0.9;const [x1,z1]=polar(a,R-0.3);const [x2,z2]=polar(a,R+5);r.geometry.setFromPoints([v3(x1,1.55+fh,z1),v3(x2,1.2,z2)])}})}
   // personas dentro del tanque (control de seguridad)
@@ -871,21 +918,20 @@ window.__T=T;function update(t){
        const climb=active>0?ss(seg(au,0.72,0.76))*(1-ss(seg(au,0.94,0.98))):0;crew.asi.position.y=climb*1.12;
        gun.visible=false}
      poles.forEach(p=>p.visible=false);ladder2.visible=false;
-     if(t>T['p'+(LAST-1)][1]&&t<T.close[0]){const ga=th(LAST);
-       // adentro solo cuando el manipulador ya salió (lu>0.52) y hasta que la lona está arriba (lu<0.93); salen por el panel abierto
-       const inF=ss(seg(lu,0.69,0.71))*(1-ss(seg(lu,0.965,0.995)));const wall=lu>0.88&&lu<0.965;
-       const sweep=wall?ss(seg(lu,0.88,0.96)):0;const sa=th(0)+Math.min(LAST-1,seg(lu,0.88,0.965)*LAST)*DT;// frente de trabajo único: avanza de la placa 1 a la 21
-       [['int',-1],['asi',1]].forEach(([k,sg],i)=>{const aIn=wall?sa+(i?-0.12:0)+2*Math.PI*(sa<ga?1:0)-2*Math.PI*(sa<ga?1:0):ga+(i?0.25:0.1),rIn=R-1.8;const aOut=ga+sg*0.32,rOut=R+5;
-         const [xi,zi]=polar(aIn,rIn),[xo,zo]=polar(aOut,rOut);const [xg,zg]=polar(ga,R);
-         let x,z;if(inF<=0.001){x=xo;z=zo}else if(inF>=0.999){x=xi;z=zi}else{const f=inF;const mid=[xg,zg];if(f<0.5){x=lerp(xo,mid[0],f*2);z=lerp(zo,mid[1],f*2)}else{x=lerp(mid[0],xi,(f-0.5)*2);z=lerp(mid[1],zi,(f-0.5)*2)}}
-         put(crew[k],x,z,faceTo(x,z,x*2,z*2));
-         if(wall){const p=poles[i];p.visible=true;const hand=crew[k].position.clone().add(v3(0,1.3,0));const [wx,wz]=polar(aIn,R-0.3);aimY(p,hand,v3(wx,2.9,wz));p.scale.y=Math.min(p.scale.y,2)}});
-       // afuera: dos operadores en escalera burrito atan cada extremo al anillo exterior
-       const tieA=wall?sa+0.02:th(LAST)+0.36,tieB=wall?sa-0.12:th(LAST)-0.36;
-       [['ext',tieA,ladder],['sog',tieB,ladder2]].forEach(([k,aa,ld])=>{const [x,z]=polar(aa,R+1.15);put(crew[k],x,z,faceTo(x,z,0,0));if(wall){crew[k].position.y=1.12;ld.visible=true;const [lx,lz]=polar(aa,R+0.75);ld.position.set(lx,0,lz);ld.rotation.set(0,-aa+Math.PI/2,0)}});
-       const [sx,sz]=polar(ga+0.5,R+11);put(crew.sen,sx,sz,faceTo(sx,sz,tele.position.x,tele.position.z))
-       // apertura: con el manipulador afuera entra toda la cuadrilla (también el operador del manipulador) y tiran del borde, primero hacia un lado y después hacia el otro
-       if(lu>0.69&&lu<0.805){OPEN(lu)}}
+     if(t>T['p'+(LAST-1)][1]&&t<T.close[0]){const ga=th(LAST);const inL=t>=T.liner[0],A=inL?linerState(lu).act:null;
+        // dos guías adentro (uno coloca y retira las bolsas): entran con el manipulador ya afuera, se paran del lado opuesto al tiro y salen por el panel abierto
+        const inF=ss(seg(lu,0.69,0.71))*(1-ss(seg(lu,0.965,0.995)));const zG=-4.5+9*ss(seg(lu,0.835,0.85));
+        const bag1=lu>0.69&&lu<0.72,bag2=lu>0.835&&lu<0.848;
+        const gIn={int:axW(-5,0,zG),asi:bag1?axW(17-29*seg(lu,0.69,0.72),0,-1.7):bag2?axW(-12+24*seg(lu,0.835,0.848),0,1.8):axW(lu<0.835?-12:12,0,zG)};
+        [['int',-1],['asi',1]].forEach(([k,sg])=>{const Pi=gIn[k];const [xo,zo]=polar(ga+sg*0.32,R+5),[xg,zg]=polar(ga,R);const f=inF;let x,z;
+          if(f<=0.001){x=xo;z=zo}else if(f>=0.999){x=Pi.x;z=Pi.z}else if(f<0.5){x=lerp(xo,xg,f*2);z=lerp(zo,zg,f*2)}else{x=lerp(xg,Pi.x,(f-0.5)*2);z=lerp(zg,Pi.z,(f-0.5)*2)}
+          const lk=A?axW(0,0,(A.s?-1:1)*12):v3(0,0,0);put(crew[k],x,z,faceTo(x,z,lk.x,lk.z));crew[k].position.y=f>0.6?0.36:0});
+        // operador del cabrestante: junto a la camioneta, afuera
+        {const [hx,hz]=polar(ga+0.36,R+2.2);const wp=winchTruck.localToWorld(v3(1.4,0,-2.4));const f=ss(seg(lu,0.69,0.72))*(1-ss(seg(lu,0.97,1)));const x=lerp(hx,wp.x,f),z=lerp(hz,wp.z,f);put(crew.ext,x,z,faceTo(x,z,0,0));crew.ext.visible=!(inL&&lu>0.836&&lu<0.847)}
+        // ayudante de sogas: afuera; mueve los caballetes y, desde la escalera burrito, ata las cintas a la varilla
+        {const S_=sogPhi(inL?lu:0);const aa=LX+S_.a;const [x,z]=polar(aa,R+(S_.up?1.15:2.2));put(crew.sog,x,z,faceTo(x,z,0,0));crew.sog.position.y=S_.up*1.12;
+         if(S_.up){ladder2.visible=true;const [lx,lz]=polar(aa,R+0.75);ladder2.position.set(lx,0,lz);ladder2.rotation.set(0,-aa+Math.PI/2,0)}}
+        const [sx,sz]=polar(ga+0.5,R+11);put(crew.sen,sx,sz,faceTo(sx,sz,tele.position.x,tele.position.z))}
      if(t>=T.suc[0]&&t<T.goose[1]){const inS=t<T.suc[1],g=inS?seg(t,...T.suc):seg(t,...T.goose);const ga=th(LAST);
        const W2=(a,r)=>({a,r});const wrapTo=(a,ref)=>ref+Math.atan2(Math.sin(a-ref),Math.cos(a-ref));
        const home={int:W2(ga-0.32,R+5),asi:W2(ga+0.32,R+5),ext:W2(ga+0.36,R+1.15),sog:W2(ga-0.36,R+1.15),sen:W2(ga+0.5,R+11)};
@@ -921,7 +967,7 @@ window.__T=T;function update(t){
      const near=eu>0.87;[['ext',-0.5],['asi',-0.62],['int',-0.74],['sog',0.95]].forEach(([k,o],i)=>{const qq=near&&k!=='sog'?polar(LADA+0.14+i*0.11,R+3.4):polar(LADA+o,R+12);put(crew[k],qq[0],qq[1],faceTo(qq[0],qq[1],stair.position.x,stair.position.z))})}
    {// chofer en la cabina del manipulador
     crew.op.visible=tele.visible;if(tele.visible){const p=tele.localToWorld(v3(-0.72,1.07,0.35));crew.op.position.copy(p);crew.op.rotation.y=tele.rotation.y+Math.PI;sitPose(crew.op)}
-    if(t>=T.liner[0]&&lu>0.69&&lu<0.805){OPEN(lu)}
+
     // supervisores: recorren la periferia observando la tarea, fuera de las zonas de riesgo
     {// HSE con tablilla: la mira y anota; supervisor: llama, mira el plano o indica señalando
      const ah=crew.hse.userData.arms;ah[0].rotation.set(-1.0,0,0);ah[1].rotation.set(-0.8+0.15*Math.sin(t*5),0,0.25);
@@ -989,14 +1035,18 @@ window.__T=T;function update(t){
    goose.userData.lay.visible=t>=T.goose[0]&&g>0.9||t>=T.goose[1];goose.userData.conn.forEach(o=>o.visible=goose.userData.lay.visible)}
 bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=pst.visible&&Math.floor(t*2+i)%2===0);
   // llenado
-  const wu=seg(t,...T.fill);water.visible=wu>0.05;water.position.y=0.4+ss(seg(wu,0.05,1))*2.1;const gT=T.goose[0]+(T.goose[1]-T.goose[0])*0.9;{const e=document.getElementById('cagua');if(e){const v=t<=gT?'<b style="color:#9fb0bd">sin instalar</b>':wu<=0.05?'<b>disponible</b>':wu<1?'<b style="color:#41b8ea">ingresando al tanque</b>':'<b style="color:#4fd18b">tanque lleno</b>';const h='Agua en cuello de cisne: '+v;if(e.innerHTML!==h)e.innerHTML=h}}stream.visible=wu>0.05&&wu<1;
+  const wu=seg(t,...T.fill);const sheet=t>=T.bolt[0]+2;water.visible=sheet||wu>0.05;water.position.y=0.45+ss(seg(wu,0.05,1))*2.05;const gT=T.goose[0]+(T.goose[1]-T.goose[0])*0.9;{const e=document.getElementById('cagua');if(e){const v=t<=gT?'<b style="color:#9fb0bd">sin instalar</b>':wu<=0.05?(sheet?'<b style="color:#41b8ea">lámina de 5–10 cm</b>':'<b>disponible</b>'):wu<1?'<b style="color:#41b8ea">ingresando al tanque</b>':'<b style="color:#4fd18b">tanque lleno</b>';const h='Agua en cuello de cisne: '+v;if(e.innerHTML!==h)e.innerHTML=h}}stream.visible=wu>0.05&&wu<1;
   {const [x,z]=polar(GA,R-0.9);stream.position.set(x,(3.1+water.position.y)/2,z);stream.scale.y=Math.max(0.1,(3.1-water.position.y)/2.8)}
   {const [x,z]=polar(GA,R+18);L.lay.p.set(x,1.5,z);L.lay.e.hidden=!(t>T.fill[0])}
   L.suc.p.set(Math.cos(TS)*R,1.2,Math.sin(TS)*R);L.suc.e.hidden=!(t>T.mark[0]+8&&t<T.dist[1]);
   // abulonado: operario con pistola de impacto del lado de la cabeza y otro con llave combinada de 24 en la tuerca; filas de abajo hacia arriba, arriba suben a los burritos
   wrench.visible=wrench2.visible=false;ladder3.visible=ladder4.visible=false;
+  // abulonado progresivo (día 1): una segunda pareja presenta los bulones restantes al menos 3 placas detrás del izaje
+  {const pg=plateProg(t);const on=t>=asmStart&&t<T['p'+(LAST-1)][1]&&pg>=4&&ppB<PRE;L.pb.e.hidden=!on;
+   if(on){const j=Math.floor(ppB),ja=th(j)+DT/2;const [lx,lz]=polar(ja,R+0.75);ladder3.position.set(lx,0,lz);ladder3.rotation.set(0,-ja+Math.PI/2,0);ladder3.visible=true;
+    const [ix,iz]=polar(ja,R+1.15);put(crew.int,ix,iz,faceTo(ix,iz,0,0));crew.int.position.y=1.12;const [mx,mz]=polar(ja+0.085,R+1.3);crew.m2.visible=true;put(crew.m2,mx,mz,faceTo(mx,mz,0,0));L.pb.p.set(ix,3.9,iz)}}
   if(t>=T.bolt[0]&&t<T.fill[0]&&!(t>=T.esc[0]&&t<T.esc[1])&&bu<1){const up=v3(0,1,0);
-   [[bj,gun,wrench,crew.asi,crew.ext,ladder,ladder3],[bj2,gun2,wrench2,crew.sen,crew.sog,ladder2,ladder4]].forEach(([j,G,Wr,pg,pw,LA,LB])=>{if(j>=N){G.visible=false;return}const ja=th(Math.min(N-1,j))+DT/2;const frac=C(0,0.999,bu*H2-Math.floor(bu*H2));
+   [[bj,gun,wrench,crew.asi,crew.ext,ladder,ladder3],[bj2,gun2,wrench2,crew.sen,crew.sog,ladder2,ladder4]].forEach(([j,G,Wr,pg,pw,LA,LB])=>{if(j>=N){G.visible=false;return}const ja=th(Math.min(N-1,j))+DT/2;const frac=C(0,0.999,bfr);
     const row=Math.floor(frac*8),hb=0.2+row*0.37;const tg=v3(-Math.sin(ja),0,Math.cos(ja)),out=v3(Math.cos(ja),0,Math.sin(ja));
     const at=(tang,rad,y)=>v3(Math.cos(ja)*rad,y,Math.sin(ja)*rad).addScaledVector(tg,tang);
     const H=at(-0.09,R+0.12,hb),Nn=at(0.09,R+0.12,hb);
@@ -1022,7 +1072,7 @@ bags.visible=false;pst.visible=t>=T.fill[0];beacons2.forEach((b,i)=>b.visible=ps
   else if(cn==='esc'){const eu=seg(t,...T.esc);const P=stairPose(eu);const [x,z]=polar(P.a,P.r);camGoal.t.set(x,2,z);const [ex,ez]=polar(P.a-0.45,R+24);camGoal.e.set(ex,13,ez)}
   else if(cn==='suc'){const [x,z]=polar(TS,R+1);camGoal.t.set(x,0.3,z);const [ex,ez]=polar(TS-0.3,R+10);camGoal.e.set(ex,7,ez)}
   else if(cn==='p0'||cn==='close'){const [x,z]=polar(a0,R+4);camGoal.t.set(x,2,z);const [ex,ez]=polar(a0-0.55,R+30);camGoal.e.set(ex,17,ez)}
-  else if(cn==='liner'){const ga=th(LAST);const [ex,ez]=polar(ga+0.5,R+26);camGoal.t.set(0,0.5,0);camGoal.e.set(ex,24,ez)}
+  else if(cn==='liner'){const ga=th(LAST);const lq=seg(t,...T.liner);if(lq>0.69&&lq<0.97){const sd=1-2*ss(seg(lq,0.835,0.85));camGoal.t.copy(axW(0,0,-sd*4));camGoal.e.copy(axW(9,66,-sd*70))}else{const [ex,ez]=polar(ga+0.5,R+26);camGoal.t.set(0,0.5,0);camGoal.e.set(ex,24,ez)}}
   else if(cn==='fill'){const fu=seg(t,...T.fill);if(fu<0.55){const [x,z]=polar(TS,R+14);camGoal.t.set(x,1,z);const [ex,ez]=polar(TS-0.55,R+30);camGoal.e.set(ex,16,ez)}else{const [ex,ez]=polar(GA+0.9,R+34);camGoal.t.set(0,1,0);camGoal.e.set(ex,24,ez)}}
   else {camGoal.t.set(0,1,0);camGoal.e.set(-36,30,44)}
   return ch}
@@ -1054,14 +1104,14 @@ function crewPause(g){const lab=g.lab||'';const night=/Noche|retira/.test(lab)&&
   const ks=['sen','sog','int','ext','asi','m1','op','sop','hse'];
   if(/Noche|sin personal/.test(lab)){ks.concat(['m2']).forEach(k=>crew[k].visible=false);return}
   ks.forEach((k,i)=>{const a=-0.2+i*0.34,x=-33.7+Math.cos(a+Math.PI/2)*3.4,z=-38.2+Math.sin(a+Math.PI/2)*2.2;crew[k].visible=true;crew[k].position.set(x,0,z);crew[k].rotation.y=faceTo(x,z,-31.6,-38.0);crew[k].userData.arms.forEach(a=>{a.rotation.set(0,0,0)})});
-  crew.m2.visible=false;gun.visible=false;ladder.visible=false;ladder2.visible=false;sogRope.visible=false}
+  crew.m2.visible=false;gun.visible=false;ladder.visible=false;ladder2.visible=false;ladder3.visible=false;sogRope.visible=false;L.pb.e.hidden=true}
 function render(dt=0){const ch=update(sceneAt(time));showCh(ch);daylight(time);
   {const g0=segA(time);if(g0.k==='p')crewPause(g0);else{const fillOn=g0.note&&g0.note.startsWith('Llenado');crewTrucks.forEach(p=>p.visible=!fillOn);kit.visible=false;if(fillOn)Object.values(crew).forEach(p=>p.visible=false)}}
   {const g=segA(time),cm=clockAt(time);const day=cm>=1440?2:g.day;$('cday').textContent='DÍA '+day;$('chr').textContent=hhmm(cm);
    $('cnote').textContent=g.k==='p'?g.lab:(g.note||CH[ch].h);if(barDay!==day)drawBar(day);const mk=$('dmk');if(mk)mk.style.left=C(0,100,(((cm>=1440?cm-1440:cm))-450)/900*100)+'%';
    $('pz').hidden=g.k!=='p';if(g.k==='p')$('pz').textContent=g.lab;
    const st=sceneAt(time);const bu=seg(st,...T.bolt);$('cpl').textContent=$('pc').textContent;
-   {const pl=parseInt($('pc').textContent)||0;const un=st>=T.close[1]?N:Math.max(0,pl-1);$('cbo').textContent=Math.round(un*3+bu*15*N)+'/396'}
+   {const pl=parseInt($('pc').textContent)||0;const un=st>=T.close[1]?N:Math.max(0,pl-1);$('cbo').textContent=Math.round(un*3+15*(window.__BN||0))+'/396'}
    $('chh').textContent=Math.round(effMin(time)/60*6)}
   if(auto){const k=Math.min(1,dt*1.6||1);controls.target.lerp(camGoal.t,k);camera.position.lerp(camGoal.e,k*0.8)}
   controls.update();resize();rigFrame();renderer.render(scene,camera);
@@ -1070,12 +1120,12 @@ function render(dt=0){const ch=update(sceneAt(time));showCh(ch);daylight(time);
 // ---------- leyendas al pasar el mouse ----------
 const TIP=[];const tip=(o,t,d)=>{if(o){o.userData.tipT=t;o.userData.tipD=d;TIP.push(o)}};
 tip(crew.sen,'Señalero','Chaleco reflectivo verde. Guía al manipulador; sin izaje, colabora con bolsas y abulonado.');
-tip(crew.sog,'Soguero','Lleva la placa con la soga guía desde el extremo libre, fuera de la zona de exclusión.');
-tip(crew.int,'Operador interno','Trabaja del lado interior del anillo; nunca adentro al cerrar ni durante el llenado.');
-tip(crew.ext,'Operador externo','Trabaja del lado exterior: bulones y atado de la lona a la varilla.');
+tip(crew.sog,'Soguero','Lleva la placa con la soga guía desde el extremo libre. En la lona: ayudante de sogas, mueve caballetes y ata las cintas desde el burrito.');
+tip(crew.int,'Operador interno','Presenta bulones detrás del izaje; guía interno en la lona. Nunca adentro al cerrar ni durante el llenado.');
+tip(crew.ext,'Operador externo','Trabaja del lado exterior: bulones; en la lona opera el cabrestante.');
 tip(crew.asi,'Asistente','Cuñas, escalera burrito y bulones de agarre.');
 tip(crew.m1,'Banderillero / operario','Chaleco naranja. Guía a los camiones de arena; ayuda con las bolsas de lastre.');
-tip(crew.m2,'Operario de marcado','Sostiene la cuerda desde la estaca central.');
+tip(crew.m2,'Operario de marcado','Sostiene la cuerda desde la estaca central; después acompaña el abulonado progresivo.');
 tip(crew.op,'Chofer del manipulador','Operador habilitado del manipulador telescópico.');
 tip(crew.sop,'Supervisor operativo','Coordina por teléfono, revisa el plano de instalación e indica tareas a la cuadrilla.');
 tip(crew.hse,'Supervisor HSE','Chaleco. Con tablilla y formularios: ATS, permisos, checklist de izaje y observaciones.');
@@ -1085,12 +1135,12 @@ trucks.forEach(g=>tip(g,'Camión batea de arena','22 m³. Retrocede con banderil
 crewTrucks.forEach(g=>tip(g,'Camioneta de la cuadrilla','Estacionada de culata, con calzas, pértiga y baliza.'));
 tip(stair,'Escalera de inspección','Único acceso habilitado al borde del tanque. Se instala con el manipulador.');
 tip(ladder,'Escalera burrito','Plataforma con baranda y ruedas: para bulones y atado de la lona.');tip(ladder2,'Escalera burrito (2.º equipo)','Segundo frente de abulonado.');
-tip(ballast,'Bolsas de lastre','Bolsas blancas de rafia llenadas con arena de la zona: evitan que el viento levante la lona.');
+tip(ballast,'Bolsas de lastre','Lastre reducido: 14 bolsas sobre el borde de la mitad que todavía no se abre. Después del cierre, la lámina de agua asienta la lona.');
 sandPiles.forEach(p=>tip(p,'Pila de arena','Descargada por camión batea; la retropala la distribuye como colchón bajo la lona.'));
 tip(loader,'Retropala','Distribuye la arena y arma los taludes a 45°.');tip(sucGroup,'Succión (pipa)','En la 5.ª placa: caño enterrado, malla antivórtice, sombrero y dos válvulas.');
 tip(pst,'Estación de bombeo','Manifold, manguerotes Bauer, bombas A y B, cisterna de gasoil y telemetría.');tip(goose,'Cuello de cisne','La layflat entra por arriba del borde, sin rozar la lona.');
 tip(cones,'Conos y cartel','Delimitan la zona de izaje y del carretón.');tip(kit,'Fajas y grilletes','Chequeo de certificados y estado antes de izar.');
-tip(sock,'Manga de viento','Con viento fuerte no se iza.');tip(stab,'Estabilizadores','Sostienen la primera placa hasta cerrar el anillo.');
+tip(winchTruck,'Camioneta con cabrestante portátil','Tira de las sogas desde afuera, con fusible de 100 kg por barra de mordaza.');lnSad.forEach(s=>tip(s,'Caballete con rodillo','Calza sobre el borde de la placa: la lona y la soga nunca tocan chapa.'));lnBars.forEach(b=>tip(b,'Barra de mordaza','Caño de 3 m que toma el borde de la lona y reparte el tiro.'));tip(sock,'Manga de viento','Con viento fuerte no se iza.');tip(stab,'Estabilizadores','Sostienen la primera placa hasta cerrar el anillo.');
 plates.forEach((p,i)=>tip(p,'Placa '+(i+1),'Chapa de 6 × 3 m. '+(i===SUCK?'Lleva la succión.':i===LAST?'Última placa: se coloca en el cierre.':'')));
 const tipEl=document.createElement('div');tipEl.className='lbl';tipEl.style.cssText+='white-space:normal;max-width:260px;padding:6px 8px;font-weight:400;z-index:9;transform:translate(12px,12px)';tipEl.hidden=true;$('labels').appendChild(tipEl);
 const rc=new THREE.Raycaster(),mv=new THREE.Vector2();

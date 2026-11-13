@@ -71,7 +71,7 @@ El día 1 termina cerca de las 18:10 y el día 2 a las 17:20. El llenado (unas 4
 
 | Qué cambia | Hoy | Propuesta | Efecto estimado |
 |---|---|---|---|
-| Apertura de la lona | 8–10 personas tirando a mano | Tiro radial con sogas por encima del borde y un cabrestante afuera | **4 personas**, sin arrastre manual |
+| Apertura de la lona | 8–10 personas tirando a mano | Tiro con sogas por encima del borde y un cabrestante afuera | **4 personas** en la maniobra más el señalero, sin arrastre manual |
 | Levantado de la lona | Hisopos desde adentro | El mismo tiro la sube hasta el borde | Sin hisopos; nadie empuja desde adentro |
 | Lastre | 40 bolsas | 12–16 bolsas a barlovento y lámina de agua de 5–10 cm después del cierre | Unos 600 kg menos de carga manual |
 | Bulones | Todos después del cierre | Presentados durante el armado, torque final con el anillo cerrado | Unas 2 h menos el día 2 |
@@ -90,7 +90,7 @@ Las paredes siguen yendo **antes** de la lona. Descarté el método norteamerica
 
 ### 4.2 Kit de tiro
 
-- 6 caballetes con rodillo de nylon que calzan sobre el borde superior de la placa y lo cubren. La lona y la soga nunca tocan chapa.
+- 4 a 6 caballetes con rodillo de nylon que calzan sobre el borde superior de la placa y lo cubren. La lona y la soga nunca tocan chapa.
 - 6 sogas de poliéster de 12 mm × 40 m, de bajo estiramiento, y 2 bridas de tres ramales.
 - 1 cabrestante portátil tipo capstan de 700–1.000 kg, anclado al enganche de la camioneta o del manipulador, a unos 15 m del anillo.
 - 6 barras de mordaza de 3 m (ver 4.1).
@@ -101,17 +101,17 @@ Las paredes siguen yendo **antes** de la lona. Descarté el método norteamerica
 
 1. **Armado del anillo con abulonado progresivo.** La unión nueva la atienden dos (uno en el burrito, uno abajo) con los 3 bulones de agarre. Una segunda pareja va presentando los 15 bulones restantes, sin torque final, **al menos 3 placas (18 m) detrás del izaje**, fuera de la zona de exclusión. Estimado: quedan presentadas 12 o 13 uniones el día 1.
 2. Arena, taludes, succión y cuello de cisne: sin cambios.
-3. **Antes de irse:** colgar un caballete y una soga en cada una de las 6 placas del primer sector, con el chicote interior atado al pie de la placa. Unos 20 min entre dos personas.
+3. **Antes de irse:** colgar un caballete y una soga en cada placa del primer grupo de tiro, con el chicote interior atado al pie de la placa. Unos 20 min entre dos personas.
 4. El rollo queda adentro junto al panel abierto, enrollado, como hoy.
 
 ### 4.4 Día 2: lona con 4 personas
 
-Roles: **operador del cabrestante** (afuera), **ayudante de sogas** (afuera, mueve caballetes y ata desde el burrito), **guía interno**, **señalero**. El operador del manipulador se suma como segundo guía cuando saca el equipo.
+Roles: **operador del cabrestante** (afuera), **ayudante de sogas** (afuera, mueve caballetes y ata desde el burrito) y **dos guías internos**, uno de los cuales coloca y retira las bolsas. El señalero coordina por radio.
 
 1. **Control de viento y temperatura.** El PVC se endurece con frío: con heladas, esperar a que la lona tome temperatura antes de abrir pliegues. Fijar en el ATS el límite para abrir lona. Sugerido: no abrir con ráfagas de más de 25–30 km/h. Empezar a primera hora.
 2. **Desenrollar** con el manipulador sobre el diámetro, igual que hoy. El manipulador sale y no vuelve a entrar.
-3. **Colocar las barras de mordaza** en el borde de la primera mitad, una por placa (cada 6 m), y enganchar las sogas de a tres placas contiguas por brida.
-4. **Tirar en dos pasadas.** Empezar por las tres placas del centro de la mitad, que tienen el recorrido más largo (21 m), y seguir alternando hacia los extremos. Primera pasada hasta medio recorrido; segunda hasta el pie del talud. Son 4 grupos por mitad.
+3. **Colocar las barras de mordaza** en el borde de la primera mitad, una por placa (cada 6 m), y enganchar las sogas de a 3 o 4 placas contiguas por brida. Cada soga corre perpendicular a la lonja, desde el borde hasta la placa que tiene enfrente.
+4. **Tirar en dos pasadas.** Empezar por las placas del centro de la mitad, que tienen el recorrido más largo (21 m), y seguir hacia los extremos. Primera pasada hasta medio recorrido; segunda hasta el pie del talud. Son 3 grupos por mitad.
 5. **Seguir tirando y la lona sube sola** por el talud y la placa hasta el caballete. El ayudante, desde el burrito, ata las cintas a la varilla exterior, retira la barra y pasa el caballete a la placa siguiente.
 6. **Repetir con la otra mitad.** Las 12–16 bolsas van solo sobre el borde de barlovento de la mitad que todavía no está atada.
 7. **Sector del cierre:** la lona queda media baja a 2 m de cada lado del panel abierto, como hoy. Salen los guías, conteo de personal, se coloca la última placa y se sube ese tramo con las sogas desde afuera.
@@ -125,11 +125,15 @@ Tiempo estimado del bloque de lona: 120 a 150 min, parecido o algo menor al actu
 
 - Colocar los bulones de las uniones que faltaron (unas 9) y dar el torque final a las 22 con los dos equipos. Estimado: 150 a 170 min contra los 285 actuales.
 - Escalera de inspección en simultáneo, como hoy.
-- Fin de montaje estimado: **entre 14:00 y 14:30** en lugar de 17:20, con el llenado arrancando unas 3 h antes.
+- Fin de montaje estimado: **cerca de las 14:40** (con la hora de almuerzo) en lugar de 17:20, con el llenado arrancando unas 2 h 40 min antes.
 
 ### 4.6 Opcional: placas directo del carretón al anillo
 
 Evita los 22 izajes de descarga, pero el carretón queda unas 3 h más en locación y cada placa viaja suspendida más lejos. Solo conviene si la estadía del carretón no se cobra y hay recorrido despejado. No lo incluí en la propuesta base.
+
+### 4.7 En la animación
+
+`index.html` ya muestra este proceso: abulonado progresivo en la etapa Anillo, tiro de la lona con cabrestante en la etapa Lona, lámina de agua después del Cierre y el día 2 terminando a las 14:40. El día 1 queda 15 min más largo por la preparación de caballetes y sogas.
 
 ## 5. Qué validar antes de usarlo
 
